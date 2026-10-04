@@ -37,6 +37,10 @@ export const InquiryManager = ({ onUnauthorized }) => {
     const [inquiryToDelete, setInquiryToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [perPage, setPerPage] = useState(10);
+
     const loadInquiries = async (isManual = false) => {
         setIsLoading(true);
         try {
@@ -270,7 +274,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
     };
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+        <div className="w-full px-4 sm:px-8 py-8 space-y-8 font-sans">
             {/* Top Heading & Actions */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -297,7 +301,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                     <button
                         onClick={() => loadInquiries(true)}
                         disabled={isLoading}
-                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-neutral-200 bg-white text-xs font-semibold text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-colors shadow-2xs cursor-pointer disabled:opacity-60"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-all cursor-pointer disabled:opacity-60"
                         title="Refresh inquiries list"
                     >
                         <RefreshCw size={13} className={isLoading ? 'animate-spin text-[#1A4D2E]' : ''} />
@@ -399,8 +403,8 @@ export const InquiryManager = ({ onUnauthorized }) => {
                         onClick={() => setStatusFilter('all')}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                             statusFilter === 'all'
-                                ? 'bg-white text-neutral-900 shadow-2xs'
-                                : 'text-neutral-600 hover:text-neutral-900'
+                                ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
                         }`}
                     >
                         All ({counts.total})
@@ -409,19 +413,19 @@ export const InquiryManager = ({ onUnauthorized }) => {
                         onClick={() => setStatusFilter('pending')}
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                             statusFilter === 'pending'
-                                ? 'bg-amber-500 text-white shadow-2xs'
-                                : 'text-amber-800 hover:text-amber-900'
+                                ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
                         }`}
                     >
-                        <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                         Pending ({counts.pending})
                     </button>
                     <button
                         onClick={() => setStatusFilter('responded')}
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                             statusFilter === 'responded'
-                                ? 'bg-[#1A4D2E] text-white shadow-2xs'
-                                : 'text-emerald-800 hover:text-emerald-900'
+                                ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
                         }`}
                     >
                         <Check size={12} />
@@ -488,162 +492,329 @@ export const InquiryManager = ({ onUnauthorized }) => {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="border-b border-neutral-200/80 bg-neutral-50/75 text-[11px] font-bold text-neutral-500 uppercase tracking-wider font-mono">
-                                    <th className="py-3.5 px-4 sm:px-6">Status & Received</th>
-                                    <th className="py-3.5 px-4 sm:px-6">Customer Details</th>
-                                    <th className="py-3.5 px-4 sm:px-6">Service & Location</th>
-                                    <th className="py-3.5 px-4 sm:px-6">Message Preview</th>
-                                    <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-neutral-100 text-xs">
-                                {inquiries.map((inquiry) => {
-                                    const isResponded = inquiry.status === 'responded';
-                                    const isUpdating = updatingStatusId === inquiry.id;
+                        {(() => {
+                            const totalItems = inquiries.length;
+                            const totalPages = Math.ceil(totalItems / perPage) || 1;
+                            const paginatedInquiries = inquiries.slice((currentPage - 1) * perPage, currentPage * perPage);
 
-                                    return (
-                                        <tr
-                                            key={inquiry.id}
-                                            onClick={() => openDetailModal(inquiry)}
-                                            className={`group transition-colors cursor-pointer hover:bg-neutral-50/80 ${
-                                                !isResponded ? 'bg-amber-50/20' : ''
-                                            }`}
-                                        >
-                                            {/* Status & Received Date */}
-                                            <td className="py-4 px-4 sm:px-6 align-top">
-                                                <div className="space-y-2">
+                            return (
+                                <>
+                                {/* Desktop View: Full Responsive Table */}
+                                <div className="hidden md:block overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-neutral-200/80 bg-neutral-50/75 text-[11px] font-bold text-neutral-500 uppercase tracking-wider font-mono">
+                                                <th className="py-3.5 px-3 sm:px-4 text-center w-12 font-mono">#</th>
+                                                <th className="py-3.5 px-4 sm:px-6">Status & Received</th>
+                                                <th className="py-3.5 px-4 sm:px-6">Customer Details</th>
+                                                <th className="py-3.5 px-4 sm:px-6">Service & Location</th>
+                                                <th className="py-3.5 px-4 sm:px-6">Message Preview</th>
+                                                <th className="py-3.5 px-4 sm:px-6 text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-neutral-100 text-xs">
+                                            {paginatedInquiries.map((inquiry, idx) => {
+                                                const isResponded = inquiry.status === 'responded';
+                                                const isUpdating = updatingStatusId === inquiry.id;
+
+                                                return (
+                                                    <tr
+                                                        key={inquiry.id}
+                                                        onClick={() => openDetailModal(inquiry)}
+                                                        className={`group transition-colors cursor-pointer hover:bg-neutral-50/80 ${
+                                                            !isResponded ? 'bg-amber-50/20' : ''
+                                                        }`}
+                                                    >
+                                                        {/* Serial Number */}
+                                                        <td className="py-4 px-3 sm:px-4 text-center font-mono text-neutral-400 text-xs font-semibold align-top">
+                                                            {(currentPage - 1) * perPage + idx + 1}
+                                                        </td>
+                                                        {/* Status & Received Date */}
+                                                        <td className="py-4 px-4 sm:px-6 align-top">
+                                                            <div className="space-y-2">
+                                                                {isResponded ? (
+                                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                                                        <CheckCircle2 size={12} className="text-emerald-600" />
+                                                                        Responded
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                                                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                                                                        Pending Response
+                                                                    </span>
+                                                                )}
+
+                                                                <div className="text-[11px] text-neutral-400 space-y-0.5">
+                                                                    <div className="flex items-center gap-1">
+                                                                        <Calendar size={11} />
+                                                                        <span>{inquiry.created_at_human || inquiry.created_at_formatted}</span>
+                                                                    </div>
+                                                                    {inquiry.responded_at_formatted && (
+                                                                        <div className="text-[10px] text-emerald-600 font-medium">
+                                                                            Done {inquiry.responded_at_formatted}
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </td>
+
+                                                        {/* Customer Details */}
+                                                        <td className="py-4 px-4 sm:px-6 align-top">
+                                                            <div className="space-y-1">
+                                                                <div className="font-bold text-neutral-900 text-sm">
+                                                                    {inquiry.name}
+                                                                </div>
+
+                                                                <div className="flex flex-col gap-1 text-[11px] text-neutral-600">
+                                                                    <a
+                                                                        href={`mailto:${inquiry.email}`}
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                        className="inline-flex items-center gap-1.5 hover:text-[#1A4D2E] hover:underline"
+                                                                        title="Send Email"
+                                                                    >
+                                                                        <Mail size={12} className="text-neutral-400" />
+                                                                        <span>{inquiry.email}</span>
+                                                                    </a>
+
+                                                                    <div className="flex items-center gap-2">
+                                                                        <a
+                                                                            href={`tel:${inquiry.phone}`}
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                            className="inline-flex items-center gap-1.5 hover:text-[#1A4D2E] font-mono hover:underline"
+                                                                            title="Call Phone Number"
+                                                                        >
+                                                                            <Phone size={12} className="text-neutral-400" />
+                                                                            <span>{inquiry.phone}</span>
+                                                                        </a>
+
+                                                                        <a
+                                                                            href={formatWhatsAppUrl(
+                                                                                inquiry.phone,
+                                                                                inquiry.name,
+                                                                                inquiry.service
+                                                                            )}
+                                                                            target="_blank"
+                                                                            rel="noreferrer"
+                                                                            onClick={(e) => e.stopPropagation()}
+                                                                            className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition-colors"
+                                                                            title="Chat on WhatsApp"
+                                                                        >
+                                                                            WhatsApp
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+
+                                                        {/* Service & Location */}
+                                                        <td className="py-4 px-4 sm:px-6 align-top">
+                                                            <div className="space-y-1.5">
+                                                                <span className="inline-block px-2.5 py-1 rounded-lg text-[11px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-200/80">
+                                                                    {inquiry.service}
+                                                                </span>
+
+                                                                <div className="flex items-center gap-1 text-[11px] text-neutral-500">
+                                                                    <MapPin size={11} className="text-neutral-400 shrink-0" />
+                                                                    <span className="truncate max-w-[180px]">
+                                                                        {inquiry.place}, {inquiry.district}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+
+                                                        {/* Message Excerpt */}
+                                                        <td className="py-4 px-4 sm:px-6 align-top max-w-xs">
+                                                            <p className="text-neutral-700 line-clamp-2 leading-relaxed">
+                                                                {inquiry.message}
+                                                            </p>
+                                                            {inquiry.admin_notes && (
+                                                                <div className="mt-1.5 text-[10px] text-indigo-700 bg-indigo-50/80 px-2 py-0.5 rounded border border-indigo-100 inline-block line-clamp-1">
+                                                                    Note: {inquiry.admin_notes}
+                                                                </div>
+                                                            )}
+                                                        </td>
+
+                                                        {/* Action Buttons */}
+                                                        <td className="py-4 px-4 sm:px-6 align-top text-right whitespace-nowrap">
+                                                            <div
+                                                                className="flex items-center justify-end gap-1.5"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {/* Mark as Responded / Pending Toggle Button */}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={(e) => handleToggleStatus(inquiry, e)}
+                                                                    disabled={isUpdating}
+                                                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                                                                        isResponded
+                                                                            ? 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700'
+                                                                            : 'bg-[#1A4D2E] hover:bg-[#143c24] text-white shadow-xs font-bold'
+                                                                    }`}
+                                                                    title={
+                                                                        isResponded
+                                                                            ? 'Click to mark as Pending Response'
+                                                                            : 'Click to mark as Responded'
+                                                                    }
+                                                                >
+                                                                    {isUpdating ? (
+                                                                        <RefreshCw size={12} className="animate-spin" />
+                                                                    ) : isResponded ? (
+                                                                        <>
+                                                                            <Clock size={12} />
+                                                                            <span className="hidden sm:inline">Set Pending</span>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <Check size={12} />
+                                                                            <span>Mark Responded</span>
+                                                                        </>
+                                                                    )}
+                                                                </button>
+
+                                                                {/* View Full Message / Details */}
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => openDetailModal(inquiry)}
+                                                                    className="p-1.5 rounded-xl border border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50 cursor-pointer transition-all"
+                                                                    title="View full details and reply"
+                                                                >
+                                                                    <Eye size={14} />
+                                                                </button>
+
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setInquiryToDelete(inquiry)}
+                                                                    className="p-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 hover:text-neutral-900 cursor-pointer transition-all"
+                                                                    title="Delete inquiry record"
+                                                                >
+                                                                    <Trash2 size={14} />
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                {/* Mobile View: Dedicated Card Views for Each Row */}
+                                <div className="block md:hidden p-3.5 space-y-3 bg-neutral-50/50">
+                                    {paginatedInquiries.map((inquiry, idx) => {
+                                        const isResponded = inquiry.status === 'responded';
+                                        const isUpdating = updatingStatusId === inquiry.id;
+
+                                        return (
+                                            <div
+                                                key={inquiry.id}
+                                                className={`bg-white border rounded-2xl p-4 shadow-2xs space-y-3 transition-colors ${
+                                                    !isResponded ? 'border-amber-200/80' : 'border-neutral-200/90'
+                                                }`}
+                                            >
+                                                {/* Top Row: Serial, Name & Status Badge */}
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-mono text-[10px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-md">
+                                                            #{(currentPage - 1) * perPage + idx + 1}
+                                                        </span>
+                                                        <h4
+                                                            onClick={() => openDetailModal(inquiry)}
+                                                            className="text-sm font-bold text-neutral-900 hover:text-[#1A4D2E] cursor-pointer"
+                                                        >
+                                                            {inquiry.name}
+                                                        </h4>
+                                                    </div>
+
                                                     {isResponded ? (
-                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                                            <CheckCircle2 size={12} className="text-emerald-600" />
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                                                            <CheckCircle2 size={11} className="text-emerald-600" />
                                                             Responded
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                                                            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                                                            Pending Response
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                                            Pending
                                                         </span>
                                                     )}
-
-                                                    <div className="text-[11px] text-neutral-400 space-y-0.5">
-                                                        <div className="flex items-center gap-1">
-                                                            <Calendar size={11} />
-                                                            <span>{inquiry.created_at_human || inquiry.created_at_formatted}</span>
-                                                        </div>
-                                                        {inquiry.responded_at_formatted && (
-                                                            <div className="text-[10px] text-emerald-600 font-medium">
-                                                                Done {inquiry.responded_at_formatted}
-                                                            </div>
-                                                        )}
-                                                    </div>
                                                 </div>
-                                            </td>
 
-                                            {/* Customer Details */}
-                                            <td className="py-4 px-4 sm:px-6 align-top">
-                                                <div className="space-y-1">
-                                                    <div className="font-bold text-neutral-900 text-sm">
-                                                        {inquiry.name}
-                                                    </div>
-
-                                                    <div className="flex flex-col gap-1 text-[11px] text-neutral-600">
-                                                        <a
-                                                            href={`mailto:${inquiry.email}`}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                            className="inline-flex items-center gap-1.5 hover:text-[#1A4D2E] hover:underline"
-                                                            title="Send Email"
-                                                        >
-                                                            <Mail size={12} className="text-neutral-400" />
-                                                            <span>{inquiry.email}</span>
-                                                        </a>
-
-                                                        <div className="flex items-center gap-2">
-                                                            <a
-                                                                href={`tel:${inquiry.phone}`}
-                                                                onClick={(e) => e.stopPropagation()}
-                                                                className="inline-flex items-center gap-1.5 hover:text-[#1A4D2E] font-mono hover:underline"
-                                                                title="Call Phone Number"
-                                                            >
-                                                                <Phone size={12} className="text-neutral-400" />
-                                                                <span>{inquiry.phone}</span>
-                                                            </a>
-
-                                                            <a
-                                                                href={formatWhatsAppUrl(
-                                                                    inquiry.phone,
-                                                                    inquiry.name,
-                                                                    inquiry.service
-                                                                )}
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                                onClick={(e) => e.stopPropagation()}
-                                                                className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition-colors"
-                                                                title="Chat on WhatsApp"
-                                                            >
-                                                                WhatsApp
-                                                            </a>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-
-                                            {/* Service & Location */}
-                                            <td className="py-4 px-4 sm:px-6 align-top">
-                                                <div className="space-y-1.5">
-                                                    <span className="inline-block px-2.5 py-1 rounded-lg text-[11px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-200/80">
+                                                {/* Date & Service/Location */}
+                                                <div className="flex flex-wrap items-center gap-2 text-xs">
+                                                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-neutral-100 text-neutral-800 border border-neutral-200/80">
                                                         {inquiry.service}
                                                     </span>
-
                                                     <div className="flex items-center gap-1 text-[11px] text-neutral-500">
                                                         <MapPin size={11} className="text-neutral-400 shrink-0" />
-                                                        <span className="truncate max-w-[180px]">
-                                                            {inquiry.place}, {inquiry.district}
-                                                        </span>
+                                                        <span>{inquiry.place}, {inquiry.district}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1 text-[10px] text-neutral-400 ml-auto">
+                                                        <Calendar size={10} />
+                                                        <span>{inquiry.created_at_human || inquiry.created_at_formatted}</span>
                                                     </div>
                                                 </div>
-                                            </td>
 
-                                            {/* Message Excerpt */}
-                                            <td className="py-4 px-4 sm:px-6 align-top max-w-xs">
-                                                <p className="text-neutral-700 line-clamp-2 leading-relaxed">
-                                                    {inquiry.message}
-                                                </p>
-                                                {inquiry.admin_notes && (
-                                                    <div className="mt-1.5 text-[10px] text-indigo-700 bg-indigo-50/80 px-2 py-0.5 rounded border border-indigo-100 inline-block line-clamp-1">
-                                                        Note: {inquiry.admin_notes}
+                                                {/* Customer Contact Links */}
+                                                <div className="bg-neutral-50/70 rounded-xl p-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+                                                    <div className="flex flex-col gap-1">
+                                                        <a
+                                                            href={`mailto:${inquiry.email}`}
+                                                            className="inline-flex items-center gap-1.5 text-[11px] text-neutral-600 hover:text-[#1A4D2E]"
+                                                        >
+                                                            <Mail size={11} className="text-neutral-400" />
+                                                            <span className="truncate max-w-[170px]">{inquiry.email}</span>
+                                                        </a>
+                                                        <a
+                                                            href={`tel:${inquiry.phone}`}
+                                                            className="inline-flex items-center gap-1.5 text-[11px] text-neutral-700 font-mono font-medium hover:text-[#1A4D2E]"
+                                                        >
+                                                            <Phone size={11} className="text-neutral-400" />
+                                                            <span>{inquiry.phone}</span>
+                                                        </a>
                                                     </div>
-                                                )}
-                                            </td>
 
-                                            {/* Action Buttons */}
-                                            <td className="py-4 px-4 sm:px-6 align-top text-right whitespace-nowrap">
-                                                <div
-                                                    className="flex items-center justify-end gap-1.5"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    {/* Mark as Responded / Pending Toggle Button */}
+                                                    <a
+                                                        href={formatWhatsAppUrl(
+                                                            inquiry.phone,
+                                                            inquiry.name,
+                                                            inquiry.service
+                                                        )}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                        className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-green-50 text-green-700 hover:bg-green-100 border border-green-200 transition-colors inline-flex items-center gap-1 cursor-pointer"
+                                                        title="Chat on WhatsApp"
+                                                    >
+                                                        <span>WhatsApp</span>
+                                                    </a>
+                                                </div>
+
+                                                {/* Message Excerpt */}
+                                                {inquiry.message && (
+                                                    <p
+                                                        onClick={() => openDetailModal(inquiry)}
+                                                        className="text-xs text-neutral-600 line-clamp-2 leading-relaxed cursor-pointer"
+                                                    >
+                                                        {inquiry.message}
+                                                    </p>
+                                                )}
+
+                                                {/* Action Buttons (Strictly using approved button styles) */}
+                                                <div className="flex items-center justify-between gap-2 pt-2 border-t border-neutral-100">
                                                     <button
                                                         type="button"
                                                         onClick={(e) => handleToggleStatus(inquiry, e)}
                                                         disabled={isUpdating}
-                                                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer ${
+                                                        className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                                                             isResponded
-                                                                ? 'bg-neutral-100 hover:bg-amber-50 hover:text-amber-700 text-neutral-600 border border-neutral-200'
-                                                                : 'bg-[#1A4D2E] hover:bg-[#143d24] text-white border border-emerald-800'
+                                                                ? 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700'
+                                                                : 'bg-[#1A4D2E] hover:bg-[#143c24] text-white shadow-xs'
                                                         }`}
-                                                        title={
-                                                            isResponded
-                                                                ? 'Click to mark as Pending Response'
-                                                                : 'Click to mark as Responded'
-                                                        }
                                                     >
                                                         {isUpdating ? (
                                                             <RefreshCw size={12} className="animate-spin" />
                                                         ) : isResponded ? (
                                                             <>
                                                                 <Clock size={12} />
-                                                                <span className="hidden sm:inline">Set Pending</span>
+                                                                <span>Set Pending</span>
                                                             </>
                                                         ) : (
                                                             <>
@@ -653,32 +824,94 @@ export const InquiryManager = ({ onUnauthorized }) => {
                                                         )}
                                                     </button>
 
-                                                    {/* View Full Message / Details */}
                                                     <button
                                                         type="button"
                                                         onClick={() => openDetailModal(inquiry)}
-                                                        className="p-1.5 rounded-xl border border-neutral-200 bg-white text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 cursor-pointer transition-colors"
-                                                        title="View full details and reply"
+                                                        className="py-1.5 px-3 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer"
+                                                        title="View full details"
                                                     >
-                                                        <Eye size={14} />
+                                                        <Eye size={13} />
+                                                        <span>View</span>
                                                     </button>
 
-                                                    {/* Delete Inquiry */}
                                                     <button
                                                         type="button"
                                                         onClick={() => setInquiryToDelete(inquiry)}
-                                                        className="p-1.5 rounded-xl border border-neutral-200 bg-white text-neutral-400 hover:text-red-600 hover:bg-red-50 hover:border-red-200 cursor-pointer transition-colors"
-                                                        title="Delete inquiry record"
+                                                        className="p-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 hover:text-red-600 transition-all flex items-center justify-center cursor-pointer"
+                                                        title="Delete inquiry"
                                                     >
-                                                        <Trash2 size={14} />
+                                                        <Trash2 size={13} />
                                                     </button>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Pagination Controls */}
+                                {totalItems > 0 && (
+                                    <div className="px-6 py-3.5 border-t border-neutral-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 bg-neutral-50/50">
+                                        <div className="flex items-center gap-3 text-xs text-neutral-500">
+                                            <span>
+                                                Showing <strong className="text-neutral-800 font-semibold">{totalItems === 0 ? 0 : (currentPage - 1) * perPage + 1}</strong> to <strong className="text-neutral-800 font-semibold">{Math.min(currentPage * perPage, totalItems)}</strong> of <strong className="text-neutral-800 font-semibold">{totalItems}</strong> inquiries
+                                            </span>
+                                            <div className="flex items-center gap-1.5 ml-2">
+                                                <span className="text-[11px] text-neutral-400">Per page:</span>
+                                                <select
+                                                    value={perPage}
+                                                    onChange={(e) => {
+                                                        setPerPage(Number(e.target.value));
+                                                        setCurrentPage(1);
+                                                    }}
+                                                    className="bg-white border border-neutral-300 rounded-lg px-2 py-1 text-xs text-neutral-700 outline-none cursor-pointer"
+                                                >
+                                                    <option value={5}>5</option>
+                                                    <option value={10}>10</option>
+                                                    <option value={20}>20</option>
+                                                    <option value={50}>50</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        {totalPages > 1 && (
+                                            <div className="flex items-center gap-1">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                                    disabled={currentPage === 1}
+                                                    className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold cursor-pointer transition-all"
+                                                >
+                                                    Prev
+                                                </button>
+                                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                                                    <button
+                                                        key={page}
+                                                        type="button"
+                                                        onClick={() => setCurrentPage(page)}
+                                                        className={`w-7 h-7 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                                                            currentPage === page
+                                                                ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                                                : 'bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50'
+                                                        }`}
+                                                    >
+                                                        {page}
+                                                    </button>
+                                                ))}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                                    disabled={currentPage === totalPages}
+                                                    className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold cursor-pointer transition-all"
+                                                >
+                                                    Next
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                                </>
+                            );
+                        })()}
                     </div>
                 )}
             </div>
@@ -818,7 +1051,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                                     )} in ${encodeURIComponent(
                                         selectedInquiry.place
                                     )}.%0D%0A%0D%0A`}
-                                    className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-blue-200 bg-blue-50/80 hover:bg-blue-100 text-blue-800 text-xs font-bold transition-colors shadow-2xs"
+                                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-all shadow-2xs"
                                 >
                                     <Mail size={14} />
                                     <span>Send Email Reply</span>
@@ -833,7 +1066,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                                     )}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-green-300 bg-green-500 hover:bg-green-600 text-white text-xs font-bold transition-colors shadow-2xs"
+                                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-bold transition-all shadow-xs"
                                 >
                                     <Send size={14} />
                                     <span>Open WhatsApp</span>
@@ -842,7 +1075,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                                 {/* Phone Call */}
                                 <a
                                     href={`tel:${selectedInquiry.phone}`}
-                                    className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-neutral-200 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-bold transition-colors shadow-2xs"
+                                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 text-xs font-semibold transition-all shadow-2xs"
                                 >
                                     <Phone size={14} />
                                     <span>Call {selectedInquiry.phone}</span>
@@ -868,10 +1101,10 @@ export const InquiryManager = ({ onUnauthorized }) => {
                                     type="button"
                                     onClick={() => handleToggleStatus(selectedInquiry)}
                                     disabled={updatingStatusId === selectedInquiry.id}
-                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
+                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                                         selectedInquiry.status === 'responded'
-                                            ? 'bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-300'
-                                            : 'bg-[#1A4D2E] hover:bg-[#143d24] text-white border border-emerald-900'
+                                            ? 'bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700'
+                                            : 'bg-[#1A4D2E] hover:bg-[#143c24] text-white shadow-xs'
                                     }`}
                                 >
                                     {selectedInquiry.status === 'responded' ? (
@@ -908,7 +1141,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                                         type="button"
                                         onClick={handleSaveNotes}
                                         disabled={isSavingNotes}
-                                        className="px-3 py-1.5 rounded-lg bg-neutral-900 hover:bg-black text-white text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
+                                        className="px-4 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
                                     >
                                         {isSavingNotes ? 'Saving...' : 'Save Notes'}
                                     </button>
@@ -923,7 +1156,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                                 onClick={() => {
                                     setInquiryToDelete(selectedInquiry);
                                 }}
-                                className="inline-flex items-center gap-1.5 text-xs text-red-600 hover:text-red-700 font-semibold p-1 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs text-neutral-700 hover:text-neutral-900 font-semibold bg-neutral-100 hover:bg-neutral-200/80 rounded-xl cursor-pointer transition-all"
                             >
                                 <Trash2 size={13} />
                                 <span>Delete Record</span>
@@ -932,7 +1165,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                             <button
                                 type="button"
                                 onClick={() => setIsDetailModalOpen(false)}
-                                className="px-5 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-xs font-bold transition-colors cursor-pointer"
+                                className="px-5 py-2 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-all cursor-pointer"
                             >
                                 Close Window
                             </button>

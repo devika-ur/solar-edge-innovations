@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -26,6 +27,7 @@ import {
 } from 'lucide-react';
 import { PiWhatsappLogoThin } from 'react-icons/pi';
 import { assets } from '../assets/assets';
+import contactConsultationImg from '../assets/contact-consultation.jpg';
 
 const serviceOptions = [
     { id: 'solar', label: 'Rooftop Solar (On-Grid / Hybrid)', icon: SunMedium },
@@ -109,6 +111,25 @@ const defaultFaqs = [
 ];
 
 const Contact = () => {
+    const location = useLocation();
+
+    // Scroll to Enquiry / Send Message section if navigated with hash
+    useEffect(() => {
+        if (location.hash === '#enquiry' || location.hash === '#send-message') {
+            const timer = setTimeout(() => {
+                const el = document.getElementById('enquiry');
+                if (el) {
+                    if (window.lenis) {
+                        window.lenis.scrollTo(el, { duration: 1.2, offset: -90 });
+                    } else {
+                        el.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            }, 150);
+            return () => clearTimeout(timer);
+        }
+    }, [location.hash]);
+
     // Dynamic FAQs with default fallback for immediate, reliable UI display
     const [faqList, setFaqList] = useState(defaultFaqs);
     const [selectedFaqCategory, setSelectedFaqCategory] = useState('All');
@@ -231,7 +252,7 @@ const Contact = () => {
     };
 
     // Office WhatsApp Number (configured as requested)
-    const OFFICE_WHATSAPP_NUMBER = '91XXXXXXXXXX';
+    const OFFICE_WHATSAPP_NUMBER = '918289841004';
 
     /**
      * Generate pre-filled WhatsApp message link with all submitted form details.
@@ -291,17 +312,9 @@ const Contact = () => {
 
         const serviceName = serviceOptions.find((s) => s.id === formData.service)?.label || formData.service;
 
-        // 2. Prepare WhatsApp URL with complete inquiry details
+        // 2. Prepare WhatsApp URL with complete inquiry details for the optional popup action
         const whatsappUrl = generateWhatsAppUrl(formData, serviceName);
         setSubmittedWhatsAppUrl(whatsappUrl);
-
-        // Pre-open a reference window during the user gesture to avoid popup blocker restrictions
-        let whatsappTab = null;
-        try {
-            whatsappTab = window.open('about:blank', '_blank');
-        } catch {
-            whatsappTab = null;
-        }
 
         try {
             const response = await fetch('/api/contact.php', {
@@ -327,7 +340,7 @@ const Contact = () => {
                     loading: false,
                     success: true,
                     error: null,
-                    responseMsg: data.message || 'Your inquiry has been stored. Opening WhatsApp chat with your details...',
+                    responseMsg: data.message || 'Your inquiry has been submitted successfully.',
                 });
                 setShowSuccessModal(true);
                 setFormData({
@@ -344,27 +357,19 @@ const Contact = () => {
                     loading: false,
                     success: true,
                     error: null,
-                    responseMsg: 'Your inquiry has been prepared. Opening WhatsApp chat to send message...',
+                    responseMsg: data?.message || 'Your inquiry has been recorded.',
                 });
                 setShowSuccessModal(true);
             }
         } catch (err) {
             console.error('Contact Form error:', err);
-            // Fallback for offline/local environments: inquiry still proceeds through WhatsApp
             setStatus({
                 loading: false,
                 success: true,
                 error: null,
-                responseMsg: 'Your message has been prepared. Opening WhatsApp chat to complete submission...',
+                responseMsg: 'Your inquiry has been recorded.',
             });
             setShowSuccessModal(true);
-        } finally {
-            // Navigate the pre-opened tab to the WhatsApp URL, or open window if not pre-opened
-            if (whatsappTab && !whatsappTab.closed) {
-                whatsappTab.location.href = whatsappUrl;
-            } else {
-                window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-            }
         }
     };
 
@@ -656,7 +661,10 @@ const Contact = () => {
                 {/* =========================================================
                     MAIN INTERACTIVE SECTION: FORM + DETAIL OVERVIEW
                 ========================================================= */}
-                <section className="max-w-7xl xl:max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-16 pb-20 relative z-10">
+                <section
+                    id="enquiry"
+                    className="max-w-7xl xl:max-w-[1380px] mx-auto px-6 sm:px-10 lg:px-16 pb-20 relative z-10 scroll-mt-28"
+                >
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
                         {/* =================================================
                             LEFT COLUMN: INTERACTIVE QUOTATION & CONTACT FORM
@@ -681,34 +689,6 @@ const Contact = () => {
                                 </p>
                             </div>
 
-                            {/* Success Notification Card */}
-                            <AnimatePresence>
-                                {status.success && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: -10, scale: 0.98 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                                        className="mb-8 p-6 bg-[#E5F5E8] border border-green-300/80 rounded-2xl flex items-start gap-4 text-green-950"
-                                    >
-                                        <div className="w-10 h-10 rounded-full bg-green-700 text-white flex items-center justify-center shrink-0">
-                                            <Check className="w-5 h-5 stroke-[2.5]" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-bold text-sm">Message Sent Successfully!</h4>
-                                            <p className="text-xs text-green-900 mt-1 leading-relaxed">
-                                                {status.responseMsg || 'Thank you for reaching out. A Solar Edge engineer will contact you shortly.'}
-                                            </p>
-                                            <button
-                                                type="button"
-                                                onClick={() => setStatus((prev) => ({ ...prev, success: false }))}
-                                                className="mt-3 text-xs font-bold underline cursor-pointer text-green-800 hover:text-green-950"
-                                            >
-                                                Send another message
-                                            </button>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
 
                             {/* Error Notification Card */}
                             <AnimatePresence>
@@ -760,18 +740,16 @@ const Contact = () => {
                                                     key={svc.id}
                                                     type="button"
                                                     onClick={() => handleServiceSelect(svc.id)}
-                                                    className={`flex items-center gap-3 p-3 rounded-2xl border text-left transition-all duration-200 cursor-pointer text-xs ${
-                                                        isSelected
+                                                    className={`flex items-center gap-3 p-3 rounded-2xl border text-left transition-all duration-200 cursor-pointer text-xs ${isSelected
                                                             ? 'bg-[#E5F5E8] border-[#1A4D2E] text-[#1A4D2E] font-bold shadow-2xs'
                                                             : 'bg-neutral-50/70 hover:bg-neutral-100/70 border-neutral-200 text-neutral-700 font-medium'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <div
-                                                        className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 ${
-                                                            isSelected
+                                                        className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 ${isSelected
                                                                 ? 'bg-[#1A4D2E] text-white'
                                                                 : 'bg-white text-neutral-500 border border-neutral-200'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         <IconComp className="w-3.5 h-3.5" />
                                                     </div>
@@ -959,16 +937,14 @@ const Contact = () => {
 
                                     {/* Live Business Hours Indicator */}
                                     <div
-                                        className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full ${
-                                            isCurrentlyOpen
+                                        className={`inline-flex items-center gap-1.5 text-[11px] font-bold px-3 py-1 rounded-full ${isCurrentlyOpen
                                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
                                                 : 'bg-neutral-100 text-neutral-600 border border-neutral-200'
-                                        }`}
+                                            }`}
                                     >
                                         <span
-                                            className={`w-2 h-2 rounded-full ${
-                                                isCurrentlyOpen ? 'bg-emerald-500 animate-pulse' : 'bg-neutral-400'
-                                            }`}
+                                            className={`w-2 h-2 rounded-full ${isCurrentlyOpen ? 'bg-emerald-500 animate-pulse' : 'bg-neutral-400'
+                                                }`}
                                         />
                                         <span>{isCurrentlyOpen ? 'Open Now' : 'Closed Now'}</span>
                                     </div>
@@ -1048,28 +1024,23 @@ const Contact = () => {
                                 </div>
                             </div>
 
-                            {/* Card 3: Quick Direct WhatsApp Banner */}
-                            <div className="bg-gradient-to-br from-[#0c2b1a] to-[#05180D] text-white rounded-[32px] p-6 sm:p-8 relative overflow-hidden shadow-lg border border-green-900/40">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl pointer-events-none" />
-                                <div className="relative z-10">
+                            {/* Card 3: Contact Consultation Image Card */}
+                            <div className="relative rounded-[32px] overflow-hidden border border-neutral-200/90 shadow-sm group">
+                                <img
+                                    src={contactConsultationImg}
+                                    alt="Solar Edge energy engineers and consultation desk"
+                                    className="w-full h-64 sm:h-72 object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-6 sm:p-7 text-white">
                                     <span className="text-[10px] font-bold tracking-widest uppercase text-green-400 font-mono">
-                                        PREFER SPEED?
+                                        SOLAR CONSULTATION
                                     </span>
-                                    <h4 className="font-playfair font-bold text-xl sm:text-2xl mt-1">
-                                        WhatsApp Fast-Track
+                                    <h4 className="font-playfair font-bold text-lg sm:text-xl text-white mt-1">
+                                        Expert Energy Planning
                                     </h4>
-                                    <p className="text-xs text-neutral-300 font-light mt-2 leading-relaxed">
-                                        Send your KSEB electricity bill copy directly over WhatsApp for an instant rooftop kW sizing estimate and subsidy calculation.
+                                    <p className="text-xs text-neutral-200 font-light mt-1 leading-relaxed">
+                                        Our certified engineering team designs customized rooftop solar solutions suited to your power needs and budget.
                                     </p>
-                                    <a
-                                        href={whatsappDirectLink}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="mt-5 inline-flex items-center gap-2 bg-[#78B61A] hover:bg-[#689f15] text-white px-5 py-3 rounded-full text-xs font-bold tracking-wider uppercase font-sans transition-all duration-300 shadow-md"
-                                    >
-                                        <PiWhatsappLogoThin className="w-4 h-4 stroke-[2]" />
-                                        <span>Send Bill on WhatsApp</span>
-                                    </a>
                                 </div>
                             </div>
                         </motion.div>
@@ -1147,11 +1118,10 @@ const Contact = () => {
                                             key={cat}
                                             type="button"
                                             onClick={() => handleCategorySelect(cat)}
-                                            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
-                                                isSelected
+                                            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${isSelected
                                                     ? 'bg-[#1A4D2E] text-white shadow-xs'
                                                     : 'bg-white text-neutral-600 hover:text-neutral-900 border border-neutral-200/80 hover:border-neutral-300'
-                                            }`}
+                                                }`}
                                         >
                                             {cat}
                                         </button>
@@ -1189,9 +1159,8 @@ const Contact = () => {
                                             )}
                                         </div>
                                         <div
-                                            className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 ${
-                                                isOpen ? 'rotate-180 bg-[#E5F5E8] text-[#1A4D2E]' : 'bg-neutral-100 text-neutral-500'
-                                            }`}
+                                            className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180 bg-[#E5F5E8] text-[#1A4D2E]' : 'bg-neutral-100 text-neutral-500'
+                                                }`}
                                         >
                                             <ChevronDown className="w-4 h-4" />
                                         </div>
@@ -1214,39 +1183,6 @@ const Contact = () => {
                                 </motion.div>
                             );
                         })}
-                    </div>
-
-                    {/* Bottom CTA Card */}
-                    <div className="mt-12 bg-gradient-to-br from-emerald-50/70 via-white to-green-50/50 border border-emerald-100/80 rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-2xs">
-                        <div className="text-center sm:text-left">
-                            <span className="text-[11px] font-bold uppercase tracking-widest text-green-700 font-mono">
-                                STILL HAVE QUESTIONS?
-                            </span>
-                            <h3 className="font-bold text-lg sm:text-xl text-neutral-900 mt-1">
-                                Need custom sizing or have unique rooftop requirements?
-                            </h3>
-                            <p className="text-xs sm:text-sm text-neutral-500 font-light mt-1 max-w-xl">
-                                Our solar engineers in Kerala are available right now to assess your energy needs and provide a free quotation.
-                            </p>
-                        </div>
-                        <div className="flex flex-wrap items-center gap-3 shrink-0">
-                            <a
-                                href={whatsappDirectLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 bg-[#1A4D2E] hover:bg-[#143d24] text-white px-5 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase font-mono transition-all shadow-xs"
-                            >
-                                <PiWhatsappLogoThin className="w-4 h-4 stroke-[1.5]" />
-                                <span>WhatsApp Us</span>
-                            </a>
-                            <a
-                                href="tel:+919526801406"
-                                className="inline-flex items-center gap-2 bg-white hover:bg-neutral-50 text-neutral-800 border border-neutral-200/90 px-5 py-2.5 rounded-full text-xs font-bold tracking-wider uppercase font-mono transition-all shadow-2xs"
-                            >
-                                <Phone className="w-3.5 h-3.5 text-green-700" />
-                                <span>+91 95268 01406</span>
-                            </a>
-                        </div>
                     </div>
                 </section>
             </div>
@@ -1315,11 +1251,11 @@ const Contact = () => {
                                 id="success-modal-title"
                                 className="text-2xl sm:text-3xl font-bold font-playfair text-neutral-900 tracking-tight"
                             >
-                                Thank You!
+                                Inquiry Submitted!
                             </h3>
 
                             <p className="mt-2 text-xs sm:text-sm text-neutral-600 font-light leading-relaxed max-w-sm mx-auto">
-                                {status.responseMsg || 'Your message has been sent successfully. Our solar engineering team will review your inquiry and contact you shortly.'}
+                                Thank you! Your inquiry details have been saved successfully. Would you also like to send this message directly via WhatsApp to our solar team?
                             </p>
 
                             {/* What happens next box */}
@@ -1329,32 +1265,33 @@ const Contact = () => {
                                 </div>
                                 <div className="flex items-start gap-2.5 text-xs text-neutral-700">
                                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                                    <span>Our system engineers will assess feasibility and solar subsidy benefits.</span>
+                                    <span>Our system engineers have received your inquiry and will review it.</span>
                                 </div>
                                 <div className="flex items-start gap-2.5 text-xs text-neutral-700">
                                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                                    <span>We’ll reach out via phone or email within 2–4 business hours.</span>
+                                    <span>You can choose to send via WhatsApp now or cancel to close.</span>
                                 </div>
                             </div>
 
                             {/* CTA Actions */}
-                            <div className="mt-6 flex flex-col sm:flex-row items-center gap-3">
+                            <div className="mt-6 flex flex-col-reverse sm:flex-row items-center gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowSuccessModal(false)}
+                                    className="w-full sm:w-1/2 py-3 px-5 rounded-xl border border-neutral-300 hover:bg-neutral-100 text-neutral-700 text-xs sm:text-sm font-semibold transition-all cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
                                 <a
                                     href={submittedWhatsAppUrl || whatsappDirectLink}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 transition-all hover:shadow-lg hover:-translate-y-0.5"
+                                    onClick={() => setShowSuccessModal(false)}
+                                    className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 transition-all hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
                                 >
                                     <PiWhatsappLogoThin className="w-5 h-5 text-xl font-bold" />
-                                    <span>Continue on WhatsApp</span>
+                                    <span>Send through WhatsApp</span>
                                 </a>
-                                <button
-                                    type="button"
-                                    onClick={() => setShowSuccessModal(false)}
-                                    className="w-full sm:w-auto py-3 px-6 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs sm:text-sm font-semibold transition-all hover:shadow-md cursor-pointer"
-                                >
-                                    Done
-                                </button>
                             </div>
                         </motion.div>
                     </div>

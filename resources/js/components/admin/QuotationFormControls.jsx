@@ -4,7 +4,6 @@ import {
     Trash2,
     Save,
     RotateCcw,
-    Printer,
     FileText,
     User,
     Wrench,
@@ -26,7 +25,9 @@ export const QuotationFormControls = ({
     pdfProgress = "",
     onLogout,
     activeTab: propActiveTab,
-    onTabChange
+    onTabChange,
+    hideTopToolbar = false,
+    hideTabs = false
 }) => {
     const [localActiveTab, setLocalActiveTab] = useState('client');
     const activeTab = propActiveTab !== undefined ? propActiveTab : localActiveTab;
@@ -105,89 +106,93 @@ export const QuotationFormControls = ({
     const totalPages = 3 + mfgPageCount + permitFeePageCount + termsPageCount;
 
     return (
-        <div className="w-full h-full bg-white border-r border-neutral-200 flex flex-col font-sans overflow-hidden" data-lenis-prevent>
-            {/* Top Editor Toolbar */}
-            <div className="p-4 border-b border-neutral-200 bg-neutral-900 text-white flex items-center justify-between gap-2 shadow-xs">
-                <div className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-emerald-400" />
-                    <div>
-                        <h2 className="text-sm font-bold leading-none">Quotation Builder</h2>
-                        <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider">
-                            {totalPages}-Page Live Editor
-                        </span>
+        <div className="w-full h-full bg-white flex flex-col font-sans overflow-hidden" data-lenis-prevent>
+            {/* Top Editor Toolbar (Shown when not in desktop full-width layout) */}
+            {!hideTopToolbar && (
+                <div className="p-4 border-b border-neutral-200 bg-neutral-900 text-white flex items-center justify-between gap-2 shadow-xs">
+                    <div className="flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-emerald-400" />
+                        <div>
+                            <h2 className="text-sm font-bold leading-none">Quotation Builder</h2>
+                            <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider">
+                                {totalPages}-Page Live Editor
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={onSave}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                            title="Save quotation data to local storage"
+                        >
+                            <Save className="w-3.5 h-3.5" />
+                            <span>Save</span>
+                        </button>
+                        <button
+                            onClick={onGeneratePdf}
+                            disabled={isGeneratingPdf}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${isGeneratingPdf ? 'bg-blue-400 cursor-not-allowed opacity-80' : 'bg-blue-600 hover:bg-blue-500 cursor-pointer'} text-white rounded-lg text-xs font-bold transition-all shadow-xs`}
+                            title={isGeneratingPdf ? (pdfProgress || "Generating PDF document...") : `Generate and download ${totalPages}-page PDF`}
+                        >
+                            {isGeneratingPdf ? (
+                                <>
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    <span>{pdfProgress || "Exporting..."}</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Download className="w-3.5 h-3.5" />
+                                    <span>PDF</span>
+                                </>
+                            )}
+                        </button>
+                        <button
+                            onClick={onReset}
+                            className="p-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-lg text-xs transition-colors cursor-pointer"
+                            title="Reset to default template"
+                        >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                            onClick={onLogout}
+                            className="p-1.5 bg-red-950/80 hover:bg-red-800 text-red-200 rounded-lg text-xs transition-colors cursor-pointer"
+                            title="Logout from admin session"
+                        >
+                            <LogOut className="w-3.5 h-3.5" />
+                        </button>
                     </div>
                 </div>
+            )}
 
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={onSave}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold transition-all shadow-xs cursor-pointer"
-                        title="Save quotation data to local storage"
-                    >
-                        <Save className="w-3.5 h-3.5" />
-                        <span>Save</span>
-                    </button>
-                    <button
-                        onClick={onGeneratePdf}
-                        disabled={isGeneratingPdf}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 ${isGeneratingPdf ? 'bg-blue-400 cursor-not-allowed opacity-80' : 'bg-blue-600 hover:bg-blue-500 cursor-pointer'} text-white rounded-lg text-xs font-bold transition-all shadow-xs`}
-                        title={isGeneratingPdf ? (pdfProgress || "Generating PDF document...") : `Generate and download ${totalPages}-page PDF`}
-                    >
-                        {isGeneratingPdf ? (
-                            <>
-                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                                <span>{pdfProgress || "Exporting..."}</span>
-                            </>
-                        ) : (
-                            <>
-                                <Download className="w-3.5 h-3.5" />
-                                <span>PDF</span>
-                            </>
-                        )}
-                    </button>
-                    <button
-                        onClick={onReset}
-                        className="p-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-lg text-xs transition-colors cursor-pointer"
-                        title="Reset to default template"
-                    >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                        onClick={onLogout}
-                        className="p-1.5 bg-red-950/80 hover:bg-red-800 text-red-200 rounded-lg text-xs transition-colors cursor-pointer"
-                        title="Logout from admin session"
-                    >
-                        <LogOut className="w-3.5 h-3.5" />
-                    </button>
+            {/* Navigation Form Tabs (Shown when not in desktop full-width layout) */}
+            {!hideTabs && (
+                <div className="flex overflow-x-auto border-b border-neutral-200 bg-neutral-50 p-1.5 gap-1 scrollbar-none" data-lenis-prevent>
+                    {[
+                        { id: 'client', label: 'Client & Ref', icon: User },
+                        { id: 'manufacturers', label: 'Manufacturers', icon: Sliders },
+                        { id: 'technical', label: 'Technical', icon: Wrench },
+                        { id: 'pricing', label: 'Pricing & Fees', icon: DollarSign },
+                        { id: 'terms', label: 'Terms & Warranty', icon: Shield }
+                    ].map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => handleSelectTab(tab.id)}
+                                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${isActive
+                                    ? 'bg-white text-emerald-800 shadow-xs border border-neutral-200/80'
+                                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/50'
+                                    }`}
+                            >
+                                <Icon className="w-3.5 h-3.5" />
+                                <span>{tab.label}</span>
+                            </button>
+                        );
+                    })}
                 </div>
-            </div>
-
-            {/* Navigation Form Tabs */}
-            <div className="flex overflow-x-auto border-b border-neutral-200 bg-neutral-50 p-1.5 gap-1 scrollbar-none" data-lenis-prevent>
-                {[
-                    { id: 'client', label: 'Client & Ref', icon: User },
-                    { id: 'manufacturers', label: 'Manufacturers', icon: Sliders },
-                    { id: 'technical', label: 'Technical', icon: Wrench },
-                    { id: 'pricing', label: 'Pricing & Fees', icon: DollarSign },
-                    { id: 'terms', label: 'Terms & Warranty', icon: Shield }
-                ].map((tab) => {
-                    const Icon = tab.icon;
-                    const isActive = activeTab === tab.id;
-                    return (
-                        <button
-                            key={tab.id}
-                            onClick={() => handleSelectTab(tab.id)}
-                            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${isActive
-                                ? 'bg-white text-emerald-800 shadow-xs border border-neutral-200/80'
-                                : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/50'
-                                }`}
-                        >
-                            <Icon className="w-3.5 h-3.5" />
-                            <span>{tab.label}</span>
-                        </button>
-                    );
-                })}
-            </div>
+            )}
 
             {/* Form Fields Area */}
             <div ref={formScrollRef} className="flex-1 overflow-y-auto p-5 space-y-6 text-xs text-neutral-700" data-lenis-prevent>

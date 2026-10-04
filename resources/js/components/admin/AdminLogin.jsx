@@ -138,7 +138,7 @@ export const AdminLogin = ({ onLoginSuccess }) => {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full py-3.5 px-6 bg-gradient-to-r from-green-900 via-emerald-800 to-green-950 hover:from-green-800 hover:to-green-900 text-white rounded-2xl font-bold text-sm tracking-wider uppercase transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
+                        className="w-full py-3.5 px-6 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl font-bold text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
                     >
                         {isLoading ? (
                             <span>Logging in...</span>

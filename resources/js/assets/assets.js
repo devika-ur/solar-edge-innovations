@@ -12,6 +12,7 @@ import solarPanel from '../assets/Home-page-images/solar-panel.svg'
 import JoseJo from '../assets/jose-jo.png'
 import joseJoNoBg from '../assets/jose-jo-no-bg.png'
 import aboutImage from '../assets/about-image.png'
+import paleBlueSolarEcoEmblem from '../assets/Pale Blue Solar Eco Emblem.png';
 
 import one from '../assets/Home-page-images/1.jpg'
 import two from '../assets/Home-page-images/3.jpg'
@@ -100,6 +101,7 @@ export const projectGalleryImages = [
 
 export const assets = {
     logo,
+    paleBlueSolarEcoEmblem,
     quotationHeader,
     quotationFooter,
     headerImage,

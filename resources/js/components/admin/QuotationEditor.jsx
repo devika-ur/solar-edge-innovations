@@ -8,9 +8,24 @@ import { defaultQuotationData } from '../../data/defaultQuotationData';
 import { QuotationFormControls } from './QuotationFormControls';
 import { QuotationPreview6Pages } from './QuotationPreview6Pages';
 import { QuotationEditorMobile } from './QuotationEditorMobile';
+import { SaveQuotationModal } from './SaveQuotationModal';
+import {
+    FileText,
+    Layers,
+    RotateCcw,
+    Save,
+    Download,
+    Loader2,
+    User,
+    Sliders,
+    Wrench,
+    DollarSign,
+    Shield,
+    Trash2
+} from 'lucide-react';
 import toast from 'react-hot-toast';
 
-export const QuotationEditor = ({ onLogout, onBack }) => {
+export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
     // Screen responsiveness detection
     const [isMobile, setIsMobile] = useState(() => {
         return typeof window !== 'undefined' && window.innerWidth < 768;
@@ -184,19 +199,241 @@ export const QuotationEditor = ({ onLogout, onBack }) => {
         };
     }, []);
 
-    // Save quotation to local storage
-    const handleSave = (showToastNotification = true) => {
+    // Modal & saving states for database quotation history
+    const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+    const [isSavingToBackend, setIsSavingToBackend] = useState(false);
+    const [saveProgress, setSaveProgress] = useState("");
+
+    // Open save confirmation modal popup
+    const handleSave = () => {
+        setIsSaveModalOpen(true);
+    };
+
+    // Helper: capture 6-page A4 preview and render jsPDF document
+    const generatePdfDocument = async (onProgress) => {
         try {
-            localStorage.setItem('solar_quotation_data', JSON.stringify(quotationData));
-            const client = quotationData.clientInfo?.name?.trim() || 'Client';
-            const date = quotationData.date?.trim() || '';
-            if (showToastNotification) {
-                toast.success(`Quotation saved for ${client}${date ? ` (${date})` : ''}!`);
+            const pages = document.querySelectorAll('.quotation-preview-container .quotation-page, .quotation-page');
+            if (!pages || pages.length === 0) {
+                return null;
             }
-        } catch (e) {
-            if (showToastNotification) {
-                toast.error("Failed to save quotation data.");
+
+            if (document.fonts && document.fonts.ready) {
+                await document.fonts.ready;
             }
+
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4',
+                compress: true
+            });
+
+            const pdfWidth = 210;
+            const pdfHeight = 297;
+
+            for (let i = 0; i < pages.length; i++) {
+                if (onProgress) onProgress(`Page ${i + 1}/${pages.length}`);
+
+                const pageEl = pages[i];
+
+                const canvas = await html2canvas(pageEl, {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    onclone: (clonedDoc, clonedEl) => {
+                        clonedEl.style.transform = 'none';
+                        clonedEl.style.boxShadow = 'none';
+                        clonedEl.style.margin = '0 auto';
+                        let p = clonedEl.parentElement;
+                        while (p && p !== clonedDoc.body) {
+                            p.style.transform = 'none';
+                            p = p.parentElement;
+                        }
+                    },
+                    ignoreElements: (el) => {
+                        if (!el) return false;
+                        if (el.classList?.contains('quotation-page')) return false;
+                        return (
+                            el.getAttribute?.('role') === 'status' ||
+                            el.getAttribute?.('aria-live') === 'polite' ||
+                            el.closest?.('[role="status"]') !== null ||
+                            el.closest?.('[aria-live="polite"]') !== null ||
+                            el.classList?.contains('toast-notification') ||
+                            el.classList?.contains('no-print')
+                        );
+                    }
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                if (i > 0) {
+                    pdf.addPage('a4', 'portrait');
+                }
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+            }
+
+            return pdf;
+        } catch (err) {
+            console.error("Error in generatePdfDocument:", err);
+            return null;
+        }
+    };
+
+    // Confirm save from popup modal and post to backend database
+    const handleConfirmSave = async () => {
+        setIsSavingToBackend(true);
+        setSaveProgress("Generating PDF...");
+
+        try {
+            let pdfBlob = null;
+            let pdfBase64 = null;
+            try {
+                const pdf = await generatePdfDocument((p) => setSaveProgress(`Exporting ${p}...`));
+                if (pdf) {
+                    pdfBlob = pdf.output('blob');
+                    pdfBase64 = pdf.output('datauristring');
+                }
+            } catch (pdfErr) {
+                console.warn("Could not generate PDF blob during save:", pdfErr);
+            }
+
+            setSaveProgress("Saving to backend...");
+
+            const formData = new FormData();
+            const clientClean = (quotationData.clientInfo?.name || 'Client')
+                .trim()
+                .replace(/[/\\?%*:|"<>]/g, '')
+                .replace(/\s+/g, '_');
+            const dateClean = (quotationData.date || '')
+                .trim()
+                .replace(/[/\\?%*:|"<>]/g, '-')
+                .replace(/\s+/g, '_');
+
+            const fileName = `Quotation_${clientClean || 'client'}_${dateClean || Date.now()}.pdf`;
+            if (pdfBlob) {
+                formData.append('pdf_file', pdfBlob, fileName);
+            }
+            if (pdfBase64) {
+                formData.append('pdf_base64', pdfBase64);
+            }
+
+            formData.append('client_name', quotationData.clientInfo?.name || 'Unnamed Client');
+            formData.append('client_phone', quotationData.clientInfo?.contactNo || '');
+            formData.append('client_address', quotationData.clientInfo?.address || '');
+            formData.append('capacity', quotationData.clientInfo?.capacity || '');
+            formData.append('system_type', quotationData.clientInfo?.type || '');
+            formData.append('total_amount', quotationData.pricing?.totalPayable || '');
+            formData.append('ref_no', quotationData.refNo || '');
+            formData.append('quotation_date', quotationData.date || '');
+
+            const res = await fetch('/api/admin-quotations.php', {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                // Clear the form fields for the next quotation
+                const today = new Date();
+                const day = String(today.getDate()).padStart(2, '0');
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const year = today.getFullYear();
+                const formattedDate = `${day}/${month}/${year}`;
+
+                const clearedData = {
+                    ...defaultQuotationData,
+                    refNo: '',
+                    date: formattedDate,
+                    clientInfo: {
+                        name: '',
+                        address: '',
+                        contactNo: '',
+                        capacity: '',
+                        type: 'ON GRID'
+                    },
+                    pricing: {
+                        ...defaultQuotationData.pricing,
+                        headerTitle: '',
+                        totalPayable: '',
+                        amountInWords: ''
+                    }
+                };
+
+                setQuotationData(clearedData);
+                localStorage.removeItem('solar_quotation_data');
+                setActiveTab('client');
+                activeTabRef.current = 'client';
+                if (rightPanelRef.current) {
+                    rightPanelRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+                setIsSaveModalOpen(false);
+
+                toast.success((t) => (
+                    <div className="flex items-center justify-between gap-3">
+                        <span className="text-xs">Quotation saved & form cleared!</span>
+                        {onNavigate && (
+                            <button
+                                onClick={() => {
+                                    toast.dismiss(t.id);
+                                    onNavigate('quotation-history');
+                                }}
+                                className="px-3 py-1 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                            >
+                                View History
+                            </button>
+                        )}
+                    </div>
+                ), { duration: 5000 });
+            } else {
+                toast.error(data.message || "Failed to save quotation to history.");
+            }
+        } catch (err) {
+            console.error("Save quotation error:", err);
+            toast.error("Network error saving quotation to history.");
+        } finally {
+            setIsSavingToBackend(false);
+            setSaveProgress("");
+        }
+    };
+
+    // Clear form fields for entering a fresh quotation
+    const handleClearForm = () => {
+        if (window.confirm("Are you sure you want to clear all client and pricing fields for a new quotation?")) {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = today.getFullYear();
+            const formattedDate = `${day}/${month}/${year}`;
+
+            const clearedData = {
+                ...defaultQuotationData,
+                refNo: '',
+                date: formattedDate,
+                clientInfo: {
+                    name: '',
+                    address: '',
+                    contactNo: '',
+                    capacity: '',
+                    type: 'ON GRID'
+                },
+                pricing: {
+                    ...defaultQuotationData.pricing,
+                    headerTitle: '',
+                    totalPayable: '',
+                    amountInWords: ''
+                }
+            };
+
+            setQuotationData(clearedData);
+            localStorage.removeItem('solar_quotation_data');
+            setActiveTab('client');
+            activeTabRef.current = 'client';
+            if (rightPanelRef.current) {
+                rightPanelRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            toast.success("Quotation form cleared.");
         }
     };
 
@@ -213,127 +450,23 @@ export const QuotationEditor = ({ onLogout, onBack }) => {
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [pdfProgress, setPdfProgress] = useState("");
 
-    // Generate & Download PDF matching exact live preview per page
+    // Generate & Download PDF directly to user's device
     const handleGeneratePdf = async () => {
         if (isGeneratingPdfRef.current || isGeneratingPdf) return;
 
-        // Save silently without popping up a toast that flickers
-        handleSave(false);
         isGeneratingPdfRef.current = true;
         isProgrammaticScrollRef.current = true;
         setIsGeneratingPdf(true);
         setPdfProgress("Starting...");
 
-        let exportContainer = null;
-
         try {
-            const container = document.querySelector('.quotation-preview-container');
-            if (!container) {
+            const pdf = await generatePdfDocument((p) => setPdfProgress(p));
+            if (!pdf) {
                 window.print();
                 return;
             }
 
-            // Create an isolated, unscaled clone attached directly to document.body
-            // This guarantees html2canvas always captures full-size 794x1123 desktop A4 pages
-            // without being shrunk by mobile viewport, parent scale transforms, or flex wrappers.
-            exportContainer = container.cloneNode(true);
-            exportContainer.id = 'quotation-export-stage';
-            exportContainer.style.position = 'fixed';
-            exportContainer.style.left = '-9999px';
-            exportContainer.style.top = '0px';
-            exportContainer.style.width = '794px';
-            exportContainer.style.minWidth = '794px';
-            exportContainer.style.maxWidth = '794px';
-            exportContainer.style.height = 'auto';
-            exportContainer.style.zIndex = '-99999';
-            exportContainer.style.opacity = '1';
-            exportContainer.style.pointerEvents = 'none';
-            exportContainer.style.transform = 'none';
-            exportContainer.style.margin = '0';
-            exportContainer.style.padding = '0';
-            exportContainer.style.background = '#ffffff';
-
-            document.body.appendChild(exportContainer);
-
-            const pages = exportContainer.querySelectorAll('.quotation-page');
-            if (!pages || pages.length === 0) {
-                toast.error("No quotation pages found to export.");
-                return;
-            }
-
-            // Make sure web fonts are loaded so text widths match the live preview
-            if (document.fonts && document.fonts.ready) {
-                await document.fonts.ready;
-            }
-
-            // Ensure all images inside exportContainer are loaded
-            const imgs = exportContainer.querySelectorAll('img');
-            await Promise.all(
-                Array.from(imgs).map((img) => {
-                    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
-                    return new Promise((resolve) => {
-                        img.onload = resolve;
-                        img.onerror = resolve;
-                        setTimeout(resolve, 300);
-                    });
-                })
-            );
-
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4',
-                compress: true
-            });
-
-            const pdfWidth = 210;
-            const pdfHeight = 297;
-
-            for (let i = 0; i < pages.length; i++) {
-                setPdfProgress(`Page ${i + 1}/${pages.length}`);
-
-                const pageEl = pages[i];
-                pageEl.style.margin = '0px';
-                pageEl.style.boxShadow = 'none';
-                pageEl.style.transform = 'none';
-
-                const canvas = await html2canvas(pageEl, {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    logging: false,
-                    backgroundColor: '#ffffff',
-                    width: 794,
-                    height: 1123,
-                    windowWidth: 1200,
-                    windowHeight: 1600,
-                    scrollX: 0,
-                    scrollY: 0,
-                    ignoreElements: (el) => {
-                        if (!el) return false;
-                        if (el.classList?.contains('quotation-page')) return false;
-                        return (
-                            el.getAttribute?.('role') === 'status' ||
-                            el.getAttribute?.('aria-live') === 'polite' ||
-                            el.closest?.('[role="status"]') !== null ||
-                            el.closest?.('[aria-live="polite"]') !== null ||
-                            el.classList?.contains('toast-notification') ||
-                            el.classList?.contains('no-print')
-                        );
-                    }
-                });
-
-                const imgData = canvas.toDataURL('image/jpeg', 0.98);
-
-                if (i > 0) {
-                    pdf.addPage('a4', 'portrait');
-                }
-
-                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-            }
-
             setPdfProgress("Saving...");
-
             const clientClean = (quotationData.clientInfo?.name || 'Client')
                 .trim()
                 .replace(/[/\\?%*:|"<>]/g, '')
@@ -349,16 +482,12 @@ export const QuotationEditor = ({ onLogout, onBack }) => {
                 : `Quotation_${clientClean}.pdf`;
 
             pdf.save(fileName);
-
-            toast.success(`Quotation PDF (${pages.length} pages) downloaded successfully!`);
+            toast.success("Quotation PDF downloaded successfully!");
         } catch (err) {
             console.error("PDF generation failed, falling back to window.print()", err);
             toast.error("Automatic PDF download failed. Opening print view...");
             window.print();
         } finally {
-            if (exportContainer && document.body.contains(exportContainer)) {
-                document.body.removeChild(exportContainer);
-            }
             isGeneratingPdfRef.current = false;
             isProgrammaticScrollRef.current = false;
             setIsGeneratingPdf(false);
@@ -467,18 +596,27 @@ export const QuotationEditor = ({ onLogout, onBack }) => {
                     onChange={setQuotationData}
                     onSave={handleSave}
                     onReset={handleReset}
+                    onClear={handleClearForm}
                     onGeneratePdf={handleGeneratePdf}
                     isGeneratingPdf={isGeneratingPdf}
                     pdfProgress={pdfProgress}
                     onLogout={onLogout}
                     onBack={onBack}
                 />
+                <SaveQuotationModal
+                    isOpen={isSaveModalOpen}
+                    onClose={() => setIsSaveModalOpen(false)}
+                    onConfirm={handleConfirmSave}
+                    quotationData={quotationData}
+                    isSaving={isSavingToBackend}
+                    saveProgress={saveProgress}
+                />
             </div>
         );
     }
 
     return (
-        <div className="w-full h-screen flex flex-col md:flex-row bg-neutral-100 overflow-hidden font-sans relative" data-lenis-prevent>
+        <div className="w-full flex flex-col font-sans bg-neutral-100 min-h-[calc(100vh-135px)] h-[calc(100vh-135px)] overflow-hidden relative" data-lenis-prevent>
             {/* Print Stylesheet Injection */}
             <style>{`
                 @media print {
@@ -562,30 +700,150 @@ export const QuotationEditor = ({ onLogout, onBack }) => {
                 }
             `}</style>
 
-            {/* Left Column: Form Controls (Hidden during print) */}
-            <div className="w-full md:w-[440px] lg:w-[480px] xl:w-[520px] h-[50vh] md:h-full shrink-0 quotation-editor-left-panel z-20 flex flex-col overflow-hidden" data-lenis-prevent>
-                <QuotationFormControls
-                    data={quotationData}
-                    onChange={setQuotationData}
-                    onSave={handleSave}
-                    onReset={handleReset}
-                    onGeneratePdf={handleGeneratePdf}
-                    isGeneratingPdf={isGeneratingPdf}
-                    pdfProgress={pdfProgress}
-                    onLogout={onLogout}
-                    activeTab={activeTab}
-                    onTabChange={handleTabChange}
-                />
+            {/* Top Toolbar (Matching Official Letterhead Creator Layout) */}
+            <div className="no-print bg-white border-b border-neutral-200/90 px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4 shadow-2xs">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#1A4D2E] flex items-center justify-center border border-emerald-200/60 shadow-2xs">
+                        <FileText size={20} />
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-2">
+                            <h1 className="text-base sm:text-lg font-black text-neutral-900 leading-tight">
+                                Quotation Builder
+                            </h1>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-[#1A4D2E]">
+                                <Layers size={12} />
+                                6 Pages
+                            </span>
+                        </div>
+                        <p className="text-xs text-neutral-500 font-medium">
+                            Live 6-page solar powerplant quotation editor with instant A4 PDF export.
+                        </p>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                        onClick={handleClearForm}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200/80 rounded-xl transition-all cursor-pointer"
+                        title="Clear all client and pricing fields for a new quotation"
+                    >
+                        <Trash2 size={14} />
+                        <span>Clear Form</span>
+                    </button>
+
+                    <button
+                        onClick={handleReset}
+                        className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200/80 rounded-xl transition-all cursor-pointer"
+                        title="Reset all fields to default 6-page template values"
+                    >
+                        <RotateCcw size={14} />
+                        <span>Reset Template</span>
+                    </button>
+
+                    <button
+                        onClick={handleSave}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#1A4D2E] hover:bg-[#143c24] active:scale-98 rounded-xl shadow-xs transition-all cursor-pointer"
+                        title="Save quotation and PDF to history"
+                    >
+                        <Save size={14} />
+                        <span>Save</span>
+                    </button>
+
+                    <button
+                        onClick={handleGeneratePdf}
+                        disabled={isGeneratingPdf}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-[#1A4D2E] hover:bg-[#143c24] active:scale-98 rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                        title="Download 6-page PDF document"
+                    >
+                        {isGeneratingPdf ? (
+                            <>
+                                <Loader2 size={15} className="animate-spin" />
+                                <span>{pdfProgress || "Exporting..."}</span>
+                            </>
+                        ) : (
+                            <>
+                                <Download size={15} />
+                                <span>Download PDF (6p)</span>
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
 
-            {/* Right Column: Live Preview */}
-            <div
-                ref={rightPanelRef}
-                className="flex-1 h-[50vh] md:h-full overflow-y-auto quotation-preview-right-panel p-4 md:p-8 bg-neutral-200/80"
-                data-lenis-prevent
-            >
-                <QuotationPreview6Pages data={quotationData} />
+            {/* Section Tabs Sub-bar (Matching Letterhead secondary toolbar) */}
+            <div className="no-print bg-neutral-50 border-b border-neutral-200/90 px-4 sm:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-none">
+                    {[
+                        { id: 'client', label: '1. Client & Ref', icon: User },
+                        { id: 'manufacturers', label: '2. Manufacturers', icon: Sliders },
+                        { id: 'technical', label: '3. Technical Specs', icon: Wrench },
+                        { id: 'pricing', label: '4. Pricing & Fees', icon: DollarSign },
+                        { id: 'terms', label: '5. Terms & Warranty', icon: Shield }
+                    ].map((tab) => {
+                        const Icon = tab.icon;
+                        const isActive = activeTab === tab.id;
+                        return (
+                            <button
+                                key={tab.id}
+                                onClick={() => handleTabChange(tab.id)}
+                                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                                    isActive
+                                        ? 'bg-[#1A4D2E] text-white shadow-2xs'
+                                        : 'bg-white text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 border border-neutral-200/80'
+                                }`}
+                            >
+                                <Icon size={13} />
+                                <span>{tab.label}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                <div className="hidden sm:flex items-center gap-2 text-xs font-semibold text-neutral-500">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Live 6-Page A4 Preview</span>
+                </div>
             </div>
+
+            {/* Split Screen Workspace Area */}
+            <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+                {/* Left Column: Form Controls */}
+                <div className="w-full md:w-[460px] lg:w-[500px] xl:w-[540px] h-full shrink-0 border-r border-neutral-200 bg-white flex flex-col overflow-hidden quotation-editor-left-panel z-20" data-lenis-prevent>
+                    <QuotationFormControls
+                        data={quotationData}
+                        onChange={setQuotationData}
+                        onSave={handleSave}
+                        onReset={handleReset}
+                        onGeneratePdf={handleGeneratePdf}
+                        isGeneratingPdf={isGeneratingPdf}
+                        pdfProgress={pdfProgress}
+                        onLogout={onLogout}
+                        activeTab={activeTab}
+                        onTabChange={handleTabChange}
+                        hideTopToolbar={true}
+                        hideTabs={true}
+                    />
+                </div>
+
+                {/* Right Column: Live Preview */}
+                <div
+                    ref={rightPanelRef}
+                    className="flex-1 h-full overflow-y-auto quotation-preview-right-panel p-4 md:p-8 bg-neutral-200/80"
+                    data-lenis-prevent
+                >
+                    <QuotationPreview6Pages data={quotationData} />
+                </div>
+            </div>
+
+            <SaveQuotationModal
+                isOpen={isSaveModalOpen}
+                onClose={() => setIsSaveModalOpen(false)}
+                onConfirm={handleConfirmSave}
+                quotationData={quotationData}
+                isSaving={isSavingToBackend}
+                saveProgress={saveProgress}
+            />
         </div>
     );
 };

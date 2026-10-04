@@ -1,7 +1,18 @@
 import React from 'react';
 import { QuotationHeader } from './QuotationHeader';
 import { QuotationFooter } from './QuotationFooter';
+import paleBlueSolarEcoEmblem from '../../assets/Pale Blue Solar Eco Emblem.png';
 import { assets } from '../../assets/assets';
+
+const WatermarkOverlay = () => (
+    <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none select-none z-0">
+        <img
+            src={paleBlueSolarEcoEmblem}
+            alt="Solar Edge Watermark"
+            className="w-[480px] h-[480px] object-contain"
+        />
+    </div>
+);
 
 export const QuotationPreview6Pages = ({ data }) => {
     // 1. Chunk Manufacturers (First page shows exactly 10 items; any additional items move to new page)
@@ -50,14 +61,11 @@ export const QuotationPreview6Pages = ({ data }) => {
                 PAGE 1: COVER PAGE
             ════════════════════════════════════════════════════════════ */}
             <div data-section="client" id="preview-page-client" className="quotation-page w-[210mm] min-h-[297mm] h-[297mm] bg-white shadow-xl print:shadow-none flex flex-col justify-between relative overflow-hidden box-border page-break-after-always">
+                <WatermarkOverlay />
                 <QuotationHeader refNo={data.refNo} date={data.date} />
 
                 {/* Page Content */}
                 <div className="px-12 py-10 flex-1 flex flex-col items-center justify-center text-center relative z-10 gap-10">
-                    {/* Background Sun Logo Watermark Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none select-none z-0">
-                        <img src={assets.logo} alt="Watermark" className="w-[420px] h-[420px] object-contain" />
-                    </div>
 
                     {/* Main Title Banner */}
                     <div className="flex flex-col items-center gap-3 z-10 mb-4">
@@ -100,6 +108,7 @@ export const QuotationPreview6Pages = ({ data }) => {
                 PAGE 2: SOLAR GENERATION TECHNOLOGY
             ════════════════════════════════════════════════════════════ */}
             <div data-section="client" className="quotation-page w-[210mm] min-h-[297mm] h-[297mm] bg-white shadow-xl print:shadow-none flex flex-col justify-between relative overflow-hidden box-border page-break-after-always">
+                <WatermarkOverlay />
                 <QuotationHeader />
 
                 <div className="px-10 py-4 flex-1 flex flex-col gap-5 text-neutral-800 text-[11.5px] leading-relaxed relative z-10">
@@ -167,6 +176,7 @@ export const QuotationPreview6Pages = ({ data }) => {
                     id={chunkIdx === 0 ? "preview-page-manufacturers" : undefined}
                     className="quotation-page w-[210mm] min-h-[297mm] h-[297mm] bg-white shadow-xl print:shadow-none flex flex-col justify-between relative overflow-hidden box-border page-break-after-always"
                 >
+                    <WatermarkOverlay />
                     <QuotationHeader />
 
                     <div className="px-10 py-4 flex-1 flex flex-col relative z-10">
@@ -220,6 +230,7 @@ export const QuotationPreview6Pages = ({ data }) => {
                 PAGE 4: CLIENT INFO & TECHNICAL DETAILS
             ════════════════════════════════════════════════════════════ */}
             <div data-section="technical" id="preview-page-technical" className="quotation-page w-[210mm] min-h-[297mm] h-[297mm] bg-white shadow-xl print:shadow-none flex flex-col justify-between relative overflow-hidden box-border page-break-after-always">
+                <WatermarkOverlay />
                 <QuotationHeader />
 
                 <div className="px-10 py-6 flex-1 flex flex-col gap-6 relative z-10">
@@ -324,6 +335,7 @@ export const QuotationPreview6Pages = ({ data }) => {
                     id={chunkIdx === 0 ? "preview-page-pricing" : undefined}
                     className="quotation-page w-[210mm] min-h-[297mm] h-[297mm] bg-white shadow-xl print:shadow-none flex flex-col justify-between relative overflow-hidden box-border page-break-after-always"
                 >
+                    <WatermarkOverlay />
                     <QuotationHeader />
 
                     <div className="px-10 py-5 flex-1 flex flex-col gap-4 relative z-10">
@@ -418,6 +430,7 @@ export const QuotationPreview6Pages = ({ data }) => {
                     id={chunkIdx === 0 ? "preview-page-terms" : undefined}
                     className={`quotation-page w-[210mm] min-h-[297mm] h-[297mm] bg-white shadow-xl print:shadow-none flex flex-col justify-between relative overflow-hidden box-border ${chunkIdx === termsChunks.length - 1 ? 'page-break-after-avoid' : 'page-break-after-always'}`}
                 >
+                    <WatermarkOverlay />
                     <QuotationHeader />
 
                     <div className="px-10 py-4 flex-1 flex flex-col relative z-10">
