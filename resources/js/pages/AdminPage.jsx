@@ -8,6 +8,8 @@ import { QuotationEditor } from '../components/admin/QuotationEditor';
 import { InquiryManager } from '../components/admin/InquiryManager';
 import { LetterheadEditor } from '../components/admin/LetterheadEditor';
 import { QuotationHistoryManager } from '../components/admin/QuotationHistoryManager';
+import { PaymentManager } from '../components/admin/PaymentManager';
+import { ReportManager } from '../components/admin/reports/ReportManager';
 import { Toaster, toast } from 'react-hot-toast';
 import {
     LayoutDashboard,
@@ -15,6 +17,7 @@ import {
     HelpCircle,
     FileText,
     History,
+    CreditCard,
     ScrollText,
     LogOut,
     Globe,
@@ -22,11 +25,12 @@ import {
     Sparkles,
     AlertTriangle,
     Mail,
-    X
+    X,
+    BarChart3
 } from 'lucide-react';
 import { assets } from '../assets/assets';
 
-const VALID_TABS = ['dashboard', 'inquiries', 'projects', 'faqs', 'quotation', 'quotation-history', 'letterhead'];
+const VALID_TABS = ['dashboard', 'inquiries', 'projects', 'faqs', 'letterhead', 'quotation', 'quotation-history', 'payments', 'reports'];
 
 const AdminPage = () => {
     const { tab } = useParams();
@@ -176,9 +180,11 @@ const AdminPage = () => {
         },
         { id: 'projects', label: 'Projects & Gallery', icon: FolderGit2 },
         { id: 'faqs', label: 'Website FAQs', icon: HelpCircle },
+        { id: 'letterhead', label: 'Letterhead', icon: ScrollText },
         { id: 'quotation', label: 'Quotation Builder', icon: FileText },
         { id: 'quotation-history', label: 'Quotation History', icon: History },
-        { id: 'letterhead', label: 'Letterhead', icon: ScrollText },
+        { id: 'payments', label: 'Payments', icon: CreditCard },
+        { id: 'reports', label: 'Reports', icon: BarChart3 },
     ];
 
     return (
@@ -315,6 +321,18 @@ const AdminPage = () => {
                 )}
                 {activeTab === 'quotation-history' && (
                     <QuotationHistoryManager
+                        onNavigate={handleTabChange}
+                        onUnauthorized={handleUnauthorized}
+                    />
+                )}
+                {activeTab === 'payments' && (
+                    <PaymentManager
+                        onNavigate={handleTabChange}
+                        onUnauthorized={handleUnauthorized}
+                    />
+                )}
+                {activeTab === 'reports' && (
+                    <ReportManager
                         onNavigate={handleTabChange}
                         onUnauthorized={handleUnauthorized}
                     />

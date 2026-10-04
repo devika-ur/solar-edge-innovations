@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Quotation;
+use App\Models\QuotationPayment;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -170,6 +171,13 @@ class QuotationController extends Controller
                 'status' => 'active',
                 'created_by' => $adminUser,
             ]);
+
+            // Sync master payment tracking record
+            try {
+                QuotationPayment::syncForQuotation($quotation);
+            } catch (\Throwable $e) {
+                // Non-blocking for quotation generation
+            }
 
             return response()->json([
                 'success' => true,
