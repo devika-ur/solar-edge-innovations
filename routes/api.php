@@ -3,8 +3,10 @@
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Api\Admin\InquiryController as AdminInquiryController;
+use App\Http\Controllers\Api\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Api\Admin\ProjectController as AdminProjectController;
 use App\Http\Controllers\Api\Admin\QuotationController as AdminQuotationController;
+use App\Http\Controllers\Api\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Api\Admin\StatsController as AdminStatsController;
 use App\Http\Controllers\Api\Admin\TokenController as AdminTokenController;
 use App\Http\Controllers\Api\ContactController;
@@ -88,6 +90,34 @@ Route::middleware('admin.session')->group(function () {
     Route::get('/admin/quotations/{id}', [AdminQuotationController::class, 'show']);
     Route::post('/admin/quotations/delete', [AdminQuotationController::class, 'handle']);
     Route::post('/admin-quotations-delete.php', [AdminQuotationController::class, 'handle']);
+
+    // Payment Tracking & History
+    Route::get('/admin/payments', [AdminPaymentController::class, 'index']);
+    Route::get('/admin-payments.php', [AdminPaymentController::class, 'index']);
+    Route::post('/admin/payments', [AdminPaymentController::class, 'store']);
+    Route::post('/admin-payments.php', [AdminPaymentController::class, 'store']);
+    Route::post('/admin/payments/update-total', [AdminPaymentController::class, 'updateTotal']);
+    Route::post('/admin-payments-update-total.php', [AdminPaymentController::class, 'updateTotal']);
+    Route::get('/admin/payments/{id}/history', [AdminPaymentController::class, 'history']);
+    Route::get('/admin-payments-history.php', [AdminPaymentController::class, 'history']);
+    Route::get('/admin/payments/{id}', [AdminPaymentController::class, 'show']);
+
+    // Dedicated Report APIs (Non-paginated, server-side filtered)
+    Route::get('/admin/reports/payment-history', [AdminReportController::class, 'paymentHistory']);
+    Route::get('/admin-reports-payment-history.php', [AdminReportController::class, 'paymentHistory']);
+    Route::get('/reports/payment-history', [AdminReportController::class, 'paymentHistory']);
+
+    Route::get('/admin/reports/quotation-history', [AdminReportController::class, 'quotationHistory']);
+    Route::get('/admin-reports-quotation-history.php', [AdminReportController::class, 'quotationHistory']);
+    Route::get('/reports/quotation-history', [AdminReportController::class, 'quotationHistory']);
+
+    Route::get('/admin/reports/client-payment-history', [AdminReportController::class, 'clientPaymentHistory']);
+    Route::get('/admin-reports-client-payment-history.php', [AdminReportController::class, 'clientPaymentHistory']);
+    Route::get('/reports/client-payment-history', [AdminReportController::class, 'clientPaymentHistory']);
+
+    Route::get('/admin/reports/clients-list', [AdminReportController::class, 'clientsList']);
+    Route::get('/admin-reports-clients-list.php', [AdminReportController::class, 'clientsList']);
+    Route::get('/reports/clients-list', [AdminReportController::class, 'clientsList']);
 
     // Token Management
     Route::get('/admin/tokens', [AdminTokenController::class, 'index']);

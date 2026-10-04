@@ -21,9 +21,11 @@ import {
     Clock,
     Plus,
     CheckCircle,
-    ExternalLink
+    ExternalLink,
+    CreditCard
 } from 'lucide-react';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
+import { Pagination } from './Pagination';
 
 export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
     const [quotations, setQuotations] = useState([]);
@@ -476,6 +478,14 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                                                     <td className="py-4 px-4 sm:px-6 text-right">
                                                         <div className="flex items-center justify-end gap-2">
                                                             <button
+                                                                onClick={() => onNavigate && onNavigate('payments')}
+                                                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs transition-all cursor-pointer"
+                                                                title="View or record payments for this quotation"
+                                                            >
+                                                                <CreditCard size={13} />
+                                                                <span>Payments</span>
+                                                            </button>
+                                                            <button
                                                                 onClick={() => setQuotationToDelete(quote)}
                                                                 className="w-8 h-8 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 hover:text-neutral-900 transition-all flex items-center justify-center cursor-pointer"
                                                                 title="Delete quotation"
@@ -586,77 +596,39 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                                                     )}
                                                 </div>
 
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setQuotationToDelete(quote)}
-                                                    className="p-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 hover:text-red-600 transition-all flex items-center justify-center cursor-pointer"
-                                                    title="Delete quotation"
-                                                >
-                                                    <Trash2 size={13} />
-                                                </button>
+                                                <div className="flex items-center gap-1.5">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => onNavigate && onNavigate('payments')}
+                                                        className="py-1.5 px-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+                                                        title="Payments"
+                                                    >
+                                                        <CreditCard size={12} />
+                                                        <span>Payments</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setQuotationToDelete(quote)}
+                                                        className="p-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 hover:text-red-600 transition-all flex items-center justify-center cursor-pointer"
+                                                        title="Delete quotation"
+                                                    >
+                                                        <Trash2 size={13} />
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
 
                                 {/* Pagination Footer Controls */}
-                                {totalItems > 0 && (
-                                    <div className="px-6 py-3.5 border-t border-neutral-200/80 flex flex-col sm:flex-row items-center justify-between gap-4 bg-neutral-50/50">
-                                        <div className="flex items-center gap-3 text-xs text-neutral-500">
-                                            <span>
-                                                Showing <strong className="text-neutral-800 font-semibold">{totalItems === 0 ? 0 : (currentPage - 1) * perPage + 1}</strong> to <strong className="text-neutral-800 font-semibold">{Math.min(currentPage * perPage, totalItems)}</strong> of <strong className="text-neutral-800 font-semibold">{totalItems}</strong> quotations
-                                            </span>
-                                            <div className="flex items-center gap-1.5 ml-2">
-                                                <span className="text-[11px] text-neutral-400">Per page:</span>
-                                                <select
-                                                    value={perPage}
-                                                    onChange={(e) => {
-                                                        setPerPage(Number(e.target.value));
-                                                        setCurrentPage(1);
-                                                    }}
-                                                    className="bg-white border border-neutral-300 rounded-lg px-2 py-1 text-xs text-neutral-700 outline-none cursor-pointer"
-                                                >
-                                                    <option value={5}>5</option>
-                                                    <option value={10}>10</option>
-                                                    <option value={20}>20</option>
-                                                    <option value={50}>50</option>
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        {totalPages > 1 && (
-                                            <div className="flex items-center gap-1">
-                                                <button
-                                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                                                    disabled={currentPage === 1}
-                                                    className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold cursor-pointer transition-all"
-                                                >
-                                                    Prev
-                                                </button>
-                                                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                                                    <button
-                                                        key={page}
-                                                        onClick={() => setCurrentPage(page)}
-                                                        className={`w-7 h-7 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                                                            currentPage === page
-                                                                ? 'bg-[#1A4D2E] text-white shadow-xs'
-                                                                : 'bg-white border border-neutral-200 text-neutral-700 hover:bg-neutral-50'
-                                                        }`}
-                                                    >
-                                                        {page}
-                                                    </button>
-                                                ))}
-                                                <button
-                                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                                    disabled={currentPage === totalPages}
-                                                    className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 disabled:opacity-30 disabled:cursor-not-allowed text-xs font-semibold cursor-pointer transition-all"
-                                                >
-                                                    Next
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalItems={totalItems}
+                                    perPage={perPage}
+                                    onPageChange={setCurrentPage}
+                                    onPerPageChange={setPerPage}
+                                    itemLabel="quotations"
+                                />
                             </>
                         );
                     })()}

@@ -43,4 +43,20 @@ class Quotation extends Model
             $q->whereNull('status')->orWhere('status', '!=', 'deleted');
         });
     }
+
+    /**
+     * Payment master record.
+     */
+    public function payment()
+    {
+        return $this->hasOne(QuotationPayment::class, 'quotation_id');
+    }
+
+    /**
+     * Payment history transactions.
+     */
+    public function paymentHistories()
+    {
+        return $this->hasMany(PaymentHistory::class, 'quotation_id');
+    }
 }

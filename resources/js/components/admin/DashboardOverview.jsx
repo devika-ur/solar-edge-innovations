@@ -9,13 +9,15 @@ import {
     FileText, 
     ScrollText,
     History,
+    CreditCard,
     RefreshCw,
     Sparkles,
     Mail,
     Clock,
     CheckCircle2,
     MessageSquare,
-    ExternalLink
+    ExternalLink,
+    BarChart3
 } from 'lucide-react';
 
 export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
@@ -454,6 +456,42 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
                                     </div>
                                 </div>
                                 <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-indigo-700" />
+                            </button>
+
+                            <button
+                                onClick={() => onNavigate('payments')}
+                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-emerald-600 hover:bg-emerald-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                                        <CreditCard size={17} />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-emerald-800">
+                                            Payments Tracker
+                                        </div>
+                                        <div className="text-[10px] text-neutral-400">Track client payments & balance</div>
+                                    </div>
+                                </div>
+                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-emerald-800" />
+                            </button>
+
+                            <button
+                                onClick={() => onNavigate('reports')}
+                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-teal-700 hover:bg-teal-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center">
+                                        <BarChart3 size={17} />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-teal-800">
+                                            Reports & Exports
+                                        </div>
+                                        <div className="text-[10px] text-neutral-400">Export Excel & PDF reports</div>
+                                    </div>
+                                </div>
+                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-teal-800" />
                             </button>
 
                             <button
