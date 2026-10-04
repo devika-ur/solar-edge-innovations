@@ -13,10 +13,9 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        // Set admin credentials directly here
-        $username = 'admin';
-        $email    = 'admin@solaredgeinnovation.in';
-        $password = 'SolarEdge@2026!';
+        $username = env('ADMIN_DEFAULT_USER', 'admin');
+        $email    = env('ADMIN_DEFAULT_EMAIL', 'admin@solaredgeinnovation.in');
+        $password = env('ADMIN_DEFAULT_PASSWORD', 'SolarEdge@2026!');
 
         Admin::updateOrCreate(
             ['username' => $username],
@@ -27,9 +26,8 @@ class AdminSeeder extends Seeder
             ]
         );
 
-        $this->command->info("Admin account seeded successfully!");
-        $this->command->line("Username: {$username}");
-        $this->command->line("Email:    {$email}");
-        $this->command->line("Password: {$password}");
+        $this->command?->info("Admin account seeded successfully!");
+        $this->command?->line("Username: {$username}");
+        $this->command?->line("Email:    {$email}");
     }
 }

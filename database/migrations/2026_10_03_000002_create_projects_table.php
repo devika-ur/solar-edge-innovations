@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title', 255);
             $table->text('description')->nullable();
             $table->string('location', 150)->nullable();
-            $table->string('category', 100)->nullable()->default('solar');
+            $table->string('category', 100)->nullable();
             $table->string('image', 255)->nullable();
             $table->enum('status', ['published', 'draft', 'deleted'])->default('published');
             $table->timestamps();
