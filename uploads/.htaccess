@@ -1,0 +1,16 @@
+# Prevent PHP and other script execution in uploads directory
+<FilesMatch "\.(php|php[0-9]|phtml|pl|py|jsp|asp|htm|html|shtml|sh|cgi)$">
+    Deny from all
+</FilesMatch>
+
+Options -ExecCGI -Indexes
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+    php_flag engine off
+</IfModule>

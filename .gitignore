@@ -1,0 +1,40 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+api/config.php
+api/database.sqlite
+
+node_modules
+/vendor
+dist
+dist-ssr
+*.local
+*.zip
+
+# Laravel
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

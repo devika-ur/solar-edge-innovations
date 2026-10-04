@@ -1,0 +1,44 @@
+.circular-text-wrapper {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  cursor: pointer;
+}
+
+.circular-text {
+  border-radius: 50%;
+  width: 140px;
+  position: relative;
+  height: 140px;
+  font-weight: 900;
+  color: #166534;
+  text-align: center;
+  transform-origin: 50% 50%;
+  -webkit-transform-origin: 50% 50%;
+}
+
+.circular-text span {
+  position: absolute;
+  display: inline-block;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  transition: all 0.5s cubic-bezier(0, 0, 0, 1);
+}
+
+/* Static center content, counter-rotates against the spinning ring */
+.circular-text-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+}
