@@ -1,6 +1,6 @@
 {
-  "_vendor-lucide-eiJnmX-g.js": {
-    "file": "assets/vendor-lucide-eiJnmX-g.js",
+  "_vendor-lucide-i7WpHHBx.js": {
+    "file": "assets/vendor-lucide-i7WpHHBx.js",
     "name": "vendor-lucide",
     "imports": [
       "_vendor-motion-MOU-OT13.js"
@@ -18,7 +18,7 @@
     "name": "vendor-react"
   },
   "node_modules/canvg/lib/index.es.js": {
-    "file": "assets/index.es-BEMtp8k-.js",
+    "file": "assets/index.es-DWj9GQOC.js",
     "name": "index.es",
     "src": "node_modules/canvg/lib/index.es.js",
     "isDynamicEntry": true,
@@ -26,10 +26,10 @@
       "_vendor-react-Dazix4UH.js",
       "resources/js/main.jsx",
       "_vendor-motion-MOU-OT13.js",
-      "_vendor-lucide-eiJnmX-g.js"
+      "_vendor-lucide-i7WpHHBx.js"
     ],
     "css": [
-      "assets/app-Ds7GmemB.css"
+      "assets/app-5G3Ai9B7.css"
     ]
   },
   "node_modules/dompurify/dist/purify.es.mjs": {
@@ -45,7 +45,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-Ds7GmemB.css",
+    "file": "assets/app-5G3Ai9B7.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
@@ -112,6 +112,10 @@
     "file": "assets/who we are-C07twSM6.svg",
     "src": "resources/js/assets/Home-page-images/who we are.svg"
   },
+  "resources/js/assets/Pale Blue Solar Eco Emblem.png": {
+    "file": "assets/Pale Blue Solar Eco Emblem-MoAZtc0D.png",
+    "src": "resources/js/assets/Pale Blue Solar Eco Emblem.png"
+  },
   "resources/js/assets/about-image.png": {
     "file": "assets/about-image-Bmm978Ok.png",
     "src": "resources/js/assets/about-image.png"
@@ -167,6 +171,10 @@
   "resources/js/assets/clients-logo/waaree-solar-logo.png": {
     "file": "assets/waaree-solar-logo-CuR_fE0S.png",
     "src": "resources/js/assets/clients-logo/waaree-solar-logo.png"
+  },
+  "resources/js/assets/contact-consultation.jpg": {
+    "file": "assets/contact-consultation-BdUwsTnn.jpg",
+    "src": "resources/js/assets/contact-consultation.jpg"
   },
   "resources/js/assets/footer.jpeg": {
     "file": "assets/footer-CVqmcyWq.jpeg",
@@ -289,14 +297,14 @@
     "src": "resources/js/assets/vector-drawing.png"
   },
   "resources/js/main.jsx": {
-    "file": "assets/main-EPVlgsxU.js",
+    "file": "assets/main-kL42f5zU.js",
     "name": "main",
     "src": "resources/js/main.jsx",
     "isEntry": true,
     "imports": [
       "_vendor-motion-MOU-OT13.js",
       "_vendor-react-Dazix4UH.js",
-      "_vendor-lucide-eiJnmX-g.js"
+      "_vendor-lucide-i7WpHHBx.js"
     ],
     "dynamicImports": [
       "node_modules/html2canvas/dist/html2canvas.esm.js",
@@ -304,13 +312,14 @@
       "node_modules/canvg/lib/index.es.js"
     ],
     "css": [
-      "assets/main-cvVD1CpE.css",
-      "assets/app-Ds7GmemB.css"
+      "assets/main-WY4Y-Zyx.css",
+      "assets/app-5G3Ai9B7.css"
     ],
     "assets": [
       "assets/logo-CkhDT9gi.png",
       "assets/jose-jo-no-bg-UTa98Tzf.png",
       "assets/about-image-Bmm978Ok.png",
+      "assets/Pale Blue Solar Eco Emblem-MoAZtc0D.png",
       "assets/adani-B2L_lTgk.png",
       "assets/vikram-solar-logo-BI9XgnG5.svg",
       "assets/waaree-solar-logo-CuR_fE0S.png",
@@ -338,7 +347,8 @@
       "assets/service-banner-image-CmXh413G.png",
       "assets/header-CeTtS6N-.jpeg",
       "assets/footer-CVqmcyWq.jpeg",
-      "assets/inverter-CrLAiEkT.png"
+      "assets/inverter-CrLAiEkT.png",
+      "assets/contact-consultation-BdUwsTnn.jpg"
     ]
   }
 }

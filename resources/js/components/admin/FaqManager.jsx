@@ -220,7 +220,7 @@ export const FaqManager = ({ onUnauthorized }) => {
     });
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 font-sans">
+        <div className="w-full px-4 sm:px-8 py-8 space-y-6 font-sans">
             {/* Top Bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-neutral-200/80 shadow-xs">
                 <div>
@@ -240,14 +240,14 @@ export const FaqManager = ({ onUnauthorized }) => {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={loadFaqs}
-                        className="p-2.5 rounded-xl border border-neutral-200 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 transition-colors cursor-pointer"
+                        className="p-2.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 transition-all cursor-pointer"
                         title="Reload FAQs"
                     >
                         <RefreshCw size={15} className={isLoading ? 'animate-spin' : ''} />
                     </button>
                     <button
                         onClick={openCreateModal}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#1A4D2E] hover:bg-[#153e24] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-xs cursor-pointer"
                     >
                         <Plus size={15} />
                         <span>Add New FAQ</span>
@@ -342,7 +342,7 @@ export const FaqManager = ({ onUnauthorized }) => {
                                 <div className="flex items-center gap-2 shrink-0 self-end md:self-start">
                                     <button
                                         onClick={() => openEditModal(faq)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-white hover:border-[#1A4D2E] transition-all cursor-pointer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition-all cursor-pointer"
                                     >
                                         <Edit2 size={12} />
                                         <span>Edit</span>
@@ -350,7 +350,7 @@ export const FaqManager = ({ onUnauthorized }) => {
 
                                     <button
                                         onClick={() => setFaqToDelete(faq)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-red-200 bg-red-50/50 text-xs font-semibold text-red-600 hover:bg-red-100 transition-all cursor-pointer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-xs font-semibold text-neutral-700 hover:text-neutral-900 transition-all cursor-pointer"
                                     >
                                         <Trash2 size={12} />
                                         <span>Delete</span>
@@ -459,14 +459,14 @@ export const FaqManager = ({ onUnauthorized }) => {
                                 <button
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-4 py-2 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 cursor-pointer"
+                                    className="px-4 py-2 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs sm:text-sm font-semibold text-neutral-700 cursor-pointer transition-all"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSaving}
-                                    className="px-5 py-2.5 rounded-xl bg-[#1A4D2E] hover:bg-[#153e24] text-white text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                                    className="px-5 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
                                 >
                                     {isSaving ? 'Saving...' : editingFaq ? 'Update FAQ' : 'Create FAQ'}
                                 </button>

@@ -9,6 +9,7 @@ use App\Models\ContactInquiry;
 use App\Models\Faq;
 use App\Models\Project;
 use App\Models\ProjectImage;
+use App\Models\Quotation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +51,23 @@ class StatsController extends Controller
 
             $pendingInquiries = ContactInquiry::where('status', 'pending')->count();
             $respondedInquiries = ContactInquiry::where('status', 'responded')->count();
+
+            // Quotations metrics
+            $totalQuotations = Quotation::active()->count();
+            $recentQuotations = Quotation::active()
+                ->orderBy('id', 'desc')
+                ->limit(5)
+                ->get()
+                ->map(function ($q) {
+                    return [
+                        'id' => (int)$q->id,
+                        'ref_no' => $q->ref_no,
+                        'client_name' => $q->client_name,
+                        'capacity' => $q->capacity,
+                        'total_amount' => $q->total_amount,
+                        'created_at_formatted' => $q->created_at?->format('d M Y, h:i A'),
+                    ];
+                });
 
             $recentProjects = Project::where(function ($q) {
                 $q->whereNull('status')->orWhere('status', '!=', 'deleted');
@@ -109,12 +127,14 @@ class StatsController extends Controller
                     'total_inquiries' => $totalInquiries,
                     'pending_inquiries' => $pendingInquiries,
                     'responded_inquiries' => $respondedInquiries,
+                    'total_quotations' => $totalQuotations,
                     'driver' => $driverName,
                     'upload_dir_writable' => $isWritable,
                     'admin_user' => $adminUsername,
                 ],
                 'recent_projects' => $recentProjects,
                 'recent_inquiries' => $recentInquiries,
+                'recent_quotations' => $recentQuotations,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

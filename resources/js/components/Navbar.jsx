@@ -82,10 +82,20 @@ export default function Navbar() {
 
           {/* Right Side: CTA */}
           <NavLink
-            to="/contact"
+            to="/contact#enquiry"
+            onClick={() => {
+              const el = document.getElementById("enquiry");
+              if (el) {
+                if (window.lenis) {
+                  window.lenis.scrollTo(el, { duration: 1.2, offset: -90 });
+                } else {
+                  el.scrollIntoView({ behavior: "smooth" });
+                }
+              }
+            }}
             className="relative z-10 inline-flex items-center gap-2 bg-green-950 text-white rounded-full font-medium transition-all group hover:bg-green-900 pl-4 pr-1.5 py-1.5 text-xs shrink-0"
           >
-            Get in touch
+            Enquiry
             <span className="bg-white text-green-950 rounded-full transition-transform group-hover:translate-x-0.5 p-1 flex items-center justify-center">
               <FiChevronRight size={12} />
             </span>

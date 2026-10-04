@@ -7,6 +7,8 @@ import {
     PlusCircle, 
     ArrowUpRight, 
     FileText, 
+    ScrollText,
+    History,
     RefreshCw,
     Sparkles,
     Mail,
@@ -100,18 +102,27 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
             actionLabel: 'Manage FAQs'
         },
         {
-            title: 'Solar Quotations',
-            value: 'Ready',
-            subtitle: 'Professional 6-Page Quotes',
-            icon: FileText,
+            title: 'Quotation History',
+            value: stats?.total_quotations !== undefined ? stats.total_quotations : '0',
+            subtitle: `${stats?.total_quotations ?? 0} saved client quotations`,
+            icon: History,
             color: 'from-purple-500 to-indigo-700',
-            action: () => onNavigate('quotation'),
-            actionLabel: 'Open Builder'
+            action: () => onNavigate('quotation-history'),
+            actionLabel: 'View History'
+        },
+        {
+            title: 'Official Letterhead',
+            value: 'Ready',
+            subtitle: 'Live Letterhead & Print',
+            icon: ScrollText,
+            color: 'from-emerald-600 to-teal-700',
+            action: () => onNavigate('letterhead'),
+            actionLabel: 'Open Letterhead'
         },
     ];
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans">
+        <div className="w-full px-4 sm:px-8 py-8 space-y-8 font-sans">
             {/* Header Greeting */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#0C2417] via-[#1A4D2E] to-[#0E351F] text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-emerald-500/20 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
@@ -132,7 +143,7 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
                 <div className="relative z-10 flex items-center gap-3">
                     <button
                         onClick={() => loadStats(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all backdrop-blur-md border border-white/10 cursor-pointer"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-800 text-xs sm:text-sm font-semibold border border-neutral-200 shadow-2xs transition-all cursor-pointer"
                         title="Refresh live data"
                     >
                         <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
@@ -140,7 +151,7 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
                     </button>
                     <button
                         onClick={() => onNavigate('inquiries')}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F4A261] hover:bg-[#e7924d] text-neutral-950 text-xs font-extrabold transition-all shadow-md cursor-pointer"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-800 text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer"
                     >
                         <Mail size={14} />
                         <span>View Inquiries</span>
@@ -149,7 +160,7 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
                 {kpis.map((kpi, idx) => {
                     const Icon = kpi.icon;
                     return (
@@ -262,7 +273,7 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
                                                 e.stopPropagation();
                                                 onNavigate('inquiries');
                                             }}
-                                            className="px-3 py-1.5 rounded-lg border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-[#1A4D2E] hover:text-white hover:border-[#1A4D2E] transition-all shrink-0 cursor-pointer"
+                                            className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition-all shrink-0 cursor-pointer"
                                         >
                                             View
                                         </button>
@@ -295,7 +306,7 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
                                 <p className="text-xs text-neutral-500 font-medium">No projects added yet.</p>
                                 <button
                                     onClick={() => onNavigate('projects')}
-                                    className="px-4 py-2 bg-[#1A4D2E] text-white rounded-xl text-xs font-bold shadow-xs hover:bg-[#153e24] cursor-pointer"
+                                    className="px-5 py-2 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
                                 >
                                     Add Your First Project
                                 </button>
@@ -331,7 +342,7 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
 
                                         <button
                                             onClick={() => onNavigate('projects')}
-                                            className="px-3 py-1.5 rounded-lg border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 transition-colors shrink-0 cursor-pointer"
+                                            className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition-all shrink-0 cursor-pointer"
                                         >
                                             Edit
                                         </button>
@@ -425,6 +436,42 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
                                     </div>
                                 </div>
                                 <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-purple-700" />
+                            </button>
+
+                            <button
+                                onClick={() => onNavigate('quotation-history')}
+                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-indigo-600 hover:bg-indigo-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                                        <History size={17} />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-indigo-700">
+                                            Quotation History
+                                        </div>
+                                        <div className="text-[10px] text-neutral-400">Saved quotes & PDF downloads</div>
+                                    </div>
+                                </div>
+                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-indigo-700" />
+                            </button>
+
+                            <button
+                                onClick={() => onNavigate('letterhead')}
+                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-[#1A4D2E] hover:bg-emerald-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-[#1A4D2E] flex items-center justify-center">
+                                        <ScrollText size={17} />
+                                    </div>
+                                    <div>
+                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-[#1A4D2E]">
+                                            Letterhead Creator
+                                        </div>
+                                        <div className="text-[10px] text-neutral-400">Official letterhead & print</div>
+                                    </div>
+                                </div>
+                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-[#1A4D2E]" />
                             </button>
                         </div>
                     </div>

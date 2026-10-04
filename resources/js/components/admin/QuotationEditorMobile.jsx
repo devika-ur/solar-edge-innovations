@@ -25,8 +25,11 @@ import {
     LogOut,
     ZoomIn,
     ZoomOut,
-    Sparkles
+    Sparkles,
+    Layers,
+    Menu
 } from 'lucide-react';
+import { assets } from '../../assets/assets';
 import { QuotationPreview6Pages } from './QuotationPreview6Pages';
 import toast from 'react-hot-toast';
 
@@ -35,6 +38,7 @@ export const QuotationEditorMobile = ({
     onChange,
     onSave,
     onReset,
+    onClear,
     onGeneratePdf,
     isGeneratingPdf = false,
     pdfProgress = "",
@@ -47,8 +51,11 @@ export const QuotationEditorMobile = ({
     // Mobile tabs inside 'details' mode: 'client', 'system', 'pricing', 'more'
     const [activeTab, setActiveTab] = useState('client');
 
-    // More actions dropdown menu
+    // Mobile nav dropdown menu (hamburger)
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // Quotation actions dropdown menu (three-dots icon)
+    const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
 
     // Zoom level for preview mode: 'fit' or 1.0 (100%)
     const [previewZoom, setPreviewZoom] = useState('fit');
@@ -174,143 +181,302 @@ export const QuotationEditorMobile = ({
     return (
         <div className="w-full min-h-screen bg-[#F8FAFC] flex flex-col font-sans select-none overflow-x-hidden pb-safe">
             {/* ════════════════════════════════════════════════════════════
-                TOP APP HEADER (Matches Screenshot 1 & 2)
+                TOP APP HEADER (Matches Letterhead Creator UI)
             ════════════════════════════════════════════════════════════ */}
-            <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200 px-4 py-3 flex items-center justify-between shadow-2xs mobile-nav-bar no-print">
-                <div className="flex items-center gap-3">
+            {/* Top Bar (Mobile Admin Header) */}
+            <div className="no-print bg-white px-4 py-3 border-b border-neutral-200/90 flex items-center justify-between sticky top-0 z-40 shadow-2xs">
+                {/* Brand Logo */}
+                <div className="flex items-center gap-2">
+                    <img
+                        src={assets.logo}
+                        alt="Solaredge Innovations"
+                        className="h-9 w-auto object-contain"
+                    />
+                    <div>
+                        <div className="text-sm font-black text-neutral-900 leading-tight">
+                            Solaredge
+                        </div>
+                        <div className="text-[11px] font-bold text-[#1A4D2E] leading-tight">
+                            Innovations
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Profile & Menu */}
+                <div className="flex items-center gap-1.5">
+                    <button
+                        onClick={onLogout}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 hover:bg-neutral-200 rounded-xl text-xs font-bold text-neutral-700 cursor-pointer"
+                        title="Admin Profile (Click to Logout)"
+                    >
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <User size={13} className="text-[#1A4D2E]" />
+                        <span>admin</span>
+                    </button>
+
+                    {/* Three-dots button for Quotation Actions (Image 1) */}
                     <button
                         type="button"
                         onClick={() => {
-                            if (viewMode === 'preview') {
-                                setViewMode('details');
-                            } else if (onBack) {
-                                onBack();
-                            } else {
-                                window.history.back();
-                            }
+                            setIsActionMenuOpen(!isActionMenuOpen);
+                            setIsMenuOpen(false);
                         }}
-                        className="p-1.5 -ml-1 text-neutral-800 hover:text-neutral-950 active:scale-95 transition-transform rounded-xl hover:bg-neutral-100"
-                        title={viewMode === 'preview' ? "Back to Edit Details" : "Back to Dashboard"}
+                        className={`p-1.5 rounded-xl border border-neutral-200 transition-all cursor-pointer ${
+                            isActionMenuOpen ? 'bg-neutral-100 text-[#1A4D2E]' : 'text-neutral-700 hover:bg-neutral-100'
+                        }`}
+                        title="Quotation Actions"
                     >
-                        <ChevronLeft size={22} className="stroke-[2.5]" />
+                        <MoreVertical size={18} />
                     </button>
-                    <h1 className="text-base font-black text-neutral-900 tracking-tight">
-                        {viewMode === 'details' ? 'Quotation Details' : 'Quotation Preview'}
-                    </h1>
-                </div>
 
-                <div className="flex items-center gap-1.5 relative">
-                    {/* In Preview mode: prominent quick download icon */}
-                    {viewMode === 'preview' && (
+                    {/* Hamburger button for Navigation Menu */}
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setIsMenuOpen(!isMenuOpen);
+                            setIsActionMenuOpen(false);
+                        }}
+                        className={`p-1.5 rounded-xl border border-neutral-200 transition-all cursor-pointer ${
+                            isMenuOpen ? 'bg-neutral-100 text-[#1A4D2E]' : 'text-neutral-700 hover:bg-neutral-100'
+                        }`}
+                        title="Toggle Navigation Menu"
+                    >
+                        {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                    </button>
+                </div>
+            </div>
+
+            {/* Mobile Nav Dropdown if toggled (Floating on top with z-50, does NOT push content) */}
+            {isMenuOpen && (
+                <>
+                    <div
+                        className="fixed inset-0 top-[57px] bg-black/25 z-40 backdrop-blur-2xs"
+                        onClick={() => setIsMenuOpen(false)}
+                    />
+                    <div className="no-print fixed top-[57px] left-0 right-0 bg-white border-b border-neutral-200 shadow-2xl p-4 space-y-2 text-xs font-bold z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                        <button
+                            onClick={() => {
+                                setIsMenuOpen(false);
+                                if (onBack) onBack();
+                            }}
+                            className="w-full text-left py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700 cursor-pointer"
+                        >
+                            ← Back to Dashboard
+                        </button>
+                        <a
+                            href="/admin/quotation"
+                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
+                        >
+                            Quotation Builder
+                        </a>
+                        <a
+                            href="/admin/quotation-history"
+                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
+                        >
+                            Quotation History
+                        </a>
+                        <a
+                            href="/admin/letterhead"
+                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
+                        >
+                            Letterhead Creator
+                        </a>
+                        <a
+                            href="/admin/inquiries"
+                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
+                        >
+                            Enquiries
+                        </a>
+                        {onLogout && (
+                            <button
+                                onClick={() => {
+                                    setIsMenuOpen(false);
+                                    onLogout();
+                                }}
+                                className="w-full text-left py-2 px-3 rounded-lg text-red-600 hover:bg-red-50 cursor-pointer"
+                            >
+                                Logout
+                            </button>
+                        )}
+                    </div>
+                </>
+            )}
+
+            {/* Quotation Actions Popup Menu (Matches Image 1 exactly, floating on top with z-50) */}
+            {isActionMenuOpen && (
+                <>
+                    <div
+                        className="fixed inset-0 z-40 bg-black/20"
+                        onClick={() => setIsActionMenuOpen(false)}
+                    />
+                    <div className="no-print fixed top-[54px] right-3 w-56 bg-white rounded-2xl shadow-2xl border border-neutral-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
                         <button
                             type="button"
-                            onClick={onGeneratePdf}
-                            disabled={isGeneratingPdf}
-                            className="p-2 text-blue-600 hover:text-blue-700 active:scale-95 transition-transform rounded-xl hover:bg-blue-50 cursor-pointer"
-                            title="Download PDF"
+                            onClick={() => {
+                                setIsActionMenuOpen(false);
+                                onSave(true);
+                            }}
+                            className="w-full px-4 py-2.5 text-left text-xs font-semibold text-neutral-800 hover:bg-neutral-50 flex items-center gap-2.5 cursor-pointer"
                         >
-                            {isGeneratingPdf ? (
-                                <Loader2 size={20} className="animate-spin text-blue-600" />
-                            ) : (
-                                <Download size={20} className="stroke-[2.5]" />
-                            )}
+                            <Save size={16} className="text-emerald-600" />
+                            <span>Save Quotation</span>
                         </button>
-                    )}
-
-                    {/* Toggle between Details and Preview */}
-                    <button
-                        type="button"
-                        onClick={() => setViewMode(viewMode === 'details' ? 'preview' : 'details')}
-                        className={`p-2 rounded-xl text-xs font-bold transition-all active:scale-95 cursor-pointer flex items-center gap-1 ${
-                            viewMode === 'preview'
-                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100'
-                        }`}
-                        title={viewMode === 'details' ? "View Live Quotation Preview" : "Switch to Form Editor"}
-                    >
-                        {viewMode === 'details' ? <Eye size={19} /> : <Edit3 size={19} />}
-                    </button>
-
-                    {/* Three dots overflow menu */}
-                    <button
-                        type="button"
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="p-2 text-neutral-700 hover:text-neutral-900 active:scale-95 transition-transform rounded-xl hover:bg-neutral-100"
-                        title="Options"
-                    >
-                        <MoreVertical size={20} />
-                    </button>
-
-                    {/* Options Dropdown Menu */}
-                    {isMenuOpen && (
-                        <>
-                            <div
-                                className="fixed inset-0 z-40"
-                                onClick={() => setIsMenuOpen(false)}
-                            />
-                            <div className="absolute right-0 top-full mt-1.5 w-52 bg-white rounded-2xl shadow-xl border border-neutral-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsActionMenuOpen(false);
+                                onGeneratePdf();
+                            }}
+                            disabled={isGeneratingPdf}
+                            className="w-full px-4 py-2.5 text-left text-xs font-semibold text-neutral-800 hover:bg-neutral-50 flex items-center gap-2.5 cursor-pointer"
+                        >
+                            <Download size={16} className="text-blue-600" />
+                            <span>Export PDF Document</span>
+                        </button>
+                        {onClear && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsActionMenuOpen(false);
+                                    onClear();
+                                }}
+                                className="w-full px-4 py-2.5 text-left text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2.5 cursor-pointer"
+                            >
+                                <Trash2 size={16} />
+                                <span>Clear Form</span>
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsActionMenuOpen(false);
+                                onReset();
+                            }}
+                            className="w-full px-4 py-2.5 text-left text-xs font-semibold text-neutral-800 hover:bg-neutral-50 flex items-center gap-2.5 cursor-pointer"
+                        >
+                            <RotateCcw size={16} className="text-amber-600" />
+                            <span>Reset to Default</span>
+                        </button>
+                        {onLogout && (
+                            <div className="border-t border-neutral-100 mt-1 pt-1">
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        onSave(true);
-                                        setIsMenuOpen(false);
+                                        setIsActionMenuOpen(false);
+                                        onLogout();
                                     }}
-                                    className="w-full px-4 py-2.5 text-left text-xs font-semibold text-neutral-800 hover:bg-neutral-50 flex items-center gap-2.5 cursor-pointer"
+                                    className="w-full px-4 py-2.5 text-left text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2.5 cursor-pointer"
                                 >
-                                    <Save size={16} className="text-emerald-600" />
-                                    <span>Save Quotation</span>
+                                    <LogOut size={16} />
+                                    <span>Logout Admin</span>
                                 </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsMenuOpen(false);
-                                        onGeneratePdf();
-                                    }}
-                                    disabled={isGeneratingPdf}
-                                    className="w-full px-4 py-2.5 text-left text-xs font-semibold text-neutral-800 hover:bg-neutral-50 flex items-center gap-2.5 cursor-pointer"
-                                >
-                                    <Download size={16} className="text-blue-600" />
-                                    <span>Export PDF Document</span>
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsMenuOpen(false);
-                                        onReset();
-                                    }}
-                                    className="w-full px-4 py-2.5 text-left text-xs font-semibold text-neutral-800 hover:bg-neutral-50 flex items-center gap-2.5 cursor-pointer"
-                                >
-                                    <RotateCcw size={16} className="text-amber-600" />
-                                    <span>Reset to Default</span>
-                                </button>
-                                {onLogout && (
-                                    <div className="border-t border-neutral-100 mt-1 pt-1">
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setIsMenuOpen(false);
-                                                onLogout();
-                                            }}
-                                            className="w-full px-4 py-2.5 text-left text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2.5 cursor-pointer"
-                                        >
-                                            <LogOut size={16} />
-                                            <span>Logout Admin</span>
-                                        </button>
-                                    </div>
-                                )}
                             </div>
-                        </>
-                    )}
+                        )}
+                    </div>
+                </>
+            )}
+
+            {/* Subheader: < Quotation Details + Page Count Badge + Actions */}
+            <div className="no-print px-4 pt-3.5 pb-2 flex items-center justify-between">
+                <button
+                    type="button"
+                    onClick={onBack}
+                    className="flex items-center gap-1 text-sm font-black text-neutral-900 hover:text-[#1A4D2E] cursor-pointer"
+                >
+                    <ChevronLeft size={18} className="text-neutral-700" />
+                    <span>Quotation Details</span>
+                </button>
+
+                <div className="flex items-center gap-1.5">
+                    <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[#1A4D2E] text-xs font-bold">
+                        <Layers size={13} />
+                        <span>6 Pages</span>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={() => {
+                            setIsActionMenuOpen(!isActionMenuOpen);
+                            setIsMenuOpen(false);
+                        }}
+                        className={`p-1 rounded-lg border border-neutral-200 text-neutral-700 hover:bg-neutral-100 cursor-pointer ${
+                            isActionMenuOpen ? 'bg-neutral-100 text-[#1A4D2E]' : ''
+                        }`}
+                        title="Quotation Actions"
+                    >
+                        <MoreVertical size={16} />
+                    </button>
                 </div>
-            </header>
+            </div>
+
+            {/* Segmented Control: [ Edit Content ] | [ Preview ] */}
+            <div className="no-print px-4 py-2">
+                <div className="grid grid-cols-2 bg-neutral-200/70 p-1 rounded-2xl">
+                    <button
+                        type="button"
+                        onClick={() => setViewMode('details')}
+                        className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer text-center ${
+                            viewMode === 'details'
+                                ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                : 'text-neutral-600 hover:text-neutral-900'
+                        }`}
+                    >
+                        Edit Content
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setViewMode('preview')}
+                        className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer text-center ${
+                            viewMode === 'preview'
+                                ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                : 'text-neutral-600 hover:text-neutral-900'
+                        }`}
+                    >
+                        Preview
+                    </button>
+                </div>
+            </div>
 
             {/* ════════════════════════════════════════════════════════════
                 SCREEN 1: QUOTATION DETAILS (FORM EDITOR)
             ════════════════════════════════════════════════════════════ */}
             {viewMode === 'details' && (
                 <div className="flex-1 flex flex-col pb-10 mobile-details-form no-print">
-                    {/* Segmented Top Tab Bar (Exact match to left screenshot) */}
-                    <div className="px-4 py-3 bg-white border-b border-neutral-200/80 sticky top-[57px] z-30">
+                    {/* Quick Action Toolbar: Save (Style 3), Clear (Style 2), Reset (Style 2) */}
+                    <div className="px-4 pt-1 pb-2 flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => onSave(true)}
+                            className="flex-1 py-2 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+                            title="Save Quotation"
+                        >
+                            <Save size={14} className="text-[#1A4D2E]" />
+                            <span>Save Quotation</span>
+                        </button>
+                        {onClear && (
+                            <button
+                                type="button"
+                                onClick={onClear}
+                                className="py-2 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+                                title="Clear All Form Fields"
+                            >
+                                <Trash2 size={13} />
+                                <span>Clear</span>
+                            </button>
+                        )}
+                        <button
+                            type="button"
+                            onClick={onReset}
+                            className="py-2 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+                            title="Reset to Default"
+                        >
+                            <RotateCcw size={13} />
+                            <span>Reset</span>
+                        </button>
+                    </div>
+
+                    {/* Sub-tabs for Form Sections */}
+                    <div className="px-4 py-1.5 bg-transparent sticky top-[61px] z-20">
                         <div className="grid grid-cols-4 gap-1.5 bg-neutral-100 p-1 rounded-2xl border border-neutral-200/70">
                             {[
                                 { id: 'client', label: 'Client & Ref', icon: FileText },
@@ -327,11 +493,11 @@ export const QuotationEditorMobile = ({
                                         onClick={() => setActiveTab(item.id)}
                                         className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
                                             isActive
-                                                ? 'bg-blue-50 text-blue-600 shadow-2xs border border-blue-200/90'
+                                                ? 'bg-white text-[#1A4D2E] shadow-2xs border border-neutral-200 font-extrabold'
                                                 : 'text-neutral-500 hover:text-neutral-900'
                                         }`}
                                     >
-                                        <Icon size={16} className={`mb-1 ${isActive ? 'text-blue-600' : 'text-neutral-400'}`} />
+                                        <Icon size={16} className={`mb-1 ${isActive ? 'text-[#1A4D2E]' : 'text-neutral-400'}`} />
                                         <span className="truncate max-w-full leading-tight">{item.label}</span>
                                     </button>
                                 );
@@ -908,8 +1074,8 @@ export const QuotationEditorMobile = ({
                                 onClick={() => setPreviewZoom(previewZoom === 'fit' ? 1.0 : 'fit')}
                                 className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                                     previewZoom === 'fit'
-                                        ? 'bg-blue-600 text-white shadow-2xs'
-                                        : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+                                        ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                        : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200/80'
                                 }`}
                             >
                                 {previewZoom === 'fit' ? `Fit (${Math.round(fitScale * 100)}%)` : '100%'}
@@ -919,7 +1085,7 @@ export const QuotationEditorMobile = ({
                         <button
                             type="button"
                             onClick={() => setViewMode('details')}
-                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-lg text-xs font-bold transition-all cursor-pointer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 rounded-xl text-xs font-semibold transition-all cursor-pointer"
                         >
                             <Edit3 size={13} />
                             <span>Edit Form</span>
@@ -980,7 +1146,7 @@ export const QuotationEditorMobile = ({
                         <button
                             type="button"
                             onClick={() => setViewMode('details')}
-                            className="flex-1 py-3 px-4 rounded-xl border border-neutral-300 text-xs font-bold text-neutral-700 hover:bg-neutral-50 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="flex-1 py-3 px-4 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                         >
                             <Edit3 size={15} />
                             <span>Edit Details</span>
@@ -989,9 +1155,7 @@ export const QuotationEditorMobile = ({
                             type="button"
                             onClick={onGeneratePdf}
                             disabled={isGeneratingPdf}
-                            className={`flex-1 py-3 px-4 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-md ${
-                                isGeneratingPdf ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
-                            }`}
+                            className="flex-1 py-3 px-4 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs bg-[#1A4D2E] hover:bg-[#143c24] disabled:opacity-50"
                         >
                             {isGeneratingPdf ? (
                                 <>

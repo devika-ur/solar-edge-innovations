@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Api\Admin\InquiryController as AdminInquiryController;
 use App\Http\Controllers\Api\Admin\ProjectController as AdminProjectController;
+use App\Http\Controllers\Api\Admin\QuotationController as AdminQuotationController;
 use App\Http\Controllers\Api\Admin\StatsController as AdminStatsController;
 use App\Http\Controllers\Api\Admin\TokenController as AdminTokenController;
 use App\Http\Controllers\Api\ContactController;
@@ -78,6 +79,15 @@ Route::middleware('admin.session')->group(function () {
     Route::get('/admin-inquiries.php', [AdminInquiryController::class, 'index']);
     Route::post('/admin/inquiries', [AdminInquiryController::class, 'handle']);
     Route::post('/admin-inquiries.php', [AdminInquiryController::class, 'handle']);
+
+    // Quotation Management & History
+    Route::get('/admin/quotations', [AdminQuotationController::class, 'index']);
+    Route::get('/admin-quotations.php', [AdminQuotationController::class, 'index']);
+    Route::post('/admin/quotations', [AdminQuotationController::class, 'store']);
+    Route::post('/admin-quotations.php', [AdminQuotationController::class, 'store']);
+    Route::get('/admin/quotations/{id}', [AdminQuotationController::class, 'show']);
+    Route::post('/admin/quotations/delete', [AdminQuotationController::class, 'handle']);
+    Route::post('/admin-quotations-delete.php', [AdminQuotationController::class, 'handle']);
 
     // Token Management
     Route::get('/admin/tokens', [AdminTokenController::class, 'index']);

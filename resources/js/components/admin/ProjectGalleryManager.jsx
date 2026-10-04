@@ -238,7 +238,7 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
     };
 
     return (
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="w-full px-4 sm:px-8 py-8">
             {/* Header Toolbar */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200">
                 <div>
@@ -257,7 +257,7 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
                     <button 
                         onClick={() => fetchProjects()}
                         disabled={isLoading}
-                        className="inline-flex items-center gap-2 px-3.5 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer"
                         title="Reload projects"
                     >
                         <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
@@ -266,7 +266,7 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
 
                     <button 
                         onClick={openCreateModal}
-                        className="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-[#1A4D2E] hover:bg-[#143e24] text-white rounded-xl text-xs font-bold tracking-wider uppercase transition-all shadow-md hover:shadow-lg cursor-pointer"
+                        className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer"
                     >
                         <Plus size={16} />
                         <span>Add New Project</span>
@@ -345,7 +345,7 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
                         </p>
                         <button 
                             onClick={openCreateModal}
-                            className="mt-5 inline-flex items-center gap-2 px-6 py-2.5 bg-[#1A4D2E] text-white rounded-xl text-xs font-bold uppercase tracking-wider cursor-pointer"
+                            className="mt-5 inline-flex items-center gap-2 px-5 py-2 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer"
                         >
                             <Plus size={14} /> Add Project
                         </button>
@@ -423,13 +423,13 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
                                     <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                                         <button 
                                             onClick={() => openEditModal(proj)}
-                                            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                                            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700 rounded-xl text-xs font-semibold transition-all cursor-pointer"
                                         >
                                             <Edit3 size={13} /> Edit Project
                                         </button>
                                         <button 
                                             onClick={() => setProjectToDelete(proj)}
-                                            className="inline-flex items-center gap-1.5 px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+                                            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 hover:text-neutral-900 rounded-xl text-xs font-semibold transition-all cursor-pointer"
                                             title="Delete project"
                                         >
                                             <Trash2 size={13} />
@@ -519,17 +519,17 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
                                                 <button
                                                     type="button"
                                                     onClick={() => imageInputRef.current?.click()}
-                                                    className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
+                                                    className="px-3 py-1.5 bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 rounded-xl text-xs font-semibold cursor-pointer transition-all"
                                                 >
                                                     Change Photo
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={handleRemoveImage}
-                                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors"
+                                                    className="p-1.5 bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 rounded-xl cursor-pointer transition-all"
                                                     title="Remove photo"
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <Trash2 size={15} />
                                                 </button>
                                             </div>
                                         </div>
@@ -644,14 +644,14 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
                                 <button 
                                     type="button" 
                                     onClick={() => setIsModalOpen(false)}
-                                    className="px-5 py-2.5 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                                    className="px-5 py-2 border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer transition-all"
                                 >
                                     Cancel
                                 </button>
                                 <button 
                                     type="submit" 
                                     disabled={isSubmitting}
-                                    className="inline-flex items-center gap-2 px-6 py-2.5 bg-[#1A4D2E] hover:bg-[#143e24] text-white rounded-xl text-xs font-bold tracking-wider uppercase transition-all shadow-md cursor-pointer disabled:opacity-50"
+                                    className="inline-flex items-center gap-2 px-6 py-2 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
                                 >
                                     {isSubmitting ? (
                                         <>

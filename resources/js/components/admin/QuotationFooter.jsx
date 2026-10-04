@@ -3,7 +3,7 @@ import footerImg from '../../assets/footer.jpeg';
 
 export const QuotationFooter = () => {
     return (
-        <div className="w-full shrink-0 relative pointer-events-none select-none mt-auto">
+        <div className="w-full shrink-0 relative z-10 pointer-events-none select-none mt-auto">
             {/* High-Resolution Letterhead Footer Banner */}
             <img
                 src={footerImg}

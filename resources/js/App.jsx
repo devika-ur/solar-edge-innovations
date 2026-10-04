@@ -24,7 +24,7 @@ const ScrollToTop = () => {
                 const element = document.getElementById(hash.substring(1));
                 if (element) {
                     if (window.lenis) {
-                        window.lenis.scrollTo(element, { duration: 1.2 });
+                        window.lenis.scrollTo(element, { duration: 1.2, offset: -90 });
                     } else {
                         element.scrollIntoView({ behavior: 'smooth' });
                     }
