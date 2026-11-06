@@ -94,9 +94,9 @@ export const SaveQuotationModal = ({
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-2.5 border-t border-neutral-200/60 bg-emerald-50/50 -mx-4 -mb-4 px-4 py-3 rounded-b-2xl">
-                        <span className="text-xs font-bold text-neutral-700">Total Project Cost</span>
-                        <span className="text-sm font-black text-[#1A4D2E]">
+                    <div className="flex items-center justify-between pt-2.5 border-t border-neutral-200/60 bg-emerald-50/50 -mx-4 -mb-4 px-4 py-3 rounded-b-2xl font-poppins">
+                        <span className="text-xs font-semibold text-neutral-700">Total Project Cost</span>
+                        <span className="text-sm font-semibold text-[#1A4D2E]">
                             ₹{pricing.totalPayable || '0'}
                         </span>
                     </div>

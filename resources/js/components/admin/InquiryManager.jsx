@@ -275,37 +275,34 @@ export const InquiryManager = ({ onUnauthorized }) => {
     };
 
     return (
-        <div className="w-full px-4 sm:px-8 py-8 space-y-8 font-sans">
+        <div className="w-full px-4 sm:px-8 py-8 space-y-8 font-poppins">
             {/* Top Heading & Actions */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
                 <div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-[11px] text-[#1A4D2E] font-bold tracking-widest uppercase font-mono bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/60">
-                            Communications & Leads
-                        </span>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
+                            Contact Form Inquiries
+                        </h1>
                         {counts.pending > 0 && (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200 animate-pulse">
-                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-800 bg-amber-50 px-3 py-1 rounded-full border border-amber-200/80">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                                 {counts.pending} Action Required
                             </span>
                         )}
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-black text-neutral-900 mt-1 font-playfair">
-                        Contact Form Inquiries
-                    </h1>
-                    <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
+                    <p className="text-xs sm:text-sm text-neutral-500 mt-1">
                         Track messages submitted by website visitors, respond to customer leads, and update contact response statuses.
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 self-start sm:self-center">
                     <button
                         onClick={() => loadInquiries(true)}
                         disabled={isLoading}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900 transition-all cursor-pointer disabled:opacity-60"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-medium border border-neutral-200/90 shadow-2xs transition-all cursor-pointer disabled:opacity-60"
                         title="Refresh inquiries list"
                     >
-                        <RefreshCw size={13} className={isLoading ? 'animate-spin text-[#1A4D2E]' : ''} />
+                        <RefreshCw size={13} className={isLoading ? 'animate-spin text-[#1A4D2E]' : 'text-neutral-500'} />
                         <span>Refresh</span>
                     </button>
                 </div>
@@ -323,7 +320,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                     }`}
                 >
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider">
+                        <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider">
                             Total Received
                         </span>
                         <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -331,7 +328,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                         </div>
                     </div>
                     <div className="mt-3 flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-neutral-900 font-mono">
+                        <span className="text-3xl font-semibold text-neutral-900 font-poppins">
                             {counts.total}
                         </span>
                         <span className="text-xs text-neutral-500 font-medium">all inquiries</span>
@@ -349,7 +346,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                     }`}
                 >
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-amber-700 uppercase tracking-wider">
+                        <span className="text-xs font-medium text-amber-700 uppercase tracking-wider">
                             Pending Response
                         </span>
                         <div className="w-9 h-9 rounded-xl bg-amber-100/70 text-amber-600 flex items-center justify-center">
@@ -357,7 +354,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                         </div>
                     </div>
                     <div className="mt-3 flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-amber-800 font-mono">
+                        <span className="text-3xl font-semibold text-amber-800 font-poppins">
                             {counts.pending}
                         </span>
                         <span className="text-xs text-amber-700/80 font-medium">awaiting contact</span>
@@ -375,7 +372,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                     }`}
                 >
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
+                        <span className="text-xs font-medium text-emerald-700 uppercase tracking-wider">
                             Responded
                         </span>
                         <div className="w-9 h-9 rounded-xl bg-emerald-100/70 text-emerald-700 flex items-center justify-center">
@@ -383,7 +380,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                         </div>
                     </div>
                     <div className="mt-3 flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-emerald-900 font-mono">
+                        <span className="text-3xl font-semibold text-emerald-900 font-poppins">
                             {counts.responded}
                         </span>
                         <span className="text-xs text-emerald-700/80 font-medium">contacted</span>
@@ -892,7 +889,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
                                         </span>
                                     )}
                                 </div>
-                                <h3 className="text-xl font-bold font-playfair text-neutral-900">
+                                <h3 className="text-xl font-semibold text-neutral-900 tracking-tight font-poppins">
                                     {selectedInquiry.name}
                                 </h3>
                                 <p className="text-xs text-neutral-400">

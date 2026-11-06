@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { AdminLogin } from '../components/admin/AdminLogin';
 import { DashboardOverview } from '../components/admin/DashboardOverview';
@@ -10,12 +10,14 @@ import { LetterheadEditor } from '../components/admin/LetterheadEditor';
 import { QuotationHistoryManager } from '../components/admin/QuotationHistoryManager';
 import { PaymentManager } from '../components/admin/PaymentManager';
 import { ReportManager } from '../components/admin/reports/ReportManager';
+import { AgreementEditor } from '../components/admin/AgreementEditor';
 import { Toaster, toast } from 'react-hot-toast';
 import {
     LayoutDashboard,
     FolderGit2,
     HelpCircle,
     FileText,
+    FileSignature,
     History,
     CreditCard,
     ScrollText,
@@ -26,11 +28,13 @@ import {
     AlertTriangle,
     Mail,
     X,
-    BarChart3
+    BarChart3,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react';
 import { assets } from '../assets/assets';
 
-const VALID_TABS = ['dashboard', 'inquiries', 'projects', 'faqs', 'letterhead', 'quotation', 'quotation-history', 'payments', 'reports'];
+const VALID_TABS = ['dashboard', 'inquiries', 'projects', 'faqs', 'letterhead', 'quotation', 'agreement', 'quotation-history', 'payments', 'reports'];
 
 const AdminPage = () => {
     const { tab } = useParams();
@@ -54,6 +58,76 @@ const AdminPage = () => {
 
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [pendingInquiriesCount, setPendingInquiriesCount] = useState(0);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+
+    const navRef = useRef(null);
+
+    const updateScrollControls = () => {
+        if (!navRef.current) return;
+        const { scrollLeft, scrollWidth, clientWidth } = navRef.current;
+        setCanScrollLeft(scrollLeft > 6);
+        setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 6);
+    };
+
+    // Auto-scroll active tab into view when activeTab changes or on mount
+    const scrollActiveTabIntoView = (behavior = 'smooth') => {
+        if (!navRef.current) return;
+        const activeBtn = navRef.current.querySelector('[data-active="true"]');
+        if (activeBtn) {
+            const nav = navRef.current;
+            const btnLeft = activeBtn.offsetLeft;
+            const btnRight = btnLeft + activeBtn.offsetWidth;
+            const navScrollLeft = nav.scrollLeft;
+            const navVisibleRight = navScrollLeft + nav.clientWidth;
+
+            if (btnLeft < navScrollLeft + 20) {
+                nav.scrollTo({ left: Math.max(0, btnLeft - 24), behavior });
+            } else if (btnRight > navVisibleRight - 20) {
+                nav.scrollTo({ left: btnRight - nav.clientWidth + 24, behavior });
+            }
+        }
+        updateScrollControls();
+    };
+
+    useEffect(() => {
+        scrollActiveTabIntoView('smooth');
+        const timer1 = setTimeout(() => scrollActiveTabIntoView('smooth'), 100);
+        const timer2 = setTimeout(() => scrollActiveTabIntoView('smooth'), 300);
+        return () => {
+            clearTimeout(timer1);
+            clearTimeout(timer2);
+        };
+    }, [activeTab]);
+
+    // Enable horizontal scrolling on navigation tabs via mouse wheel and track scroll position
+    useEffect(() => {
+        const navEl = navRef.current;
+        if (!navEl) return;
+        updateScrollControls();
+
+        const handleWheel = (e) => {
+            if (e.deltaY !== 0 && navEl.scrollWidth > navEl.clientWidth) {
+                e.preventDefault();
+                navEl.scrollLeft += e.deltaY;
+                updateScrollControls();
+            }
+        };
+
+        const handleScroll = () => {
+            updateScrollControls();
+        };
+
+        navEl.addEventListener('wheel', handleWheel, { passive: false });
+        navEl.addEventListener('scroll', handleScroll, { passive: true });
+        window.addEventListener('resize', updateScrollControls);
+
+        return () => {
+            navEl.removeEventListener('wheel', handleWheel);
+            navEl.removeEventListener('scroll', handleScroll);
+            window.removeEventListener('resize', updateScrollControls);
+        };
+    }, []);
 
     // Fetch pending count periodically or on mount / tab change
     const fetchInquiriesBadge = async () => {
@@ -182,13 +256,16 @@ const AdminPage = () => {
         { id: 'faqs', label: 'Website FAQs', icon: HelpCircle },
         { id: 'letterhead', label: 'Letterhead', icon: ScrollText },
         { id: 'quotation', label: 'Quotation Builder', icon: FileText },
+        { id: 'agreement', label: 'Agreement', icon: FileSignature },
         { id: 'quotation-history', label: 'Quotation History', icon: History },
         { id: 'payments', label: 'Payments', icon: CreditCard },
         { id: 'reports', label: 'Reports', icon: BarChart3 },
     ];
 
+    const isDocumentTab = activeTab === 'quotation' || activeTab === 'letterhead' || activeTab === 'agreement';
+
     return (
-        <div className="w-full min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
+        <div className={`w-full min-h-screen bg-[#F8FAFC] flex flex-col font-poppins admin-poppins-theme`}>
             {/* Global Hot Toast Container */}
             <Toaster
                 position="top-right"
@@ -227,10 +304,10 @@ const AdminPage = () => {
                     <div className="flex items-center gap-3.5">
                         <img src={assets.logo} alt="Solar Edge Logo" className="h-10 sm:h-12 object-contain transition-transform hover:scale-105" />
                         <div>
-                            <span className="text-base sm:text-lg font-black text-neutral-900 block leading-tight tracking-tight">
+                            <span className="text-base sm:text-lg font-semibold text-neutral-900 block leading-tight tracking-tight">
                                 Solar Edge Innovations
                             </span>
-                            <span className="text-xs text-emerald-700 font-semibold tracking-wide uppercase flex items-center gap-1 font-mono mt-0.5">
+                            <span className="text-xs text-emerald-700 font-medium tracking-wide uppercase flex items-center gap-1 mt-0.5">
                                 <Sparkles size={12} />
                                 Admin Panel
                             </span>
@@ -272,25 +349,44 @@ const AdminPage = () => {
                 </div>
 
                 {/* Sub-bar / Primary Navigation Row */}
-                <div className="w-full px-4 sm:px-8 pb-3 pt-0 border-t border-neutral-100 sm:border-t-0 flex items-center overflow-x-auto scrollbar-none">
-                    <nav className="w-full flex items-center gap-1.5 bg-neutral-100 p-1.5 rounded-2xl border border-neutral-200/80 overflow-x-auto scrollbar-none">
+                <div className="w-full px-4 sm:px-8 pb-3 pt-0 border-t border-neutral-100 sm:border-t-0 flex items-center relative admin-nav-container group/nav">
+                    {/* Left Scroll Indicator Button */}
+                    {canScrollLeft && (
+                        <button
+                            type="button"
+                            onClick={() => navRef.current?.scrollBy({ left: -220, behavior: 'smooth' })}
+                            aria-label="Scroll tabs left"
+                            className="hidden sm:flex absolute left-6 sm:left-10 z-10 w-7 h-7 items-center justify-center rounded-full bg-white text-neutral-700 shadow-md border border-neutral-200/90 hover:bg-[#1A4D2E] hover:text-white transition-all cursor-pointer opacity-0 group-hover/nav:opacity-100"
+                        >
+                            <ChevronLeft size={16} />
+                        </button>
+                    )}
+
+                    <nav
+                        ref={navRef}
+                        className="w-full flex items-center gap-1 sm:gap-1.5 bg-neutral-100 p-1.5 pb-2.5 rounded-2xl border border-neutral-200/80 overflow-x-auto admin-nav-scrollbar"
+                    >
                         {navigationItems.map((item) => {
                             const Icon = item.icon;
                             const isActive = activeTab === item.id;
                             return (
                                 <button
                                     key={item.id}
-                                    onClick={() => handleTabChange(item.id)}
-                                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${isActive
-                                            ? 'bg-[#1A4D2E] text-white shadow-xs'
-                                            : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
+                                    data-active={isActive ? "true" : "false"}
+                                    onClick={(e) => {
+                                        handleTabChange(item.id);
+                                        e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                                    }}
+                                    className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-[13px] transition-all cursor-pointer whitespace-nowrap shrink-0 ${isActive
+                                            ? 'bg-[#1A4D2E] text-white shadow-xs font-semibold'
+                                            : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 font-medium'
                                         }`}
                                 >
-                                    <Icon size={16} />
+                                    <Icon size={15} />
                                     <span>{item.label}</span>
                                     {item.badge != null && (
                                         <span
-                                            className={`px-2 py-0.5 rounded-full text-xs font-black leading-none ${
+                                            className={`px-1.5 py-0.5 rounded-full text-[11px] font-semibold leading-none ${
                                                 isActive
                                                     ? 'bg-amber-400 text-neutral-950 font-mono shadow-xs'
                                                     : 'bg-amber-500 text-white font-mono'
@@ -303,17 +399,36 @@ const AdminPage = () => {
                             );
                         })}
                     </nav>
+
+                    {/* Right Scroll Indicator Button */}
+                    {canScrollRight && (
+                        <button
+                            type="button"
+                            onClick={() => navRef.current?.scrollBy({ left: 220, behavior: 'smooth' })}
+                            aria-label="Scroll tabs right"
+                            className="hidden sm:flex absolute right-6 sm:right-10 z-10 w-7 h-7 items-center justify-center rounded-full bg-white text-neutral-700 shadow-md border border-neutral-200/90 hover:bg-[#1A4D2E] hover:text-white transition-all cursor-pointer opacity-0 group-hover/nav:opacity-100"
+                        >
+                            <ChevronRight size={16} />
+                        </button>
+                    )}
                 </div>
             </header>
 
             {/* Main Content Area */}
-            <main className={`flex-1 ${activeTab === 'quotation' || activeTab === 'letterhead' ? 'pb-0' : 'pb-12'}`}>
+            <main className={`flex-1 ${isDocumentTab ? 'font-sans' : 'font-poppins'} ${isDocumentTab ? 'pb-0' : 'pb-12'}`}>
                 {activeTab === 'dashboard' && <DashboardOverview onNavigate={handleTabChange} onUnauthorized={handleUnauthorized} />}
                 {activeTab === 'inquiries' && <InquiryManager onUnauthorized={handleUnauthorized} />}
                 {activeTab === 'projects' && <ProjectGalleryManager onUnauthorized={handleUnauthorized} />}
                 {activeTab === 'faqs' && <FaqManager onUnauthorized={handleUnauthorized} />}
                 {activeTab === 'quotation' && (
                     <QuotationEditor
+                        onLogout={() => setIsLogoutModalOpen(true)}
+                        onBack={() => handleTabChange('dashboard')}
+                        onNavigate={handleTabChange}
+                    />
+                )}
+                {activeTab === 'agreement' && (
+                    <AgreementEditor
                         onLogout={() => setIsLogoutModalOpen(true)}
                         onBack={() => handleTabChange('dashboard')}
                         onNavigate={handleTabChange}
@@ -362,7 +477,7 @@ const AdminPage = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                            <h3 className="text-base font-black text-neutral-900">
+                            <h3 className="text-base font-semibold text-neutral-900">
                                 Confirm Admin Logout
                             </h3>
                             <p className="text-xs text-neutral-500 leading-relaxed">
@@ -374,14 +489,14 @@ const AdminPage = () => {
                             <button
                                 type="button"
                                 onClick={() => setIsLogoutModalOpen(false)}
-                                className="px-4 py-2 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs sm:text-sm font-semibold text-neutral-700 transition-all cursor-pointer"
+                                className="px-4 py-2 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs sm:text-sm font-medium text-neutral-700 transition-all cursor-pointer"
                             >
                                 Stay Logged In
                             </button>
                             <button
                                 type="button"
                                 onClick={confirmLogout}
-                                className="px-5 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer"
+                                className="px-5 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs sm:text-sm font-medium transition-all shadow-xs cursor-pointer"
                             >
                                 Yes, Logout
                             </button>

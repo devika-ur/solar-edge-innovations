@@ -27,7 +27,8 @@ export const QuotationFormControls = ({
     activeTab: propActiveTab,
     onTabChange,
     hideTopToolbar = false,
-    hideTabs = false
+    hideTabs = false,
+    isFullWidth = false
 }) => {
     const [localActiveTab, setLocalActiveTab] = useState('client');
     const activeTab = propActiveTab !== undefined ? propActiveTab : localActiveTab;
@@ -195,7 +196,7 @@ export const QuotationFormControls = ({
             )}
 
             {/* Form Fields Area */}
-            <div ref={formScrollRef} className="flex-1 overflow-y-auto p-5 space-y-6 text-xs text-neutral-700" data-lenis-prevent>
+            <div ref={formScrollRef} className={`flex-1 overflow-y-auto p-5 sm:p-7 space-y-6 text-xs text-neutral-700 ${isFullWidth ? 'max-w-6xl mx-auto w-full' : ''}`} data-lenis-prevent>
                 {/* ════════════════════════════════════════════════════════════
                     TAB 1: CLIENT & REFERENCE INFO
                 ════════════════════════════════════════════════════════════ */}
@@ -206,7 +207,7 @@ export const QuotationFormControls = ({
                             <p className="text-[11px] text-emerald-700 mt-0.5">Appears on header of Page 1</p>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className={isFullWidth ? "grid grid-cols-1 md:grid-cols-4 gap-3" : "grid grid-cols-2 gap-3"}>
                             <div>
                                 <label className="block font-bold text-neutral-700 mb-1">Quote Reference No</label>
                                 <input
@@ -225,9 +226,6 @@ export const QuotationFormControls = ({
                                     className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-mono focus:bg-white focus:border-emerald-600 outline-none transition-colors"
                                 />
                             </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
                             <div>
                                 <label className="block font-bold text-neutral-700 mb-1">System Title (Page 1)</label>
                                 <input
@@ -264,55 +262,109 @@ export const QuotationFormControls = ({
                             </button>
                         </div>
 
-                        <div className="space-y-3">
-                            <div>
-                                <label className="block font-bold text-neutral-700 mb-2">Client Name</label>
-                                <input
-                                    type="text"
-                                    value={data.clientInfo.name}
-                                    onChange={(e) => updateField('clientInfo.name', e.target.value)}
-                                    className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold focus:bg-white focus:border-emerald-600 outline-none transition-colors"
-                                />
-                            </div>
-                            <div>
-                                <label className="block font-bold text-neutral-700 mb-1">Address / Location</label>
-                                <input
-                                    type="text"
-                                    value={data.clientInfo.address}
-                                    onChange={(e) => updateField('clientInfo.address', e.target.value)}
-                                    className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg focus:bg-white focus:border-emerald-600 outline-none transition-colors"
-                                />
-                            </div>
-                            <div className="grid grid-cols-3 gap-3">
-                                <div>
-                                    <label className="block font-bold text-neutral-700 mb-1">Contact No</label>
-                                    <input
-                                        type="text"
-                                        value={data.clientInfo.contactNo}
-                                        onChange={(e) => updateField('clientInfo.contactNo', e.target.value)}
-                                        className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-mono focus:bg-white focus:border-emerald-600 outline-none transition-colors"
-                                    />
+                        {isFullWidth ? (
+                            <div className="space-y-3">
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                    <div className="md:col-span-2">
+                                        <label className="block font-bold text-neutral-700 mb-1">Client Name</label>
+                                        <input
+                                            type="text"
+                                            value={data.clientInfo.name}
+                                            onChange={(e) => updateField('clientInfo.name', e.target.value)}
+                                            className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold focus:bg-white focus:border-emerald-600 outline-none transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-bold text-neutral-700 mb-1">Contact No</label>
+                                        <input
+                                            type="text"
+                                            value={data.clientInfo.contactNo}
+                                            onChange={(e) => updateField('clientInfo.contactNo', e.target.value)}
+                                            className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-mono focus:bg-white focus:border-emerald-600 outline-none transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-bold text-neutral-700 mb-1">Capacity</label>
+                                        <input
+                                            type="text"
+                                            value={data.clientInfo.capacity}
+                                            onChange={(e) => updateField('clientInfo.capacity', e.target.value)}
+                                            className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold focus:bg-white focus:border-emerald-600 outline-none transition-colors"
+                                        />
+                                    </div>
                                 </div>
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                    <div className="md:col-span-3">
+                                        <label className="block font-bold text-neutral-700 mb-1">Address / Location</label>
+                                        <input
+                                            type="text"
+                                            value={data.clientInfo.address}
+                                            onChange={(e) => updateField('clientInfo.address', e.target.value)}
+                                            className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg focus:bg-white focus:border-emerald-600 outline-none transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-bold text-neutral-700 mb-1">Type</label>
+                                        <input
+                                            type="text"
+                                            value={data.clientInfo.type}
+                                            onChange={(e) => updateField('clientInfo.type', e.target.value)}
+                                            className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold focus:bg-white focus:border-emerald-600 outline-none transition-colors"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
                                 <div>
-                                    <label className="block font-bold text-neutral-700 mb-1">Capacity</label>
+                                    <label className="block font-bold text-neutral-700 mb-2">Client Name</label>
                                     <input
                                         type="text"
-                                        value={data.clientInfo.capacity}
-                                        onChange={(e) => updateField('clientInfo.capacity', e.target.value)}
+                                        value={data.clientInfo.name}
+                                        onChange={(e) => updateField('clientInfo.name', e.target.value)}
                                         className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold focus:bg-white focus:border-emerald-600 outline-none transition-colors"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block font-bold text-neutral-700 mb-1">Type</label>
+                                    <label className="block font-bold text-neutral-700 mb-1">Address / Location</label>
                                     <input
                                         type="text"
-                                        value={data.clientInfo.type}
-                                        onChange={(e) => updateField('clientInfo.type', e.target.value)}
-                                        className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold focus:bg-white focus:border-emerald-600 outline-none transition-colors"
+                                        value={data.clientInfo.address}
+                                        onChange={(e) => updateField('clientInfo.address', e.target.value)}
+                                        className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg focus:bg-white focus:border-emerald-600 outline-none transition-colors"
                                     />
                                 </div>
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <label className="block font-bold text-neutral-700 mb-1">Contact No</label>
+                                        <input
+                                            type="text"
+                                            value={data.clientInfo.contactNo}
+                                            onChange={(e) => updateField('clientInfo.contactNo', e.target.value)}
+                                            className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-mono focus:bg-white focus:border-emerald-600 outline-none transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-bold text-neutral-700 mb-1">Capacity</label>
+                                        <input
+                                            type="text"
+                                            value={data.clientInfo.capacity}
+                                            onChange={(e) => updateField('clientInfo.capacity', e.target.value)}
+                                            className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold focus:bg-white focus:border-emerald-600 outline-none transition-colors"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-bold text-neutral-700 mb-1">Type</label>
+                                        <input
+                                            type="text"
+                                            value={data.clientInfo.type}
+                                            onChange={(e) => updateField('clientInfo.type', e.target.value)}
+                                            className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold focus:bg-white focus:border-emerald-600 outline-none transition-colors"
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 )}
 
@@ -348,47 +400,93 @@ export const QuotationFormControls = ({
                                             <Trash2 className="w-3.5 h-3.5" />
                                         </button>
                                     </div>
-                                    <div>
-                                        <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-0.5">Item Description</label>
-                                        <input
-                                            type="text"
-                                            value={item.item}
-                                            onChange={(e) => {
-                                                const newArr = [...data.manufacturers];
-                                                newArr[idx].item = e.target.value;
-                                                updateField('manufacturers', newArr);
-                                            }}
-                                            className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md focus:border-emerald-600 outline-none"
-                                        />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-0.5">Manufacturer</label>
-                                            <input
-                                                type="text"
-                                                value={item.manufacturer}
-                                                onChange={(e) => {
-                                                    const newArr = [...data.manufacturers];
-                                                    newArr[idx].manufacturer = e.target.value;
-                                                    updateField('manufacturers', newArr);
-                                                }}
-                                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold focus:border-emerald-600 outline-none"
-                                            />
+                                    {isFullWidth ? (
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-0.5">Item Description</label>
+                                                <input
+                                                    type="text"
+                                                    value={item.item}
+                                                    onChange={(e) => {
+                                                        const newArr = [...data.manufacturers];
+                                                        newArr[idx].item = e.target.value;
+                                                        updateField('manufacturers', newArr);
+                                                    }}
+                                                    className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md focus:border-emerald-600 outline-none text-xs"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-0.5">Manufacturer</label>
+                                                <input
+                                                    type="text"
+                                                    value={item.manufacturer}
+                                                    onChange={(e) => {
+                                                        const newArr = [...data.manufacturers];
+                                                        newArr[idx].manufacturer = e.target.value;
+                                                        updateField('manufacturers', newArr);
+                                                    }}
+                                                    className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold focus:border-emerald-600 outline-none text-xs"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-0.5">Origin</label>
+                                                <input
+                                                    type="text"
+                                                    value={item.origin}
+                                                    onChange={(e) => {
+                                                        const newArr = [...data.manufacturers];
+                                                        newArr[idx].origin = e.target.value;
+                                                        updateField('manufacturers', newArr);
+                                                    }}
+                                                    className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-medium focus:border-emerald-600 outline-none text-xs"
+                                                />
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-0.5">Origin</label>
-                                            <input
-                                                type="text"
-                                                value={item.origin}
-                                                onChange={(e) => {
-                                                    const newArr = [...data.manufacturers];
-                                                    newArr[idx].origin = e.target.value;
-                                                    updateField('manufacturers', newArr);
-                                                }}
-                                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-medium focus:border-emerald-600 outline-none"
-                                            />
-                                        </div>
-                                    </div>
+                                    ) : (
+                                        <>
+                                            <div>
+                                                <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-0.5">Item Description</label>
+                                                <input
+                                                    type="text"
+                                                    value={item.item}
+                                                    onChange={(e) => {
+                                                        const newArr = [...data.manufacturers];
+                                                        newArr[idx].item = e.target.value;
+                                                        updateField('manufacturers', newArr);
+                                                    }}
+                                                    className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md focus:border-emerald-600 outline-none text-xs"
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-0.5">Manufacturer</label>
+                                                    <input
+                                                        type="text"
+                                                        value={item.manufacturer}
+                                                        onChange={(e) => {
+                                                            const newArr = [...data.manufacturers];
+                                                            newArr[idx].manufacturer = e.target.value;
+                                                            updateField('manufacturers', newArr);
+                                                        }}
+                                                        className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold focus:border-emerald-600 outline-none text-xs"
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-0.5">Origin</label>
+                                                    <input
+                                                        type="text"
+                                                        value={item.origin}
+                                                        onChange={(e) => {
+                                                            const newArr = [...data.manufacturers];
+                                                            newArr[idx].origin = e.target.value;
+                                                            updateField('manufacturers', newArr);
+                                                        }}
+                                                        className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-medium focus:border-emerald-600 outline-none text-xs"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -418,88 +516,178 @@ export const QuotationFormControls = ({
                         <div className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
                             <h3 className="font-bold text-emerald-900 text-xs uppercase tracking-wider">Solar PV Modules</h3>
 
-                            <div>
-                                <label className="block font-semibold mb-1">Brand Name</label>
-                                <input
-                                    type="text"
-                                    value={data.technicalSpecs.solarPvModules.brand}
-                                    onChange={(e) => updateField('technicalSpecs.solarPvModules.brand', e.target.value)}
-                                    className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
-                                />
-                            </div>
-                            <div>
-                                <label className="block font-semibold mb-1">Type / Model</label>
-                                <input
-                                    type="text"
-                                    value={data.technicalSpecs.solarPvModules.model}
-                                    onChange={(e) => updateField('technicalSpecs.solarPvModules.model', e.target.value)}
-                                    className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-semibold focus:border-emerald-600 outline-none"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block font-semibold mb-1">Quantity</label>
-                                    <input
-                                        type="text"
-                                        value={data.technicalSpecs.solarPvModules.qty}
-                                        onChange={(e) => updateField('technicalSpecs.solarPvModules.qty', e.target.value)}
-                                        className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
-                                    />
+                            {isFullWidth ? (
+                                <div className="space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block font-semibold mb-1">Brand Name</label>
+                                            <input
+                                                type="text"
+                                                value={data.technicalSpecs.solarPvModules.brand}
+                                                onChange={(e) => updateField('technicalSpecs.solarPvModules.brand', e.target.value)}
+                                                className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-1">Type / Model</label>
+                                            <input
+                                                type="text"
+                                                value={data.technicalSpecs.solarPvModules.model}
+                                                onChange={(e) => updateField('technicalSpecs.solarPvModules.model', e.target.value)}
+                                                className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-semibold focus:border-emerald-600 outline-none"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                        <div>
+                                            <label className="block font-semibold mb-1">Quantity</label>
+                                            <input
+                                                type="text"
+                                                value={data.technicalSpecs.solarPvModules.qty}
+                                                onChange={(e) => updateField('technicalSpecs.solarPvModules.qty', e.target.value)}
+                                                className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
+                                            />
+                                        </div>
+                                        <div className="md:col-span-3">
+                                            <label className="block font-semibold mb-1">Warranty Statement</label>
+                                            <input
+                                                type="text"
+                                                value={data.technicalSpecs.solarPvModules.warranty}
+                                                onChange={(e) => updateField('technicalSpecs.solarPvModules.warranty', e.target.value)}
+                                                className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs focus:border-emerald-600 outline-none"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block font-semibold mb-1">Warranty Statement</label>
-                                    <input
-                                        type="text"
-                                        value={data.technicalSpecs.solarPvModules.warranty}
-                                        onChange={(e) => updateField('technicalSpecs.solarPvModules.warranty', e.target.value)}
-                                        className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs focus:border-emerald-600 outline-none"
-                                    />
-                                </div>
-                            </div>
+                            ) : (
+                                <>
+                                    <div>
+                                        <label className="block font-semibold mb-1">Brand Name</label>
+                                        <input
+                                            type="text"
+                                            value={data.technicalSpecs.solarPvModules.brand}
+                                            onChange={(e) => updateField('technicalSpecs.solarPvModules.brand', e.target.value)}
+                                            className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-semibold mb-1">Type / Model</label>
+                                        <input
+                                            type="text"
+                                            value={data.technicalSpecs.solarPvModules.model}
+                                            onChange={(e) => updateField('technicalSpecs.solarPvModules.model', e.target.value)}
+                                            className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-semibold focus:border-emerald-600 outline-none"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block font-semibold mb-1">Quantity</label>
+                                            <input
+                                                type="text"
+                                                value={data.technicalSpecs.solarPvModules.qty}
+                                                onChange={(e) => updateField('technicalSpecs.solarPvModules.qty', e.target.value)}
+                                                className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-1">Warranty Statement</label>
+                                            <input
+                                                type="text"
+                                                value={data.technicalSpecs.solarPvModules.warranty}
+                                                onChange={(e) => updateField('technicalSpecs.solarPvModules.warranty', e.target.value)}
+                                                className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs focus:border-emerald-600 outline-none"
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         {/* On Grid Inverter */}
                         <div className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
                             <h3 className="font-bold text-emerald-900 text-xs uppercase tracking-wider">On Grid Inverter</h3>
 
-                            <div>
-                                <label className="block font-semibold mb-1">Inverter Brand</label>
-                                <input
-                                    type="text"
-                                    value={data.technicalSpecs.inverter.brand}
-                                    onChange={(e) => updateField('technicalSpecs.inverter.brand', e.target.value)}
-                                    className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
-                                />
-                            </div>
-                            <div className="grid grid-cols-3 gap-2">
-                                <div>
-                                    <label className="block font-semibold mb-1">Quantity</label>
-                                    <input
-                                        type="text"
-                                        value={data.technicalSpecs.inverter.qty}
-                                        onChange={(e) => updateField('technicalSpecs.inverter.qty', e.target.value)}
-                                        className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
-                                    />
+                            {isFullWidth ? (
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                    <div>
+                                        <label className="block font-semibold mb-1">Inverter Brand</label>
+                                        <input
+                                            type="text"
+                                            value={data.technicalSpecs.inverter.brand}
+                                            onChange={(e) => updateField('technicalSpecs.inverter.brand', e.target.value)}
+                                            className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-semibold mb-1">Quantity</label>
+                                        <input
+                                            type="text"
+                                            value={data.technicalSpecs.inverter.qty}
+                                            onChange={(e) => updateField('technicalSpecs.inverter.qty', e.target.value)}
+                                            className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-semibold mb-1">Warranty</label>
+                                        <input
+                                            type="text"
+                                            value={data.technicalSpecs.inverter.warranty}
+                                            onChange={(e) => updateField('technicalSpecs.inverter.warranty', e.target.value)}
+                                            className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg focus:border-emerald-600 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-semibold mb-1">Additional Work</label>
+                                        <input
+                                            type="text"
+                                            value={data.technicalSpecs.inverter.additionalWork}
+                                            onChange={(e) => updateField('technicalSpecs.inverter.additionalWork', e.target.value)}
+                                            className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg focus:border-emerald-600 outline-none"
+                                        />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block font-semibold mb-1">Warranty</label>
-                                    <input
-                                        type="text"
-                                        value={data.technicalSpecs.inverter.warranty}
-                                        onChange={(e) => updateField('technicalSpecs.inverter.warranty', e.target.value)}
-                                        className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg focus:border-emerald-600 outline-none"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block font-semibold mb-1">Additional Work</label>
-                                    <input
-                                        type="text"
-                                        value={data.technicalSpecs.inverter.additionalWork}
-                                        onChange={(e) => updateField('technicalSpecs.inverter.additionalWork', e.target.value)}
-                                        className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg focus:border-emerald-600 outline-none"
-                                    />
-                                </div>
-                            </div>
+                            ) : (
+                                <>
+                                    <div>
+                                        <label className="block font-semibold mb-1">Inverter Brand</label>
+                                        <input
+                                            type="text"
+                                            value={data.technicalSpecs.inverter.brand}
+                                            onChange={(e) => updateField('technicalSpecs.inverter.brand', e.target.value)}
+                                            className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <div>
+                                            <label className="block font-semibold mb-1">Quantity</label>
+                                            <input
+                                                type="text"
+                                                value={data.technicalSpecs.inverter.qty}
+                                                onChange={(e) => updateField('technicalSpecs.inverter.qty', e.target.value)}
+                                                className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg font-bold focus:border-emerald-600 outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-1">Warranty</label>
+                                            <input
+                                                type="text"
+                                                value={data.technicalSpecs.inverter.warranty}
+                                                onChange={(e) => updateField('technicalSpecs.inverter.warranty', e.target.value)}
+                                                className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg focus:border-emerald-600 outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-1">Additional Work</label>
+                                            <input
+                                                type="text"
+                                                value={data.technicalSpecs.inverter.additionalWork}
+                                                onChange={(e) => updateField('technicalSpecs.inverter.additionalWork', e.target.value)}
+                                                className="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg focus:border-emerald-600 outline-none"
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 )}
@@ -512,43 +700,77 @@ export const QuotationFormControls = ({
                         <div>
                             <label className="block font-bold text-neutral-700 mb-1">System Header Title (Page 5 Top Banner)</label>
                             <textarea
-                                rows={2}
+                                rows={isFullWidth ? 1 : 2}
                                 value={data.pricing.headerTitle}
                                 onChange={(e) => updateField('pricing.headerTitle', e.target.value)}
-                                className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold text-xs focus:bg-white focus:border-emerald-600 outline-none"
+                                className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold text-xs focus:bg-white focus:border-emerald-600 outline-none resize-none"
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="block font-bold text-neutral-700 mb-1">Roof Type Label</label>
-                                <input
-                                    type="text"
-                                    value={data.pricing.roofTypeLabel}
-                                    onChange={(e) => updateField('pricing.roofTypeLabel', e.target.value)}
-                                    className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg focus:bg-white focus:border-emerald-600 outline-none"
-                                />
+                        {isFullWidth ? (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div>
+                                    <label className="block font-bold text-neutral-700 mb-1">Roof Type Label</label>
+                                    <input
+                                        type="text"
+                                        value={data.pricing.roofTypeLabel}
+                                        onChange={(e) => updateField('pricing.roofTypeLabel', e.target.value)}
+                                        className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg focus:bg-white focus:border-emerald-600 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block font-bold text-neutral-700 mb-1">Total Project Payable (₹)</label>
+                                    <input
+                                        type="text"
+                                        value={data.pricing.totalPayable}
+                                        onChange={(e) => updateField('pricing.totalPayable', e.target.value)}
+                                        className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-extrabold text-sm text-emerald-900 focus:bg-white focus:border-emerald-600 outline-none"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block font-bold text-neutral-700 mb-1">Amount In Words</label>
+                                    <input
+                                        type="text"
+                                        value={data.pricing.amountInWords}
+                                        onChange={(e) => updateField('pricing.amountInWords', e.target.value)}
+                                        className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg focus:bg-white focus:border-emerald-600 outline-none"
+                                    />
+                                </div>
                             </div>
-                            <div>
-                                <label className="block font-bold text-neutral-700 mb-1">Total Project Payable (₹)</label>
-                                <input
-                                    type="text"
-                                    value={data.pricing.totalPayable}
-                                    onChange={(e) => updateField('pricing.totalPayable', e.target.value)}
-                                    className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-extrabold text-sm text-emerald-900 focus:bg-white focus:border-emerald-600 outline-none"
-                                />
-                            </div>
-                        </div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="block font-bold text-neutral-700 mb-1">Roof Type Label</label>
+                                        <input
+                                            type="text"
+                                            value={data.pricing.roofTypeLabel}
+                                            onChange={(e) => updateField('pricing.roofTypeLabel', e.target.value)}
+                                            className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg focus:bg-white focus:border-emerald-600 outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-bold text-neutral-700 mb-1">Total Project Payable (₹)</label>
+                                        <input
+                                            type="text"
+                                            value={data.pricing.totalPayable}
+                                            onChange={(e) => updateField('pricing.totalPayable', e.target.value)}
+                                            className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-extrabold text-sm text-emerald-900 focus:bg-white focus:border-emerald-600 outline-none"
+                                        />
+                                    </div>
+                                </div>
 
-                        <div>
-                            <label className="block font-bold text-neutral-700 mb-1">Amount In Words</label>
-                            <input
-                                type="text"
-                                value={data.pricing.amountInWords}
-                                onChange={(e) => updateField('pricing.amountInWords', e.target.value)}
-                                className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg focus:bg-white focus:border-emerald-600 outline-none"
-                            />
-                        </div>
+                                <div>
+                                    <label className="block font-bold text-neutral-700 mb-1">Amount In Words</label>
+                                    <input
+                                        type="text"
+                                        value={data.pricing.amountInWords}
+                                        onChange={(e) => updateField('pricing.amountInWords', e.target.value)}
+                                        className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg focus:bg-white focus:border-emerald-600 outline-none"
+                                    />
+                                </div>
+                            </>
+                        )}
 
                         <hr className="border-neutral-200 my-3" />
 
@@ -567,7 +789,7 @@ export const QuotationFormControls = ({
                             </button>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className={isFullWidth ? "grid grid-cols-1 md:grid-cols-2 gap-3" : "space-y-2"}>
                             {data.permitFees.map((feeRow, idx) => (
                                 <div key={feeRow.id || idx} className="p-2.5 bg-neutral-50 border border-neutral-200 rounded-lg flex items-center gap-2">
                                     <input
@@ -622,49 +844,96 @@ export const QuotationFormControls = ({
                     <div className="space-y-4">
                         <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
                             <h3 className="font-bold text-emerald-900 text-xs uppercase tracking-wider">Warranty Statements (Page 5)</h3>
-                            <div>
-                                <label className="block font-semibold mb-1">Panel Warranty</label>
-                                <textarea
-                                    rows={2}
-                                    value={data.warranties.panel}
-                                    onChange={(e) => updateField('warranties.panel', e.target.value)}
-                                    className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none"
-                                />
-                            </div>
-                            <div>
-                                <label className="block font-semibold mb-1">Inverter Warranty</label>
-                                <input
-                                    type="text"
-                                    value={data.warranties.inverter}
-                                    onChange={(e) => updateField('warranties.inverter', e.target.value)}
-                                    className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                                <div>
-                                    <label className="block font-semibold mb-1">Isolator</label>
-                                    <input
-                                        type="text"
-                                        value={data.warranties.isolator}
-                                        onChange={(e) => updateField('warranties.isolator', e.target.value)}
-                                        className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none"
-                                    />
+                            {isFullWidth ? (
+                                <div className="space-y-3">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block font-semibold mb-1">Panel Warranty</label>
+                                            <textarea
+                                                rows={2}
+                                                value={data.warranties.panel}
+                                                onChange={(e) => updateField('warranties.panel', e.target.value)}
+                                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none resize-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-1">Inverter Warranty</label>
+                                            <textarea
+                                                rows={2}
+                                                value={data.warranties.inverter}
+                                                onChange={(e) => updateField('warranties.inverter', e.target.value)}
+                                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none resize-none"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        <div>
+                                            <label className="block font-semibold mb-1">Isolator</label>
+                                            <input
+                                                type="text"
+                                                value={data.warranties.isolator}
+                                                onChange={(e) => updateField('warranties.isolator', e.target.value)}
+                                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-1">ACDB / Dongle</label>
+                                            <input
+                                                type="text"
+                                                value={data.warranties.acdb}
+                                                onChange={(e) => updateField('warranties.acdb', e.target.value)}
+                                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="block font-semibold mb-1">ACDB / Dongle</label>
-                                    <input
-                                        type="text"
-                                        value={data.warranties.acdb}
-                                        onChange={(e) => updateField('warranties.acdb', e.target.value)}
-                                        className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none"
-                                    />
-                                </div>
-                            </div>
+                            ) : (
+                                <>
+                                    <div>
+                                        <label className="block font-semibold mb-1">Panel Warranty</label>
+                                        <textarea
+                                            rows={2}
+                                            value={data.warranties.panel}
+                                            onChange={(e) => updateField('warranties.panel', e.target.value)}
+                                            className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block font-semibold mb-1">Inverter Warranty</label>
+                                        <input
+                                            type="text"
+                                            value={data.warranties.inverter}
+                                            onChange={(e) => updateField('warranties.inverter', e.target.value)}
+                                            className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label className="block font-semibold mb-1">Isolator</label>
+                                            <input
+                                                type="text"
+                                                value={data.warranties.isolator}
+                                                onChange={(e) => updateField('warranties.isolator', e.target.value)}
+                                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block font-semibold mb-1">ACDB / Dongle</label>
+                                            <input
+                                                type="text"
+                                                value={data.warranties.acdb}
+                                                onChange={(e) => updateField('warranties.acdb', e.target.value)}
+                                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md text-xs outline-none"
+                                            />
+                                        </div>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
                             <h3 className="font-bold text-emerald-900 text-xs uppercase tracking-wider">Terms and Conditions (Page 6)</h3>
-                            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1" data-lenis-prevent>
+                            <div className={`pr-1 ${isFullWidth ? "grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[380px] overflow-y-auto" : "space-y-2 max-h-[300px] overflow-y-auto"}`} data-lenis-prevent>
                                 {data.termsAndConditions.map((term, idx) => (
                                     <div key={idx} className="p-2 bg-white border border-neutral-200 rounded-lg space-y-1">
                                         <div className="flex items-center justify-between">
@@ -678,7 +947,7 @@ export const QuotationFormControls = ({
                                                 newArr[idx].text = e.target.value;
                                                 updateField('termsAndConditions', newArr);
                                             }}
-                                            className="w-full px-2 py-1 bg-neutral-50 border border-neutral-200 rounded text-xs outline-none"
+                                            className="w-full px-2 py-1 bg-neutral-50 border border-neutral-200 rounded text-xs outline-none resize-none"
                                         />
                                     </div>
                                 ))}

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap');
 
 @source '../views/**/*.blade.php';
 @source '../js/**/*.{jsx,js,ts,tsx}';
@@ -33,6 +34,7 @@ body {
   --font-roboto: "Roboto", sans-serif;
   --font-dm: "DM Sans", sans-serif;
   --font-playfair: "Playfair Display", serif;
+  --font-poppins: "Poppins", sans-serif;
   --text-extra-large: 5rem;
   --text-main-heading: 3rem;
   --text-body: 1.25rem;
@@ -52,6 +54,50 @@ body {
 .scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Modern horizontal scrollbar for admin navigation tabs - ONLY visible when hovering */
+.admin-nav-scrollbar {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.admin-nav-container:hover .admin-nav-scrollbar,
+.admin-nav-scrollbar:hover,
+.admin-nav-scrollbar:focus-within {
+  scrollbar-color: #1A4D2E rgba(0, 0, 0, 0.08);
+}
+
+.admin-nav-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.admin-nav-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 9999px;
+  margin: 0 8px;
+}
+
+.admin-nav-scrollbar::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 9999px;
+}
+
+.admin-nav-container:hover .admin-nav-scrollbar::-webkit-scrollbar-track,
+.admin-nav-scrollbar:hover::-webkit-scrollbar-track,
+.admin-nav-scrollbar:focus-within::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.admin-nav-container:hover .admin-nav-scrollbar::-webkit-scrollbar-thumb,
+.admin-nav-scrollbar:hover::-webkit-scrollbar-thumb,
+.admin-nav-scrollbar:focus-within::-webkit-scrollbar-thumb {
+  background: #1A4D2E;
+}
+
+.admin-nav-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #123720 !important;
 }
 
 .marquee {
@@ -196,4 +242,54 @@ html.lenis, html.lenis body {
 
 .lenis-stopped {
   overflow: hidden;
+}
+
+/* Admin Panel Poppins Typography (Clean normal font with subtle semi-bold, exempting Quotation Builder and Letterhead templates) */
+.font-poppins,
+.admin-poppins-theme {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Tame heavy font-weights across full admin panel into clean normal/semi-bold */
+.admin-poppins-theme .font-black,
+.admin-poppins-theme .font-extrabold {
+  font-weight: 600 !important;
+}
+
+.admin-poppins-theme .font-bold {
+  font-weight: 600 !important;
+}
+
+.admin-poppins-theme h1,
+.admin-poppins-theme h2,
+.admin-poppins-theme h3,
+.admin-poppins-theme h4,
+.admin-poppins-theme h5,
+.admin-poppins-theme h6 {
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+}
+
+.admin-poppins-theme th {
+  font-weight: 500 !important;
+}
+
+.admin-poppins-theme input,
+.admin-poppins-theme select,
+.admin-poppins-theme textarea,
+.admin-poppins-theme button,
+.admin-poppins-theme table {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Explicit document preview exemption: keep original fonts for quotation preview and letterhead print sheets */
+.quotation-preview-container,
+.quotation-preview-container *,
+.letterhead-printable-sheet,
+.letterhead-printable-sheet * {
+  font-family: inherit !important;
+  font-weight: inherit !important;
 }

@@ -85,7 +85,7 @@ cctv varkala, cctv elakamon, solar store kollam, solar store trivandrum, solar s
   
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "Elakamon, Ayiroor, Varkala",
+    "streetAddress": "476/5, SOLAREDGE INNOVATIONS, AYIROOR VARKALA ROAD, ELAKAMON",
     "addressLocality": "Varkala",
     "addressRegion": "Kerala",
     "postalCode": "695310",
@@ -136,7 +136,7 @@ cctv varkala, cctv elakamon, solar store kollam, solar store trivandrum, solar s
   ],
 
   "sameAs": [
-    "https://maps.google.com?q=Elakamon,Ayiroor,Varkala"
+    "https://maps.google.com?q=476/5,+SOLAREDGE+INNOVATIONS,+AYIROOR+VARKALA+ROAD,+ELAKAMON,+VARKALA+695310"
   ]
 }
 `}

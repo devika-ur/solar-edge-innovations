@@ -63,7 +63,7 @@ const AboutUs = () => {
     
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Elakamon, Ayiroor, Varkala",
+      "streetAddress": "476/5, SOLAREDGE INNOVATIONS, AYIROOR VARKALA ROAD, ELAKAMON",
       "addressLocality": "Varkala",
       "addressRegion": "Kerala",
       "postalCode": "695310",
@@ -96,7 +96,7 @@ const AboutUs = () => {
     ],
 
     "sameAs": [
-      "https://maps.google.com?q=Elakamon,Ayiroor,Varkala"
+      "https://maps.google.com?q=476/5,+SOLAREDGE+INNOVATIONS,+AYIROOR+VARKALA+ROAD,+ELAKAMON,+VARKALA+695310"
     ]
   }
 }

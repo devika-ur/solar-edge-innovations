@@ -34,7 +34,7 @@ export const ConfirmDeleteModal = ({
             }}
         >
             <div 
-                className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-neutral-100 space-y-5 animate-in zoom-in-95 duration-200"
+                className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-neutral-100 space-y-5 animate-in zoom-in-95 duration-200 font-poppins"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header Icon & Close Button */}
@@ -54,10 +54,10 @@ export const ConfirmDeleteModal = ({
 
                 {/* Content */}
                 <div>
-                    <h3 className="text-lg font-bold font-playfair text-neutral-900">
+                    <h3 className="text-lg font-semibold text-neutral-900 tracking-tight font-poppins">
                         {title}
                     </h3>
-                    <p className="text-xs text-neutral-500 leading-relaxed mt-1.5">
+                    <p className="text-xs text-neutral-500 leading-relaxed mt-1.5 font-poppins">
                         {message}
                     </p>
 
@@ -65,10 +65,10 @@ export const ConfirmDeleteModal = ({
                         <div className="mt-3.5 p-3.5 bg-neutral-50 rounded-2xl border border-neutral-200/80 flex items-start gap-2.5">
                             <AlertTriangle size={15} className="text-amber-600 shrink-0 mt-0.5" />
                             <div className="min-w-0 flex-1">
-                                <span className="text-[10px] uppercase tracking-wider font-extrabold text-neutral-400 block mb-0.5">
+                                <span className="text-[10px] uppercase tracking-wider font-semibold text-neutral-500 block mb-0.5 font-poppins">
                                     Target {itemType}
                                 </span>
-                                <p className="text-xs font-bold text-neutral-800 break-words line-clamp-2">
+                                <p className="text-xs font-semibold text-neutral-800 break-words line-clamp-2 font-poppins">
                                     "{itemName}"
                                 </p>
                             </div>

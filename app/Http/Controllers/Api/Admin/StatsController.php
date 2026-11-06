@@ -14,6 +14,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 
 class StatsController extends Controller
 {
@@ -109,6 +110,122 @@ class StatsController extends Controller
                 ];
             });
 
+            // Monthly trends (Rolling last 6 months) - 100% Real Database Queries
+            $months = [];
+            for ($i = 5; $i >= 0; $i--) {
+                $carbonDate = now()->subMonths($i);
+                $key = $carbonDate->format('Y-m');
+                $months[$key] = [
+                    'key' => $key,
+                    'month' => $carbonDate->format('M'),
+                    'year' => (int)$carbonDate->format('Y'),
+                    'label' => $carbonDate->format('M'),
+                    'full_label' => $carbonDate->format('M Y'),
+                    'count' => 0,
+                    'responded' => 0,
+                    'pending' => 0,
+                    'quotations' => 0,
+                    'total_amount' => 0,
+                ];
+            }
+
+            $firstMonth = reset($months);
+            $lastMonth = end($months);
+            $startDate = \Illuminate\Support\Carbon::parse($firstMonth['key'] . '-01')->startOfMonth();
+            $endDate = \Illuminate\Support\Carbon::parse($lastMonth['key'] . '-01')->endOfMonth();
+
+            // Real Inquiries by month
+            $inquiriesRecent = ContactInquiry::where(function ($q) {
+                $q->whereNull('status')->orWhere('status', '!=', 'deleted');
+            })->whereBetween('created_at', [$startDate, $endDate])->get();
+
+            foreach ($inquiriesRecent as $inq) {
+                $k = $inq->created_at?->format('Y-m');
+                if (isset($months[$k])) {
+                    $months[$k]['count']++;
+                    if ($inq->status === 'responded') {
+                        $months[$k]['responded']++;
+                    } else {
+                        $months[$k]['pending']++;
+                    }
+                }
+            }
+
+            // Real Quotations by month
+            if (Schema::hasTable('quotations')) {
+                try {
+                    $quotesRecent = Quotation::active()->whereBetween('created_at', [$startDate, $endDate])->get();
+                    foreach ($quotesRecent as $qt) {
+                        $k = $qt->created_at?->format('Y-m');
+                        if (isset($months[$k])) {
+                            $months[$k]['quotations']++;
+                            $amountVal = (float)preg_replace('/[^0-9.]/', '', (string)($qt->total_amount ?? '0'));
+                            $months[$k]['total_amount'] += $amountVal;
+                        }
+                    }
+                } catch (\Throwable $e) {}
+            }
+
+            $monthlyInquiries = [];
+            $monthlyQuotations = [];
+            foreach ($months as $k => $m) {
+                $monthlyInquiries[] = [
+                    'key' => $m['key'],
+                    'month' => $m['month'],
+                    'year' => $m['year'],
+                    'label' => $m['label'],
+                    'full_label' => $m['full_label'],
+                    'count' => $m['count'],
+                    'responded' => $m['responded'],
+                    'pending' => $m['pending'],
+                ];
+
+                $monthlyQuotations[] = [
+                    'key' => $m['key'],
+                    'month' => $m['month'],
+                    'year' => $m['year'],
+                    'label' => $m['label'],
+                    'full_label' => $m['full_label'],
+                    'count' => $m['quotations'],
+                    'total_amount' => $m['total_amount'],
+                ];
+            }
+
+            // Quotation composition by solar system type (Real Data)
+            $quotationDistribution = [];
+            if (Schema::hasTable('quotations')) {
+                try {
+                    $systemTypesCount = Quotation::active()
+                        ->whereNotNull('system_type')
+                        ->where('system_type', '!=', '')
+                        ->select('system_type', DB::raw('count(*) as count'))
+                        ->groupBy('system_type')
+                        ->pluck('count', 'system_type')
+                        ->toArray();
+
+                    if (!empty($systemTypesCount)) {
+                        $totalTypes = array_sum($systemTypesCount);
+                        $palette = ['#1A4D2E', '#2E7D32', '#10B981', '#38BDF8', '#F59E0B', '#8B5CF6'];
+                        $idx = 0;
+                        foreach ($systemTypesCount as $type => $cnt) {
+                            $quotationDistribution[] = [
+                                'name' => (string)$type,
+                                'share' => round(($cnt / $totalTypes) * 100),
+                                'color' => $palette[$idx % count($palette)],
+                                'count' => $cnt,
+                            ];
+                            $idx++;
+                        }
+                    }
+                } catch (\Throwable $e) {}
+            }
+
+            if (empty($quotationDistribution)) {
+                $quotationDistribution = [
+                    ['name' => 'Solar Quotations', 'share' => 100, 'color' => '#1A4D2E', 'count' => $totalQuotations],
+                ];
+            }
+
             $driverName = DB::connection()->getDriverName();
             $uploadDir = public_path('uploads/projects');
             $isWritable = is_writable($uploadDir) || (!File::isDirectory($uploadDir) && is_writable(public_path()));
@@ -131,6 +248,9 @@ class StatsController extends Controller
                     'driver' => $driverName,
                     'upload_dir_writable' => $isWritable,
                     'admin_user' => $adminUsername,
+                    'monthly_inquiries' => $monthlyInquiries,
+                    'monthly_quotations' => $monthlyQuotations,
+                    'quotation_distribution' => $quotationDistribution,
                 ],
                 'recent_projects' => $recentProjects,
                 'recent_inquiries' => $recentInquiries,

@@ -25,7 +25,7 @@ const contactData = [
         icon: <MapPin className="w-5 h-5" />,
         title: "Visit Our Shop",
         desc: "Meet our system engineers, inspect solar equipment panels, and get technical aid.",
-        link: "https://maps.google.com?q=Elakamon,Ayiroor,Varkala",
+        link: "https://maps.google.com?q=476/5,+SOLAREDGE+INNOVATIONS,+AYIROOR+VARKALA+ROAD,+ELAKAMON,+VARKALA+695310",
         linkLabel: "Get Directions",
     },
     {

@@ -62,7 +62,7 @@ export const AdminLogin = ({ onLoginSuccess }) => {
     };
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#05180D] via-[#092B18] to-[#04120A] px-4 font-sans relative overflow-hidden">
+        <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#05180D] via-[#092B18] to-[#04120A] px-4 font-poppins relative overflow-hidden">
             {/* Background Glow Accents */}
             <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-600/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -74,11 +74,11 @@ export const AdminLogin = ({ onLoginSuccess }) => {
                         <img src={assets.logo} alt="Solar Edge Logo" className="w-full h-full object-contain" />
                     </div>
                     <div>
-                        <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold mb-1">
+                        <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-medium mb-1">
                             <Sparkles size={10} />
                             Session Secured
                         </div>
-                        <h1 className="text-2xl font-black text-neutral-900 tracking-tight">
+                        <h1 className="text-2xl font-semibold text-neutral-900 tracking-tight">
                             Solar Edge Admin Portal
                         </h1>
                         <p className="text-xs text-neutral-500 font-medium mt-1">
@@ -117,7 +117,7 @@ export const AdminLogin = ({ onLoginSuccess }) => {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">
+                        <label className="block text-xs font-medium text-neutral-700 uppercase tracking-wider mb-2">
                             Password
                         </label>
                         <div className="relative">
@@ -130,7 +130,7 @@ export const AdminLogin = ({ onLoginSuccess }) => {
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Enter password"
                                 required
-                                className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-2xl text-sm font-medium text-neutral-900 focus:bg-white focus:border-green-800 focus:ring-2 focus:ring-green-800/20 outline-none transition-all"
+                                className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-2xl text-sm font-normal text-neutral-900 focus:bg-white focus:border-green-800 focus:ring-2 focus:ring-green-800/20 outline-none transition-all"
                             />
                         </div>
                     </div>
@@ -138,7 +138,7 @@ export const AdminLogin = ({ onLoginSuccess }) => {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full py-3.5 px-6 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl font-bold text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
+                        className="w-full py-3.5 px-6 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl font-medium text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
                     >
                         {isLoading ? (
                             <span>Logging in...</span>

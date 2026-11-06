@@ -21,7 +21,9 @@ import {
     Wrench,
     DollarSign,
     Shield,
-    Trash2
+    Trash2,
+    Eye,
+    EyeOff
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -57,6 +59,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
     const isProgrammaticScrollRef = useRef(false);
     const scrollTimeoutRef = useRef(null);
     const rightPanelRef = useRef(null);
+    const [showPreview, setShowPreview] = useState(true); // Desktop-only preview toggle (default: visible)
 
     // Synchronize document.title with Client Name and Date so browser "Save as PDF" / Print uses it automatically
     useEffect(() => {
@@ -77,7 +80,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
 
         const panel = rightPanelRef.current;
         const targetEl = document.getElementById(`preview-page-${tabId}`);
-        if (targetEl && panel) {
+        if (targetEl && panel && showPreview) {
             isProgrammaticScrollRef.current = true;
             if (scrollTimeoutRef.current) {
                 clearTimeout(scrollTimeoutRef.current);
@@ -246,9 +249,15 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                         clonedEl.style.transform = 'none';
                         clonedEl.style.boxShadow = 'none';
                         clonedEl.style.margin = '0 auto';
+                        clonedEl.style.position = 'static';
+                        clonedEl.style.opacity = '1';
                         let p = clonedEl.parentElement;
                         while (p && p !== clonedDoc.body) {
                             p.style.transform = 'none';
+                            p.style.position = 'static';
+                            p.style.opacity = '1';
+                            p.style.left = '0';
+                            p.style.top = '0';
                             p = p.parentElement;
                         }
                     },
@@ -741,6 +750,29 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                         <span>Reset Template</span>
                     </button>
 
+                    {/* Desktop-Only Toggle: Hide / Show Live Quotation Preview */}
+                    <button
+                        onClick={() => setShowPreview((prev) => !prev)}
+                        className={`hidden lg:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                            showPreview
+                                ? 'text-neutral-700 hover:text-[#1A4D2E] bg-white hover:bg-neutral-50 border border-neutral-200'
+                                : 'text-white bg-[#1A4D2E] hover:bg-[#143c24] shadow-xs'
+                        }`}
+                        title={showPreview ? 'Hide live 6-page preview to expand editor' : 'Show live 6-page preview side-by-side'}
+                    >
+                        {showPreview ? (
+                            <>
+                                <EyeOff size={14} className="text-neutral-500" />
+                                <span>Hide Preview</span>
+                            </>
+                        ) : (
+                            <>
+                                <Eye size={14} className="text-white" />
+                                <span>Show Preview</span>
+                            </>
+                        )}
+                    </button>
+
                     <button
                         onClick={handleSave}
                         className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#1A4D2E] hover:bg-[#143c24] active:scale-98 rounded-xl shadow-xs transition-all cursor-pointer"
@@ -809,7 +841,14 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
             {/* Split Screen Workspace Area */}
             <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
                 {/* Left Column: Form Controls */}
-                <div className="w-full md:w-[460px] lg:w-[500px] xl:w-[540px] h-full shrink-0 border-r border-neutral-200 bg-white flex flex-col overflow-hidden quotation-editor-left-panel z-20" data-lenis-prevent>
+                <div
+                    className={`w-full md:w-[460px] h-full border-r border-neutral-200 bg-white flex flex-col overflow-hidden quotation-editor-left-panel z-20 ${
+                        showPreview
+                            ? 'lg:w-[500px] xl:w-[540px] shrink-0'
+                            : 'lg:w-full lg:flex-1 lg:border-r-0'
+                    }`}
+                    data-lenis-prevent
+                >
                     <QuotationFormControls
                         data={quotationData}
                         onChange={setQuotationData}
@@ -823,13 +862,18 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                         onTabChange={handleTabChange}
                         hideTopToolbar={true}
                         hideTabs={true}
+                        isFullWidth={!showPreview}
                     />
                 </div>
 
                 {/* Right Column: Live Preview */}
                 <div
                     ref={rightPanelRef}
-                    className="flex-1 h-full overflow-y-auto quotation-preview-right-panel p-4 md:p-8 bg-neutral-200/80"
+                    className={`flex-1 h-full overflow-y-auto quotation-preview-right-panel p-4 md:p-8 bg-neutral-200/80 ${
+                        showPreview
+                            ? ''
+                            : 'lg:flex-none lg:fixed lg:-left-[99999px] lg:top-0 lg:w-[210mm] lg:h-auto lg:p-0 lg:bg-transparent lg:opacity-0 lg:pointer-events-none lg:overflow-hidden'
+                    }`}
                     data-lenis-prevent
                 >
                     <QuotationPreview6Pages data={quotationData} />

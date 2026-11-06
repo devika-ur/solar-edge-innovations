@@ -238,37 +238,39 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
     };
 
     return (
-        <div className="w-full px-4 sm:px-8 py-8">
+        <div className="w-full px-4 sm:px-8 py-8 space-y-8 font-poppins">
             {/* Header Toolbar */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-neutral-200">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
                 <div>
-                    <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <h1 className="text-2xl sm:text-3xl font-bold font-playfair text-neutral-900">
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
                             Project Gallery Manager
                         </h1>
+                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-neutral-600 bg-neutral-100 px-3 py-1 rounded-full border border-neutral-200/80">
+                            {projects.length} Total {projects.length === 1 ? 'Project' : 'Projects'}
+                        </span>
                     </div>
-                    <p className="text-sm text-neutral-500 mt-1">
+                    <p className="text-xs sm:text-sm text-neutral-500 mt-1">
                         Upload solar installations & security system photos directly to your website.
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2.5 flex-wrap">
+                <div className="flex items-center gap-2.5 self-start sm:self-center">
                     <button 
                         onClick={() => fetchProjects()}
                         disabled={isLoading}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-medium border border-neutral-200/90 shadow-2xs transition-all cursor-pointer"
                         title="Reload projects"
                     >
-                        <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+                        <RefreshCw size={13} className={isLoading ? 'animate-spin text-[#1A4D2E]' : 'text-neutral-500'} />
                         <span>Refresh</span>
                     </button>
 
                     <button 
                         onClick={openCreateModal}
-                        className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-medium shadow-xs transition-all cursor-pointer"
                     >
-                        <Plus size={16} />
+                        <Plus size={14} />
                         <span>Add New Project</span>
                     </button>
                 </div>
@@ -450,7 +452,7 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="p-6 border-b border-neutral-100 flex items-center justify-between">
-                            <h2 className="text-xl font-bold font-playfair text-neutral-900">
+                            <h2 className="text-xl font-semibold text-neutral-900 tracking-tight font-poppins">
                                 {editingProjectId ? 'Edit Project' : 'Add New Project'}
                             </h2>
                             <button 

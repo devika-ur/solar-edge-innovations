@@ -423,7 +423,7 @@ const Contact = () => {
     "email": "solaredgeinnovations25@gmail.com",
     "address": {
       "@type": "PostalAddress",
-      "streetAddress": "Elakamon, Ayiroor, Varkala Paravoor Road",
+      "streetAddress": "476/5, SOLAREDGE INNOVATIONS, AYIROOR VARKALA ROAD, ELAKAMON",
       "addressLocality": "Varkala",
       "addressRegion": "Kerala",
       "postalCode": "695310",
@@ -627,7 +627,7 @@ const Contact = () => {
 
                         {/* Channel 4: Visit Office */}
                         <motion.a
-                            href="https://maps.google.com?q=Elakamon,Ayiroor,Varkala"
+                            href="https://maps.google.com?q=476/5,+SOLAREDGE+INNOVATIONS,+AYIROOR+VARKALA+ROAD,+ELAKAMON,+VARKALA+695310"
                             target="_blank"
                             rel="noopener noreferrer"
                             initial={{ opacity: 0, y: 20 }}
@@ -647,7 +647,7 @@ const Contact = () => {
                                     Elakamon, Varkala
                                 </h3>
                                 <p className="text-xs text-neutral-500 font-light mt-1.5 leading-relaxed">
-                                    Ayiroor - Varkala Paravoor Road (Near Post Office), Kerala.
+                                    476/5, SOLAREDGE INNOVATIONS, AYIROOR VARKALA ROAD, ELAKAMON, VARKALA 695310
                                 </p>
                             </div>
                             <div className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-green-700 group-hover:text-green-800 uppercase font-mono tracking-wider">
@@ -956,9 +956,9 @@ const Contact = () => {
                                         <div>
                                             <span className="font-bold text-neutral-800">Physical Address:</span>
                                             <p className="text-neutral-500 leading-relaxed mt-0.5">
-                                                Solar Edge Innovation,<br />
-                                                Varkala Paravoor Road, Elakamon, Ayiroor,<br />
-                                                Near Post Office, Varkala, Kerala — 695310
+                                                476/5, SOLAREDGE INNOVATIONS,<br />
+                                                AYIROOR VARKALA ROAD, ELAKAMON,<br />
+                                                VARKALA 695310
                                             </p>
                                         </div>
                                     </div>
@@ -985,7 +985,7 @@ const Contact = () => {
 
                                 <div className="pt-6 mt-6 border-t border-neutral-100 flex gap-3">
                                     <a
-                                        href="https://maps.google.com?q=Elakamon,Ayiroor,Varkala"
+                                        href="https://maps.google.com?q=476/5,+SOLAREDGE+INNOVATIONS,+AYIROOR+VARKALA+ROAD,+ELAKAMON,+VARKALA+695310"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex-1 inline-flex items-center justify-center gap-2 bg-neutral-50 hover:bg-neutral-100 text-neutral-800 border border-neutral-200/80 rounded-2xl py-2.5 text-xs font-bold transition-colors font-mono uppercase tracking-wider"
@@ -1061,11 +1061,11 @@ const Contact = () => {
                                     Visit Us in Varkala, Kerala
                                 </h3>
                                 <p className="text-xs text-neutral-500 font-light mt-0.5">
-                                    Located conveniently along Varkala Paravoor Road, near the Post Office.
+                                    476/5, SOLAREDGE INNOVATIONS, AYIROOR VARKALA ROAD, ELAKAMON, VARKALA 695310
                                 </p>
                             </div>
                             <a
-                                href="https://maps.google.com?q=Elakamon,Ayiroor,Varkala"
+                                href="https://maps.google.com?q=476/5,+SOLAREDGE+INNOVATIONS,+AYIROOR+VARKALA+ROAD,+ELAKAMON,+VARKALA+695310"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 bg-neutral-900 hover:bg-neutral-800 text-white px-5 py-3 rounded-full text-xs font-bold tracking-wider uppercase font-mono transition-all self-start sm:self-auto shrink-0 shadow-xs"
@@ -1080,7 +1080,7 @@ const Contact = () => {
                         <div className="relative w-full h-[380px] sm:h-[440px] rounded-[28px] overflow-hidden border border-neutral-100">
                             <iframe
                                 title="Solar Edge Innovation Office Map"
-                                src="https://maps.google.com/maps?q=Elakamon,%20Ayiroor,%20Varkala,%20Kerala&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                                src="https://maps.google.com/maps?q=476/5,%20SOLAREDGE%20INNOVATIONS,%20AYIROOR%20VARKALA%20ROAD,%20ELAKAMON,%20VARKALA%20695310&t=&z=14&ie=UTF8&iwloc=&output=embed"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0 }}

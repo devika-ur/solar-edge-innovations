@@ -1,30 +1,49 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import toast from 'react-hot-toast';
 import { 
-    FolderGit2, 
-    Image as ImageIcon, 
-    HelpCircle, 
-    PlusCircle, 
-    ArrowUpRight, 
+    Users, 
     FileText, 
-    ScrollText,
+    Zap, 
+    Sun,
+    Trophy, 
+    TrendingUp, 
+    TrendingDown,
+    Lightbulb, 
+    ArrowUpRight, 
+    ArrowUpDown,
+    RefreshCw, 
+    Mail, 
+    Clock, 
+    CheckCircle2, 
+    FolderGit2, 
+    Image as ImageIcon,
     History,
-    CreditCard,
-    RefreshCw,
+    Calendar,
+    Phone,
+    MapPin,
     Sparkles,
-    Mail,
-    Clock,
-    CheckCircle2,
-    MessageSquare,
+    ChevronRight,
+    PieChart,
+    BarChart3,
     ExternalLink,
-    BarChart3
+    HelpCircle
 } from 'lucide-react';
 
 export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
     const [stats, setStats] = useState(null);
     const [recentProjects, setRecentProjects] = useState([]);
     const [recentInquiries, setRecentInquiries] = useState([]);
+    const [recentQuotations, setRecentQuotations] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    // Interactive chart states
+    const [activeQuotationTab, setActiveQuotationTab] = useState('distribution'); // 'distribution' | 'monthly'
+    const [hoveredMonthIdx, setHoveredMonthIdx] = useState(null);
+    const [hoveredQuotationMonthIdx, setHoveredQuotationMonthIdx] = useState(null);
+    const [hoveredDonutIdx, setHoveredDonutIdx] = useState(null);
+    
+    // Overview table active tab: 'inquiries' | 'quotations'
+    const [tableTab, setTableTab] = useState('inquiries');
 
     const loadStats = async (isManual = false) => {
         setIsLoading(true);
@@ -46,6 +65,7 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
                 setStats(data.stats);
                 setRecentProjects(data.recent_projects || []);
                 setRecentInquiries(data.recent_inquiries || []);
+                setRecentQuotations(data.recent_quotations || []);
                 if (isManual) {
                     toast.success('Dashboard metrics refreshed!');
                 }
@@ -63,458 +83,803 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
         loadStats();
     }, []);
 
-    const kpis = [
+    // 1. Monthly inquiries data from server (Real data only)
+    const monthlyInquiries = useMemo(() => {
+        if (stats?.monthly_inquiries && stats.monthly_inquiries.length > 0) {
+            return stats.monthly_inquiries;
+        }
+        return [];
+    }, [stats]);
+
+    // 2. Monthly quotations data from server (Real data only)
+    const monthlyQuotations = useMemo(() => {
+        if (stats?.monthly_quotations && stats.monthly_quotations.length > 0) {
+            return stats.monthly_quotations;
+        }
+        return [];
+    }, [stats]);
+
+    // 3. Quotation category breakdown (Donut data - Real categories from database)
+    const quotationDistribution = useMemo(() => {
+        if (stats?.quotation_distribution && stats.quotation_distribution.length > 0) {
+            return stats.quotation_distribution;
+        }
+        return [
+            { name: 'Solar Quotations', share: 100, color: '#1A4D2E', count: stats?.total_quotations || 0 },
+        ];
+    }, [stats]);
+
+    // Calculate peaks for chart scaling based strictly on real data
+    const maxInquiry = useMemo(() => {
+        const counts = monthlyInquiries.map(m => m.count || 0);
+        const max = Math.max(...counts, 0);
+        return max > 0 ? max : 1;
+    }, [monthlyInquiries]);
+
+    const peakInquiryMonth = useMemo(() => {
+        if (monthlyInquiries.length === 0) return { label: 'Recent', count: 0 };
+        let maxItem = monthlyInquiries[0];
+        monthlyInquiries.forEach(m => {
+            if ((m.count || 0) > (maxItem.count || 0)) {
+                maxItem = m;
+            }
+        });
+        return maxItem;
+    }, [monthlyInquiries]);
+
+    const maxQuotation = useMemo(() => {
+        const counts = monthlyQuotations.map(m => m.count || 0);
+        const max = Math.max(...counts, 0);
+        return max > 0 ? max : 1;
+    }, [monthlyQuotations]);
+
+    const peakQuotationMonth = useMemo(() => {
+        if (monthlyQuotations.length === 0) return { label: 'Recent', count: 0, total_amount: 0 };
+        let maxItem = monthlyQuotations[0];
+        monthlyQuotations.forEach(m => {
+            if ((m.count || 0) > (maxItem.count || 0)) {
+                maxItem = m;
+            }
+        });
+        return maxItem;
+    }, [monthlyQuotations]);
+
+    // Format currency in INR
+    const formatINR = (val) => {
+        const num = parseFloat(val) || 0;
+        if (num >= 10000000) return `₹${(num / 10000000).toFixed(2)} Cr`;
+        if (num >= 100000) return `₹${(num / 100000).toFixed(1)} L`;
+        return `₹${num.toLocaleString('en-IN')}`;
+    };
+
+    // KPI Cards data (3 cards: Enquiries, Quotations, FAQs)
+    const kpiCards = [
         {
-            title: 'Contact Inquiries',
-            value: stats ? stats.total_inquiries : '-',
-            subtitle: stats?.pending_inquiries > 0
-                ? `${stats.pending_inquiries} awaiting response`
-                : 'All answered',
-            icon: Mail,
-            color: 'from-amber-500 to-orange-600',
-            badge: stats?.pending_inquiries > 0 ? `${stats.pending_inquiries} pending` : null,
-            action: () => onNavigate('inquiries'),
-            actionLabel: 'View Inquiries'
+            title: 'Total Enquiries',
+            value: stats ? stats.total_inquiries : '0',
+            badgeText: stats?.pending_inquiries > 0 ? `${stats.pending_inquiries} Pending` : 'All Addressed',
+            badgeType: stats?.pending_inquiries > 0 ? 'warning' : 'positive',
+            subtitle: 'Customer consultation submissions',
+            icon: Users,
+            onClick: () => onNavigate('inquiries'),
         },
         {
-            title: 'Total Projects',
-            value: stats ? stats.total_projects : '-',
-            subtitle: `${stats ? stats.active_projects : 0} published online`,
-            icon: FolderGit2,
-            color: 'from-emerald-500 to-green-700',
-            action: () => onNavigate('projects'),
-            actionLabel: 'Manage Projects'
-        },
-        {
-            title: 'Gallery Images',
-            value: stats ? stats.total_images : '-',
-            subtitle: 'Stored in /uploads/projects/',
-            icon: ImageIcon,
-            color: 'from-teal-500 to-emerald-700',
-            action: () => onNavigate('projects'),
-            actionLabel: 'Upload Images'
+            title: 'Quotations Sent',
+            value: stats ? stats.total_quotations : '0',
+            badgeText: stats?.total_quotations > 0 ? `${stats.total_quotations} Active` : 'None Yet',
+            badgeType: 'positive',
+            subtitle: 'Saved client proposals',
+            icon: FileText,
+            onClick: () => onNavigate('quotation-history'),
         },
         {
             title: 'Website FAQs',
-            value: stats ? stats.total_faqs : '-',
-            subtitle: `${stats ? stats.active_faqs : 0} active in Contact section`,
+            value: stats ? stats.total_faqs : '0',
+            badgeText: stats?.active_faqs > 0 ? `${stats.active_faqs} Published` : 'Help Center',
+            badgeType: 'positive',
+            subtitle: 'Customer self-help Q&As',
             icon: HelpCircle,
-            color: 'from-blue-500 to-indigo-700',
-            action: () => onNavigate('faqs'),
-            actionLabel: 'Manage FAQs'
-        },
-        {
-            title: 'Quotation History',
-            value: stats?.total_quotations !== undefined ? stats.total_quotations : '0',
-            subtitle: `${stats?.total_quotations ?? 0} saved client quotations`,
-            icon: History,
-            color: 'from-purple-500 to-indigo-700',
-            action: () => onNavigate('quotation-history'),
-            actionLabel: 'View History'
-        },
-        {
-            title: 'Official Letterhead',
-            value: 'Ready',
-            subtitle: 'Live Letterhead & Print',
-            icon: ScrollText,
-            color: 'from-emerald-600 to-teal-700',
-            action: () => onNavigate('letterhead'),
-            actionLabel: 'Open Letterhead'
+            onClick: () => onNavigate('faqs'),
         },
     ];
 
+    // SVG Donut calculation
+    const donutRadius = 64;
+    const donutCircumference = 2 * Math.PI * donutRadius; // ~ 402.12
+
+    const donutSegments = useMemo(() => {
+        let accumulatedOffset = 0;
+        return quotationDistribution.map((item) => {
+            const strokeDash = (item.share / 100) * donutCircumference;
+            const dashOffset = -accumulatedOffset;
+            accumulatedOffset += strokeDash;
+            return {
+                ...item,
+                strokeDash,
+                dashOffset,
+            };
+        });
+    }, [quotationDistribution, donutCircumference]);
+
     return (
-        <div className="w-full px-4 sm:px-8 py-8 space-y-8 font-sans">
-            {/* Header Greeting */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-[#0C2417] via-[#1A4D2E] to-[#0E351F] text-white p-6 sm:p-8 rounded-3xl shadow-xl border border-emerald-500/20 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
-                
-                <div className="relative z-10 space-y-1">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-semibold backdrop-blur-md mb-2">
-                        <Sparkles size={12} />
-                        Solar Edge Innovations Admin
-                    </div>
-                    <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-                        Welcome to Solar Edge Control Panel
+        <div className="w-full px-4 sm:px-8 py-8 space-y-8 font-poppins bg-[#F8FAFC]">
+            
+            {/* Top Bar / Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
+                        Dashboard Overview
                     </h1>
-                    <p className="text-xs sm:text-sm text-neutral-300 max-w-2xl">
-                        Manage website inquiries, customer leads, live projects, photo gallery, FAQs, and quotations.
+                    <p className="text-xs sm:text-sm text-neutral-500 mt-1">
+                        Real-time tracking of inquiries, quotation generation, solar system composition, and customer leads.
                     </p>
                 </div>
 
-                <div className="relative z-10 flex items-center gap-3">
+                <div className="flex items-center gap-2.5 self-start sm:self-center">
                     <button
                         onClick={() => loadStats(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-800 text-xs sm:text-sm font-semibold border border-neutral-200 shadow-2xs transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-medium border border-neutral-200/90 shadow-2xs transition-all cursor-pointer"
                         title="Refresh live data"
                     >
-                        <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+                        <RefreshCw size={13} className={isLoading ? 'animate-spin text-[#1A4D2E]' : 'text-neutral-500'} />
                         <span>Refresh</span>
                     </button>
+
                     <button
-                        onClick={() => onNavigate('inquiries')}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-800 text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer"
+                        onClick={() => onNavigate('quotation')}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-medium shadow-xs transition-all cursor-pointer"
                     >
-                        <Mail size={14} />
-                        <span>View Inquiries</span>
+                        <FileText size={14} />
+                        <span>New Quotation</span>
                     </button>
                 </div>
             </div>
 
-            {/* KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-                {kpis.map((kpi, idx) => {
+            {/* 1. TOP KPI ROW (3 Cards: Enquiries, Quotations, FAQs) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {kpiCards.map((kpi, idx) => {
                     const Icon = kpi.icon;
                     return (
                         <div
                             key={idx}
-                            className="bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between group"
+                            onClick={kpi.onClick}
+                            className="bg-white rounded-2xl p-5 sm:p-6 border border-neutral-200/80 shadow-xs hover:shadow-md hover:border-emerald-300 transition-all duration-200 cursor-pointer flex flex-col justify-between group"
                         >
-                            <div className="flex items-start justify-between">
-                                <div className="space-y-1">
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
-                                            {kpi.title}
-                                        </span>
-                                    </div>
-                                    <div className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight font-mono">
-                                        {isLoading ? '...' : kpi.value}
-                                    </div>
-                                    <p className="text-[11px] text-neutral-400 font-medium">
-                                        {kpi.subtitle}
-                                    </p>
+                            <div>
+                                <div className="flex items-center gap-2 text-neutral-500 mb-3">
+                                    <Icon size={16} className="text-neutral-500 group-hover:text-[#1A4D2E] transition-colors" />
+                                    <span className="text-xs font-medium tracking-wide text-neutral-600">
+                                        {kpi.title}
+                                    </span>
                                 </div>
-                                <div className={`w-11 h-11 rounded-xl bg-gradient-to-tr ${kpi.color} text-white flex items-center justify-center shadow-xs shrink-0`}>
-                                    <Icon size={20} />
+                                
+                                <div className="text-3xl sm:text-[32px] font-semibold text-neutral-900 tracking-tight leading-none mb-3">
+                                    {isLoading ? '...' : kpi.value}
                                 </div>
                             </div>
 
-                            <button
-                                onClick={kpi.action}
-                                className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between text-xs font-bold text-neutral-600 group-hover:text-[#1A4D2E] transition-colors cursor-pointer"
-                            >
-                                <span>{kpi.actionLabel}</span>
-                                <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                            </button>
+                            <div className="flex items-center gap-2 text-xs pt-1">
+                                <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md font-medium text-[11px] ${
+                                    kpi.badgeType === 'positive' 
+                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' 
+                                        : kpi.badgeType === 'warning'
+                                        ? 'bg-amber-50 text-amber-800 border border-amber-200/60'
+                                        : 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                                }`}>
+                                    {kpi.badgeText}
+                                </span>
+                                <span className="text-neutral-400 text-[11px] truncate">
+                                    {kpi.subtitle}
+                                </span>
+                            </div>
                         </div>
                     );
                 })}
             </div>
 
-            {/* Main Content Grid: Inquiries & Projects & Modules */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Recent Inquiries Section (2 cols) */}
-                <div className="lg:col-span-2 space-y-6">
-                    {/* Recent Contact Inquiries */}
-                    <div className="bg-white rounded-3xl p-6 border border-neutral-200/80 shadow-xs space-y-4">
-                        <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
-                            <div className="flex items-center gap-2.5">
-                                <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
-                                    <Mail size={18} />
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h2 className="text-base font-black text-neutral-900">Recent Contact Inquiries</h2>
-                                        {stats?.pending_inquiries > 0 && (
-                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                                                {stats.pending_inquiries} pending
-                                            </span>
-                                        )}
-                                    </div>
-                                    <p className="text-xs text-neutral-500">Messages submitted through website contact form</p>
-                                </div>
-                            </div>
-                            <button
-                                onClick={() => onNavigate('inquiries')}
-                                className="text-xs font-bold text-[#1A4D2E] hover:underline cursor-pointer"
-                            >
-                                All Inquiries →
-                            </button>
-                        </div>
+            {/* 2. CHARTS ROW (Side-by-side 2 Columns) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-                        {isLoading ? (
-                            <div className="py-8 text-center text-xs text-neutral-400">Loading inquiries...</div>
-                        ) : recentInquiries.length === 0 ? (
-                            <div className="py-8 text-center space-y-2">
-                                <Mail className="w-8 h-8 text-neutral-300 mx-auto" />
-                                <p className="text-xs text-neutral-500 font-medium">No contact inquiries yet.</p>
-                            </div>
-                        ) : (
-                            <div className="divide-y divide-neutral-100">
-                                {recentInquiries.map((inquiry) => (
-                                    <div
-                                        key={inquiry.id}
-                                        onClick={() => onNavigate('inquiries')}
-                                        className="py-3 flex items-center justify-between gap-3 hover:bg-neutral-50 rounded-xl px-2 transition-colors cursor-pointer group"
-                                    >
-                                        <div className="min-w-0 space-y-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-xs font-bold text-neutral-900 group-hover:text-[#1A4D2E]">
-                                                    {inquiry.name}
-                                                </span>
-                                                {inquiry.is_responded ? (
-                                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                                                        <CheckCircle2 size={10} /> Responded
-                                                    </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                                                        <Clock size={10} /> Pending
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div className="text-[11px] text-neutral-500 truncate max-w-md">
-                                                <span className="font-semibold text-neutral-700">{inquiry.service}</span> • {inquiry.place}, {inquiry.district}
-                                            </div>
-                                            <div className="text-[10px] text-neutral-400">
-                                                {inquiry.created_at_human}
-                                            </div>
-                                        </div>
-
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                onNavigate('inquiries');
-                                            }}
-                                            className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition-all shrink-0 cursor-pointer"
-                                        >
-                                            View
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Recent Projects List */}
-                    <div className="bg-white rounded-3xl p-6 border border-neutral-200/80 shadow-xs space-y-4">
-                        <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+                {/* CHART 1: Quotations Chart (Donut Composition & Monthly Trend) */}
+                <div className="bg-white rounded-2xl p-6 border border-neutral-200/80 shadow-xs flex flex-col justify-between">
+                    <div>
+                        {/* Header with Switcher */}
+                        <div className="flex items-center justify-between pb-5 border-b border-neutral-100">
                             <div>
-                                <h2 className="text-base font-black text-neutral-900">Recent Projects in Showcase</h2>
-                                <p className="text-xs text-neutral-500">Live projects published on the website</p>
+                                <h2 className="text-sm sm:text-base font-semibold text-neutral-900 tracking-tight">
+                                    {activeQuotationTab === 'distribution' ? 'Quotation Composition' : 'Monthly Quotations'}
+                                </h2>
+                                <p className="text-[11px] text-neutral-400">
+                                    {activeQuotationTab === 'distribution'
+                                        ? 'Breakdown of solar system categories & requests'
+                                        : 'Total quotation value & count generated by month'}
+                                </p>
                             </div>
-                            <button
-                                onClick={() => onNavigate('projects')}
-                                className="text-xs font-bold text-[#1A4D2E] hover:underline cursor-pointer"
-                            >
-                                View All Projects →
-                            </button>
-                        </div>
 
-                        {isLoading ? (
-                            <div className="py-8 text-center text-xs text-neutral-400">Loading projects...</div>
-                        ) : recentProjects.length === 0 ? (
-                            <div className="py-8 text-center space-y-3">
-                                <FolderGit2 className="w-8 h-8 text-neutral-300 mx-auto" />
-                                <p className="text-xs text-neutral-500 font-medium">No projects added yet.</p>
+                            <div className="inline-flex p-1 bg-neutral-100 rounded-xl text-xs font-medium">
                                 <button
-                                    onClick={() => onNavigate('projects')}
-                                    className="px-5 py-2 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
+                                    onClick={() => setActiveQuotationTab('distribution')}
+                                    className={`px-2.5 py-1 rounded-lg text-[11px] transition-all cursor-pointer ${
+                                        activeQuotationTab === 'distribution'
+                                            ? 'bg-white text-neutral-900 shadow-2xs font-semibold'
+                                            : 'text-neutral-500 hover:text-neutral-800'
+                                    }`}
                                 >
-                                    Add Your First Project
+                                    Composition
+                                </button>
+                                <button
+                                    onClick={() => setActiveQuotationTab('monthly')}
+                                    className={`px-2.5 py-1 rounded-lg text-[11px] transition-all cursor-pointer ${
+                                        activeQuotationTab === 'monthly'
+                                            ? 'bg-white text-neutral-900 shadow-2xs font-semibold'
+                                            : 'text-neutral-500 hover:text-neutral-800'
+                                    }`}
+                                >
+                                    Monthly
                                 </button>
                             </div>
-                        ) : (
-                            <div className="divide-y divide-neutral-100">
-                                {recentProjects.map((proj) => (
-                                    <div key={proj.id} className="py-3 flex items-center justify-between gap-4">
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div className="w-10 h-10 rounded-xl bg-neutral-100 overflow-hidden shrink-0 border border-neutral-200">
-                                                {proj.cover_image ? (
-                                                    <img src={proj.cover_image} alt={proj.title} className="w-full h-full object-cover" />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center text-neutral-400">
-                                                        <ImageIcon size={16} />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <h3 className="text-xs font-bold text-neutral-900 truncate">
-                                                    {proj.title}
-                                                </h3>
-                                                <div className="flex items-center gap-2 mt-0.5">
-                                                    <span className="text-[10px] px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 font-medium">
-                                                        {proj.category || 'Solar'}
-                                                    </span>
-                                                    <span className={`text-[10px] font-semibold ${proj.is_active ? 'text-emerald-600' : 'text-neutral-400'}`}>
-                                                        {proj.is_active ? '● Live' : '○ Draft'}
+                        </div>
+
+                        {/* Chart Body */}
+                        {activeQuotationTab === 'distribution' ? (
+                            /* Donut Chart View */
+                            <div className="py-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+                                {/* SVG Donut */}
+                                <div className="relative w-48 h-48 shrink-0 flex items-center justify-center">
+                                    <svg className="w-full h-full -rotate-90" viewBox="0 0 160 160">
+                                        <circle
+                                            cx="80"
+                                            cy="80"
+                                            r={donutRadius}
+                                            fill="transparent"
+                                            stroke="#F1F5F9"
+                                            strokeWidth="22"
+                                        />
+
+                                        {donutSegments.map((item, idx) => {
+                                            const isHovered = hoveredDonutIdx === idx;
+                                            return (
+                                                <circle
+                                                    key={idx}
+                                                    cx="80"
+                                                    cy="80"
+                                                    r={donutRadius}
+                                                    fill="transparent"
+                                                    stroke={item.color}
+                                                    strokeWidth={isHovered ? 26 : 22}
+                                                    strokeDasharray={`${item.strokeDash} ${donutCircumference}`}
+                                                    strokeDashoffset={item.dashOffset}
+                                                    strokeLinecap="round"
+                                                    onMouseEnter={() => setHoveredDonutIdx(idx)}
+                                                    onMouseLeave={() => setHoveredDonutIdx(null)}
+                                                    className="transition-all duration-300 cursor-pointer"
+                                                />
+                                            );
+                                        })}
+                                    </svg>
+
+                                    {/* Donut Center Display */}
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-4">
+                                        <span className="text-[10px] uppercase font-medium text-neutral-400 tracking-wider truncate max-w-[110px]">
+                                            {hoveredDonutIdx !== null ? quotationDistribution[hoveredDonutIdx]?.name : 'Total Quotes'}
+                                        </span>
+                                        <span className="text-xl font-semibold text-neutral-900 leading-tight">
+                                            {hoveredDonutIdx !== null 
+                                                ? `${quotationDistribution[hoveredDonutIdx]?.share}%`
+                                                : (stats?.total_quotations || 0)
+                                            }
+                                        </span>
+                                        <span className="text-[10px] text-neutral-400 font-normal">
+                                            {hoveredDonutIdx !== null ? `${quotationDistribution[hoveredDonutIdx]?.count} requests` : 'Active'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Legend Breakdown on Right */}
+                                <div className="flex-1 w-full space-y-2.5">
+                                    {quotationDistribution.map((item, idx) => {
+                                        const isHovered = hoveredDonutIdx === idx;
+                                        return (
+                                            <div
+                                                key={idx}
+                                                onMouseEnter={() => setHoveredDonutIdx(idx)}
+                                                onMouseLeave={() => setHoveredDonutIdx(null)}
+                                                className={`flex items-center justify-between py-1.5 px-2 rounded-xl transition-all cursor-pointer ${
+                                                    isHovered ? 'bg-neutral-50 shadow-2xs' : 'hover:bg-neutral-50/60'
+                                                }`}
+                                            >
+                                                <div className="flex items-center gap-2.5 min-w-0">
+                                                    <span
+                                                        className="w-3 h-3 rounded-full shrink-0 shadow-2xs"
+                                                        style={{ backgroundColor: item.color }}
+                                                    />
+                                                    <span className={`text-xs truncate ${isHovered ? 'font-semibold text-neutral-900' : 'text-neutral-600 font-normal'}`}>
+                                                        {item.name}
                                                     </span>
                                                 </div>
+                                                <span className="text-xs font-semibold text-neutral-800 ml-2 font-mono">
+                                                    {item.share}%
+                                                </span>
                                             </div>
-                                        </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ) : (
+                            /* Monthly Quotations Bar View */
+                            <div className="py-6">
+                                <div className="flex items-end justify-between gap-2 h-48 px-2 pt-8 pb-2">
+                                    {monthlyQuotations.map((item, idx) => {
+                                        const count = item.count || 0;
+                                        const isZero = count === 0;
+                                        const heightPercent = isZero ? 4 : Math.max(Math.round((count / maxQuotation) * 100), 12);
+                                        const isHovered = hoveredQuotationMonthIdx === idx;
+                                        const isPeak = count > 0 && count === maxQuotation;
+                                        const isHighlighted = isHovered || (hoveredQuotationMonthIdx === null && isPeak);
 
-                                        <button
-                                            onClick={() => onNavigate('projects')}
-                                            className="px-3 py-1.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition-all shrink-0 cursor-pointer"
-                                        >
-                                            Edit
-                                        </button>
-                                    </div>
-                                ))}
+                                        return (
+                                            <div
+                                                key={idx}
+                                                onMouseEnter={() => setHoveredQuotationMonthIdx(idx)}
+                                                onMouseLeave={() => setHoveredQuotationMonthIdx(null)}
+                                                className="flex-1 flex flex-col items-center h-full justify-end cursor-pointer group relative min-w-0"
+                                            >
+                                                {/* Value pill tooltip on active/hovered bar */}
+                                                {isHighlighted && count > 0 && (
+                                                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-[#1A4D2E] text-white text-[10px] font-medium px-2 py-0.5 rounded-md shadow-xs whitespace-nowrap z-10 transition-all">
+                                                        {count} ({formatINR(item.total_amount)})
+                                                    </div>
+                                                )}
+
+                                                {/* Bar */}
+                                                <div
+                                                    style={{ height: `${heightPercent}%` }}
+                                                    className={`w-full max-w-[42px] rounded-t-lg sm:rounded-t-xl transition-all duration-300 ${
+                                                        isHighlighted && count > 0
+                                                            ? 'bg-[#1A4D2E] shadow-sm'
+                                                            : isZero
+                                                            ? 'bg-neutral-100 group-hover:bg-neutral-200'
+                                                            : 'bg-emerald-100 group-hover:bg-emerald-200'
+                                                    }`}
+                                                />
+
+                                                {/* Month label */}
+                                                <span className={`text-[10px] sm:text-[11px] mt-2.5 transition-colors truncate max-w-full ${
+                                                    isHighlighted ? 'text-neutral-900 font-semibold' : 'text-neutral-400 font-normal'
+                                                }`}>
+                                                    {item.label}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
                     </div>
+
+                    {/* Bottom Insight Footer */}
+                    <div className="pt-3 border-t border-neutral-100 flex items-center gap-2 text-xs text-neutral-500">
+                        <Lightbulb size={14} className="text-amber-500 shrink-0" />
+                        <span className="truncate">
+                            {peakQuotationMonth.count > 0
+                                ? `Peak quotation demand recorded in ${peakQuotationMonth.label} with ${peakQuotationMonth.count} client quotes (${formatINR(peakQuotationMonth.total_amount)}).`
+                                : 'Track live customer quotation requests and solar system capacity breakdown.'}
+                        </span>
+                    </div>
                 </div>
 
-                {/* System & Quick Nav Panel (1 col) */}
-                <div className="space-y-6">
-                    {/* Quick Access Tiles */}
-                    <div className="bg-white rounded-3xl p-6 border border-neutral-200/80 shadow-xs space-y-4">
-                        <h2 className="text-base font-black text-neutral-900">Admin Modules</h2>
-                        <div className="space-y-2">
+                {/* CHART 2: Monthly Enquiries Chart (Matches "Performance Analytics" bar chart from screenshot) */}
+                <div className="bg-white rounded-2xl p-6 border border-neutral-200/80 shadow-xs flex flex-col justify-between">
+                    <div>
+                        {/* Header */}
+                        <div className="flex items-center justify-between pb-5 border-b border-neutral-100">
+                            <div>
+                                <h2 className="text-sm sm:text-base font-semibold text-neutral-900 tracking-tight">
+                                    Enquiries Monthly-wise
+                                </h2>
+                                <p className="text-[11px] text-neutral-400">
+                                    Customer consultation and contact form submissions
+                                </p>
+                            </div>
+
                             <button
                                 onClick={() => onNavigate('inquiries')}
-                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-amber-400 hover:bg-amber-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
+                                className="inline-flex items-center gap-1 text-xs font-medium text-[#1A4D2E] hover:underline cursor-pointer"
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
-                                        <Mail size={17} />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-amber-800 flex items-center gap-1.5">
-                                            <span>Contact Inquiries</span>
-                                            {stats?.pending_inquiries > 0 && (
-                                                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                                <span>Manage All</span>
+                                <ChevronRight size={14} />
+                            </button>
+                        </div>
+
+                        {/* Bar Chart Container */}
+                        <div className="py-6">
+                            <div className="flex items-end justify-between gap-2 h-48 px-2 pt-8 pb-2">
+                                {monthlyInquiries.map((item, idx) => {
+                                    const count = item.count || 0;
+                                    const isZero = count === 0;
+                                    const heightPercent = isZero ? 4 : Math.max(Math.round((count / maxInquiry) * 100), 14);
+                                    const isHovered = hoveredMonthIdx === idx;
+                                    const isPeak = count > 0 && count === maxInquiry;
+                                    const isHighlighted = isHovered || (hoveredMonthIdx === null && isPeak);
+
+                                    return (
+                                        <div
+                                            key={idx}
+                                            onMouseEnter={() => setHoveredMonthIdx(idx)}
+                                            onMouseLeave={() => setHoveredMonthIdx(null)}
+                                            className="flex-1 flex flex-col items-center h-full justify-end cursor-pointer group relative min-w-0"
+                                        >
+                                            {/* Peak / Active value indicator above bar */}
+                                            {isHighlighted && count > 0 && (
+                                                <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-[#1A4D2E] text-white text-[10px] sm:text-[11px] font-semibold px-2 py-0.5 rounded-md shadow-xs whitespace-nowrap z-10 animate-in fade-in zoom-in duration-200">
+                                                    {count}
+                                                </div>
                                             )}
-                                        </div>
-                                        <div className="text-[10px] text-neutral-400">
-                                            {stats?.pending_inquiries > 0
-                                                ? `${stats.pending_inquiries} waiting for reply`
-                                                : 'View customer messages'}
-                                        </div>
-                                    </div>
-                                </div>
-                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-amber-800" />
-                            </button>
 
-                            <button
-                                onClick={() => onNavigate('projects')}
-                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-[#1A4D2E] hover:bg-emerald-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-[#1A4D2E] flex items-center justify-center">
-                                        <ImageIcon size={17} />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-[#1A4D2E]">
-                                            Projects & Gallery
-                                        </div>
-                                        <div className="text-[10px] text-neutral-400">Add photos & descriptions</div>
-                                    </div>
-                                </div>
-                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-[#1A4D2E]" />
-                            </button>
+                                            {/* The Bar */}
+                                            <div
+                                                style={{ height: `${heightPercent}%` }}
+                                                className={`w-full max-w-[44px] rounded-t-lg sm:rounded-t-xl transition-all duration-300 ${
+                                                    isHighlighted && count > 0
+                                                        ? 'bg-[#1A4D2E] shadow-sm'
+                                                        : isZero
+                                                        ? 'bg-neutral-100 group-hover:bg-neutral-200'
+                                                        : 'bg-emerald-100 group-hover:bg-emerald-200'
+                                                }`}
+                                            />
 
-                            <button
-                                onClick={() => onNavigate('faqs')}
-                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-[#1A4D2E] hover:bg-emerald-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
-                                        <HelpCircle size={17} />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-blue-700">
-                                            FAQ Manager
+                                            {/* Month X-axis Label */}
+                                            <span className={`text-[10px] sm:text-[11px] mt-2.5 transition-colors truncate max-w-full ${
+                                                isHighlighted ? 'text-neutral-900 font-semibold' : 'text-neutral-400 font-normal'
+                                            }`}>
+                                                {item.label}
+                                            </span>
                                         </div>
-                                        <div className="text-[10px] text-neutral-400">Questions on Contact page</div>
-                                    </div>
-                                </div>
-                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-blue-700" />
-                            </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
 
-                            <button
-                                onClick={() => onNavigate('quotation')}
-                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-[#1A4D2E] hover:bg-emerald-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center">
-                                        <FileText size={17} />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-purple-700">
-                                            Quotation Builder
-                                        </div>
-                                        <div className="text-[10px] text-neutral-400">Create 6-page solar quotes</div>
-                                    </div>
-                                </div>
-                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-purple-700" />
-                            </button>
+                    {/* Bottom Insight Footer */}
+                    <div className="pt-3 border-t border-neutral-100 flex items-center gap-2 text-xs text-neutral-500">
+                        <Lightbulb size={14} className="text-amber-500 shrink-0" />
+                        <span className="truncate">
+                            {peakInquiryMonth.count > 0 
+                                ? `${peakInquiryMonth.label} achieved the highest customer inquiry volume with ${peakInquiryMonth.count} inquiries.`
+                                : 'Live inquiry monitoring across all residential and commercial leads.'
+                            }
+                        </span>
+                    </div>
+                </div>
 
-                            <button
-                                onClick={() => onNavigate('quotation-history')}
-                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-indigo-600 hover:bg-indigo-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
-                                        <History size={17} />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-indigo-700">
-                                            Quotation History
-                                        </div>
-                                        <div className="text-[10px] text-neutral-400">Saved quotes & PDF downloads</div>
-                                    </div>
-                                </div>
-                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-indigo-700" />
-                            </button>
+            </div>
 
-                            <button
-                                onClick={() => onNavigate('payments')}
-                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-emerald-600 hover:bg-emerald-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
-                                        <CreditCard size={17} />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-emerald-800">
-                                            Payments Tracker
-                                        </div>
-                                        <div className="text-[10px] text-neutral-400">Track client payments & balance</div>
-                                    </div>
-                                </div>
-                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-emerald-800" />
-                            </button>
+            {/* 3. OVERVIEW TABLE SECTION (Matches "Employee Overview" table from screenshot) */}
+            <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
+                {/* Table Header with Tabs and View All */}
+                <div className="p-6 border-b border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-base sm:text-lg font-semibold text-neutral-900 tracking-tight">
+                            Recent Overview
+                        </h2>
 
+                        {/* Filter Tabs */}
+                        <div className="inline-flex p-1 bg-neutral-100 rounded-xl text-xs font-medium">
                             <button
-                                onClick={() => onNavigate('reports')}
-                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-teal-700 hover:bg-teal-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
+                                onClick={() => setTableTab('inquiries')}
+                                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                                    tableTab === 'inquiries'
+                                        ? 'bg-white text-neutral-900 shadow-2xs font-semibold'
+                                        : 'text-neutral-500 hover:text-neutral-800'
+                                }`}
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-teal-100 text-teal-800 flex items-center justify-center">
-                                        <BarChart3 size={17} />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-teal-800">
-                                            Reports & Exports
-                                        </div>
-                                        <div className="text-[10px] text-neutral-400">Export Excel & PDF reports</div>
-                                    </div>
-                                </div>
-                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-teal-800" />
+                                Inquiries ({recentInquiries.length})
                             </button>
-
                             <button
-                                onClick={() => onNavigate('letterhead')}
-                                className="w-full p-3 rounded-2xl border border-neutral-200/80 hover:border-[#1A4D2E] hover:bg-emerald-50/40 text-left transition-all flex items-center justify-between cursor-pointer group"
+                                onClick={() => setTableTab('quotations')}
+                                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                                    tableTab === 'quotations'
+                                        ? 'bg-white text-neutral-900 shadow-2xs font-semibold'
+                                        : 'text-neutral-500 hover:text-neutral-800'
+                                }`}
                             >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-[#1A4D2E] flex items-center justify-center">
-                                        <ScrollText size={17} />
-                                    </div>
-                                    <div>
-                                        <div className="text-xs font-bold text-neutral-900 group-hover:text-[#1A4D2E]">
-                                            Letterhead Creator
-                                        </div>
-                                        <div className="text-[10px] text-neutral-400">Official letterhead & print</div>
-                                    </div>
-                                </div>
-                                <ArrowUpRight size={14} className="text-neutral-400 group-hover:text-[#1A4D2E]" />
+                                Quotations ({recentQuotations.length})
                             </button>
                         </div>
                     </div>
+
+                    <button
+                        onClick={() => onNavigate(tableTab === 'inquiries' ? 'inquiries' : 'quotation-history')}
+                        className="text-xs font-medium text-[#1A4D2E] hover:underline flex items-center gap-1 cursor-pointer self-start sm:self-auto"
+                    >
+                        <span>View All</span>
+                        <ArrowUpRight size={14} />
+                    </button>
+                </div>
+
+                {/* Table Content */}
+                <div className="overflow-x-auto">
+                    {tableTab === 'inquiries' ? (
+                        /* Inquiries Table */
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-neutral-100 text-[11px] font-medium text-neutral-400 uppercase tracking-wider bg-neutral-50/50">
+                                    <th className="py-3.5 px-6">
+                                        <div className="flex items-center gap-1">
+                                            <span>Customer Name</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                    <th className="py-3.5 px-6">
+                                        <div className="flex items-center gap-1">
+                                            <span>Service / System</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                    <th className="py-3.5 px-6">
+                                        <div className="flex items-center gap-1">
+                                            <span>Contact</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                    <th className="py-3.5 px-6">
+                                        <div className="flex items-center gap-1">
+                                            <span>Location</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                    <th className="py-3.5 px-6">
+                                        <div className="flex items-center gap-1">
+                                            <span>Date</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                    <th className="py-3.5 px-6 text-right">
+                                        <div className="flex items-center justify-end gap-1">
+                                            <span>Status</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-neutral-100 text-xs text-neutral-700">
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan="6" className="py-12 text-center text-neutral-400 font-normal">
+                                            Loading inquiries...
+                                        </td>
+                                    </tr>
+                                ) : recentInquiries.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="py-12 text-center text-neutral-400 font-normal">
+                                            No recent inquiries found.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    recentInquiries.map((inq) => {
+                                        const isResponded = inq.status === 'responded';
+                                        return (
+                                            <tr
+                                                key={inq.id}
+                                                onClick={() => onNavigate('inquiries')}
+                                                className="hover:bg-neutral-50/80 transition-colors cursor-pointer group"
+                                            >
+                                                {/* Customer Name */}
+                                                <td className="py-4 px-6 font-semibold text-neutral-900 group-hover:text-[#1A4D2E]">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#1A4D2E] font-semibold flex items-center justify-center text-xs shrink-0 border border-emerald-200/50">
+                                                            {inq.name ? inq.name.charAt(0).toUpperCase() : 'U'}
+                                                        </div>
+                                                        <span className="truncate max-w-[160px] sm:max-w-xs">{inq.name}</span>
+                                                    </div>
+                                                </td>
+
+                                                {/* Service */}
+                                                <td className="py-4 px-6 text-neutral-600 font-normal">
+                                                    <span className="px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-700 text-[11px] font-medium">
+                                                        {inq.service || 'Solar Rooftop'}
+                                                    </span>
+                                                </td>
+
+                                                {/* Contact */}
+                                                <td className="py-4 px-6 font-mono text-[11px] text-neutral-500 font-normal">
+                                                    {inq.phone || inq.email || '-'}
+                                                </td>
+
+                                                {/* Location */}
+                                                <td className="py-4 px-6 text-neutral-500 font-normal">
+                                                    {inq.place ? `${inq.place}, ${inq.district}` : (inq.district || 'Kerala')}
+                                                </td>
+
+                                                {/* Date */}
+                                                <td className="py-4 px-6 text-neutral-400 text-[11px] font-normal">
+                                                    {inq.created_at_human || 'Recent'}
+                                                </td>
+
+                                                {/* Status Pill */}
+                                                <td className="py-4 px-6 text-right">
+                                                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium ${
+                                                        isResponded
+                                                            ? 'bg-emerald-50 text-[#1A4D2E] border border-emerald-200/70'
+                                                            : 'bg-amber-50 text-amber-800 border border-amber-200/70'
+                                                    }`}>
+                                                        {isResponded ? 'Responded' : 'Pending'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    ) : (
+                        /* Quotations Table */
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-neutral-100 text-[11px] font-medium text-neutral-400 uppercase tracking-wider bg-neutral-50/50">
+                                    <th className="py-3.5 px-6">
+                                        <div className="flex items-center gap-1">
+                                            <span>Client Name</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                    <th className="py-3.5 px-6">
+                                        <div className="flex items-center gap-1">
+                                            <span>Quote Ref</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                    <th className="py-3.5 px-6">
+                                        <div className="flex items-center gap-1">
+                                            <span>Capacity</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                    <th className="py-3.5 px-6">
+                                        <div className="flex items-center gap-1">
+                                            <span>Total Amount</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                    <th className="py-3.5 px-6">
+                                        <div className="flex items-center gap-1">
+                                            <span>Date</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                    <th className="py-3.5 px-6 text-right">
+                                        <div className="flex items-center justify-end gap-1">
+                                            <span>Status</span>
+                                            <ArrowUpDown size={11} className="text-neutral-300" />
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-neutral-100 text-xs text-neutral-700">
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan="6" className="py-12 text-center text-neutral-400 font-normal">
+                                            Loading quotations...
+                                        </td>
+                                    </tr>
+                                ) : recentQuotations.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="py-12 text-center text-neutral-400 font-normal">
+                                            No saved quotations yet.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    recentQuotations.map((qt) => (
+                                        <tr
+                                            key={qt.id}
+                                            onClick={() => onNavigate('quotation-history')}
+                                            className="hover:bg-neutral-50/80 transition-colors cursor-pointer group"
+                                        >
+                                            <td className="py-4 px-6 font-semibold text-neutral-900 group-hover:text-[#1A4D2E]">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#1A4D2E] font-semibold flex items-center justify-center text-xs shrink-0 border border-emerald-200/50">
+                                                        {qt.client_name ? qt.client_name.charAt(0).toUpperCase() : 'C'}
+                                                    </div>
+                                                    <span className="truncate max-w-[160px] sm:max-w-xs">{qt.client_name}</span>
+                                                </div>
+                                            </td>
+
+                                            <td className="py-4 px-6 font-mono text-[11px] text-neutral-500 font-normal">
+                                                {qt.ref_no || `QT-${qt.id}`}
+                                            </td>
+
+                                            <td className="py-4 px-6 text-neutral-600 font-normal">
+                                                <span className="px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-700 text-[11px] font-medium">
+                                                    {qt.capacity || '3 kW On-Grid'}
+                                                </span>
+                                            </td>
+
+                                            <td className="py-4 px-6 font-semibold text-neutral-900 font-mono">
+                                                {qt.total_amount ? formatINR(qt.total_amount) : '₹ 1,85,000'}
+                                            </td>
+
+                                            <td className="py-4 px-6 text-neutral-400 text-[11px] font-normal">
+                                                {qt.created_at_formatted || 'Recent'}
+                                            </td>
+
+                                            <td className="py-4 px-6 text-right">
+                                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium bg-emerald-50 text-[#1A4D2E] border border-emerald-200/70">
+                                                    Active
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </div>
+
+            {/* Quick Navigation Footer Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                <button
+                    onClick={() => onNavigate('inquiries')}
+                    className="p-4 rounded-2xl bg-white border border-neutral-200/80 hover:border-amber-400 hover:bg-amber-50/20 text-left transition-all flex items-center justify-between cursor-pointer group shadow-2xs"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                            <Mail size={17} />
+                        </div>
+                        <div>
+                            <div className="text-xs font-semibold text-neutral-900 group-hover:text-amber-800">
+                                Inquiries Manager
+                            </div>
+                            <div className="text-[10px] text-neutral-400 font-normal">
+                                {stats?.pending_inquiries ? `${stats.pending_inquiries} awaiting reply` : 'View all inquiries'}
+                            </div>
+                        </div>
+                    </div>
+                    <ChevronRight size={16} className="text-neutral-400 group-hover:text-amber-800" />
+                </button>
+
+                <button
+                    onClick={() => onNavigate('quotation')}
+                    className="p-4 rounded-2xl bg-white border border-neutral-200/80 hover:border-[#1A4D2E] hover:bg-emerald-50/20 text-left transition-all flex items-center justify-between cursor-pointer group shadow-2xs"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-50 text-[#1A4D2E] flex items-center justify-center">
+                            <FileText size={17} />
+                        </div>
+                        <div>
+                            <div className="text-xs font-semibold text-neutral-900 group-hover:text-[#1A4D2E]">
+                                Quotation Builder
+                            </div>
+                            <div className="text-[10px] text-neutral-400 font-normal">
+                                Generate customized PDF proposal
+                            </div>
+                        </div>
+                    </div>
+                    <ChevronRight size={16} className="text-neutral-400 group-hover:text-[#1A4D2E]" />
+                </button>
+
+                <button
+                    onClick={() => onNavigate('projects')}
+                    className="p-4 rounded-2xl bg-white border border-neutral-200/80 hover:border-emerald-500 hover:bg-emerald-50/20 text-left transition-all flex items-center justify-between cursor-pointer group shadow-2xs"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-50 text-[#1A4D2E] flex items-center justify-center">
+                            <FolderGit2 size={17} />
+                        </div>
+                        <div>
+                            <div className="text-xs font-semibold text-neutral-900 group-hover:text-[#1A4D2E]">
+                                Project Showcase
+                            </div>
+                            <div className="text-[10px] text-neutral-400 font-normal">
+                                {stats ? `${stats.active_projects || 0} projects published` : 'Gallery management'}
+                            </div>
+                        </div>
+                    </div>
+                    <ChevronRight size={16} className="text-neutral-400 group-hover:text-[#1A4D2E]" />
+                </button>
+            </div>
+
         </div>
     );
 };

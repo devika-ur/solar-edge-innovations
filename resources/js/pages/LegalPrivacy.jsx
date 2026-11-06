@@ -83,7 +83,7 @@ const PrivacyPolicy = () => {
                             </p>
                             <div className="bg-neutral-50 border border-neutral-100 rounded-2xl p-6 mt-3 space-y-2 text-xs font-mono text-neutral-600">
                                 <p><strong>Company:</strong> Solar Edge Innovation</p>
-                                <p><strong>Address:</strong> Elakamon, Ayiroor, Varkala, Varkala Paravoor Road, Kerala, India (Near Post Office)</p>
+                                <p><strong>Address:</strong> 476/5, SOLAREDGE INNOVATIONS, AYIROOR VARKALA ROAD, ELAKAMON, VARKALA 695310</p>
                                 <p><strong>Email:</strong> <a href="mailto:solaredgeinnovations25@gmail.com" className="text-green-700 hover:underline">solaredgeinnovations25@gmail.com</a></p>
                                 <p><strong>Call Support:</strong> <a href="tel:+919526801406" className="text-green-700 hover:underline">+91 95268 01406</a></p>
                             </div>

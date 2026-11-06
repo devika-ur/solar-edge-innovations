@@ -170,39 +170,35 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
     };
 
     return (
-        <div className="w-full px-4 sm:px-8 py-8 space-y-6 font-sans">
+        <div className="w-full px-4 sm:px-8 py-8 space-y-8 font-poppins">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 sm:p-7 rounded-3xl border border-neutral-200/80 shadow-xs">
-                <div className="space-y-1">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-semibold">
-                        <History size={13} className="text-[#1A4D2E]" />
-                        <span>Database History & Archives</span>
-                    </div>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-neutral-900 tracking-tight">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
                         Quotation History
                     </h1>
-                    <p className="text-xs sm:text-sm text-neutral-500">
+                    <p className="text-xs sm:text-sm text-neutral-500 mt-1">
                         View, search, filter and download all saved client quotations and generated PDF files.
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 self-start sm:self-center">
                     <button
                         onClick={() => loadQuotations(true)}
                         disabled={isLoading}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs sm:text-sm font-semibold transition-all cursor-pointer disabled:opacity-50"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-medium border border-neutral-200/90 shadow-2xs transition-all cursor-pointer disabled:opacity-50"
                         title="Refresh data"
                     >
-                        <RefreshCw size={14} className={isLoading ? "animate-spin text-[#1A4D2E]" : ""} />
+                        <RefreshCw size={13} className={isLoading ? "animate-spin text-[#1A4D2E]" : "text-neutral-500"} />
                         <span>Refresh</span>
                     </button>
 
                     {onNavigate && (
                         <button
                             onClick={() => onNavigate('quotation')}
-                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-medium shadow-xs transition-all cursor-pointer"
                         >
-                            <Plus size={15} />
+                            <Plus size={14} />
                             <span>Create New Quotation</span>
                         </button>
                     )}
@@ -212,23 +208,23 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
             {/* Quick Metrics Bar */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div className="bg-white p-4 sm:p-5 rounded-2xl border border-neutral-200/80 shadow-2xs">
-                    <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Total Saved</div>
-                    <div className="text-2xl sm:text-3xl font-black text-neutral-900 mt-1">{stats.total}</div>
+                    <div className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Total Saved</div>
+                    <div className="text-2xl sm:text-3xl font-semibold text-neutral-900 mt-1 font-poppins">{stats.total}</div>
                     <div className="text-[11px] text-neutral-400 mt-0.5">All archived quotations</div>
                 </div>
                 <div className="bg-white p-4 sm:p-5 rounded-2xl border border-neutral-200/80 shadow-2xs">
-                    <div className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Saved Today</div>
-                    <div className="text-2xl sm:text-3xl font-black text-[#1A4D2E] mt-1">{stats.today}</div>
+                    <div className="text-xs font-medium text-emerald-700 uppercase tracking-wider">Saved Today</div>
+                    <div className="text-2xl sm:text-3xl font-semibold text-[#1A4D2E] mt-1 font-poppins">{stats.today}</div>
                     <div className="text-[11px] text-neutral-400 mt-0.5">Created today</div>
                 </div>
                 <div className="bg-white p-4 sm:p-5 rounded-2xl border border-neutral-200/80 shadow-2xs">
-                    <div className="text-xs font-semibold text-blue-700 uppercase tracking-wider">This Month</div>
-                    <div className="text-2xl sm:text-3xl font-black text-blue-900 mt-1">{stats.this_month}</div>
+                    <div className="text-xs font-medium text-blue-700 uppercase tracking-wider">This Month</div>
+                    <div className="text-2xl sm:text-3xl font-semibold text-blue-900 mt-1 font-poppins">{stats.this_month}</div>
                     <div className="text-[11px] text-neutral-400 mt-0.5">Current month</div>
                 </div>
                 <div className="bg-white p-4 sm:p-5 rounded-2xl border border-neutral-200/80 shadow-2xs">
-                    <div className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Matching Filter</div>
-                    <div className="text-2xl sm:text-3xl font-black text-neutral-800 mt-1">{quotations.length}</div>
+                    <div className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Matching Filter</div>
+                    <div className="text-2xl sm:text-3xl font-semibold text-neutral-800 mt-1 font-poppins">{quotations.length}</div>
                     <div className="text-[11px] text-neutral-400 mt-0.5">Active search/date results</div>
                 </div>
             </div>
@@ -433,7 +429,7 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
 
                                                     {/* Total Amount */}
                                                     <td className="py-4 px-4">
-                                                        <div className="font-black text-[#1A4D2E] text-sm">
+                                                        <div className="font-semibold text-[#1A4D2E] text-sm">
                                                             ₹{quote.total_amount}
                                                         </div>
                                                         <span className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">
@@ -518,7 +514,7 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                                                     </span>
                                                 </div>
                                                 <div className="text-right">
-                                                    <span className="text-sm font-black text-[#1A4D2E]">
+                                                    <span className="text-sm font-semibold text-[#1A4D2E]">
                                                         ₹{quote.total_amount}
                                                     </span>
                                                 </div>

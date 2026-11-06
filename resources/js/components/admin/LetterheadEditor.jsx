@@ -16,7 +16,9 @@ import {
     ZoomIn,
     ZoomOut,
     Scissors,
-    Layers
+    Layers,
+    Eye,
+    EyeOff
 } from 'lucide-react';
 import { LetterheadEditorMobile } from './LetterheadEditorMobile';
 import headerImg from '../../assets/header.jpeg';
@@ -79,6 +81,7 @@ export const LetterheadEditor = ({ onLogout, onBack, onNavigate }) => {
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [copied, setCopied] = useState(false);
     const [previewScale, setPreviewScale] = useState(1);
+    const [showPreview, setShowPreview] = useState(true); // Desktop-only preview toggle (default: visible)
 
     // Paginated content array
     const [pages, setPages] = useState([SAMPLE_LETTER_TEXT]);
@@ -259,9 +262,15 @@ export const LetterheadEditor = ({ onLogout, onBack, onNavigate }) => {
                         clonedEl.style.transform = 'none';
                         clonedEl.style.boxShadow = 'none';
                         clonedEl.style.margin = '0 auto';
+                        clonedEl.style.position = 'static';
+                        clonedEl.style.opacity = '1';
                         let p = clonedEl.parentElement;
                         while (p && p !== clonedDoc.body) {
                             p.style.transform = 'none';
+                            p.style.position = 'static';
+                            p.style.opacity = '1';
+                            p.style.left = '0';
+                            p.style.top = '0';
                             p = p.parentElement;
                         }
                     }
@@ -446,6 +455,29 @@ export const LetterheadEditor = ({ onLogout, onBack, onNavigate }) => {
                         <span>{copied ? 'Copied' : 'Copy'}</span>
                     </button>
 
+                    {/* Desktop-Only Toggle: Hide / Show Live Letterhead Preview */}
+                    <button
+                        onClick={() => setShowPreview((prev) => !prev)}
+                        className={`hidden lg:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                            showPreview
+                                ? 'text-neutral-700 hover:text-[#1A4D2E] bg-white hover:bg-neutral-50 border border-neutral-200'
+                                : 'text-white bg-[#1A4D2E] hover:bg-[#143c24] shadow-xs'
+                        }`}
+                        title={showPreview ? 'Hide live letterhead preview to expand editor' : 'Show live letterhead preview side-by-side'}
+                    >
+                        {showPreview ? (
+                            <>
+                                <EyeOff size={14} className="text-neutral-500" />
+                                <span>Hide Preview</span>
+                            </>
+                        ) : (
+                            <>
+                                <Eye size={14} className="text-white" />
+                                <span>Show Preview</span>
+                            </>
+                        )}
+                    </button>
+
                     <button
                         onClick={handleDownloadPdf}
                         disabled={isGeneratingPdf}
@@ -461,7 +493,13 @@ export const LetterheadEditor = ({ onLogout, onBack, onNavigate }) => {
             {/* Split Screen Workspace */}
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
                 {/* Left Column: Editor Text Box & Typography Controls */}
-                <div className="letterhead-editor-controls w-full lg:w-[480px] xl:w-[540px] 2xl:w-[600px] h-full border-b lg:border-b-0 lg:border-r border-neutral-200/90 bg-white flex flex-col shrink-0 p-4 sm:p-5 gap-3.5 overflow-hidden z-20">
+                <div
+                    className={`letterhead-editor-controls w-full h-full border-b lg:border-b-0 border-neutral-200/90 bg-white flex flex-col p-4 sm:p-5 gap-3.5 overflow-hidden z-20 ${
+                        showPreview
+                            ? 'lg:w-[480px] xl:w-[540px] 2xl:w-[600px] lg:border-r shrink-0'
+                            : 'lg:w-full lg:flex-1 lg:border-r-0'
+                    }`}
+                >
                     {/* Formatting Controls Bar */}
                     <div className="shrink-0 bg-neutral-50 border border-neutral-200/80 rounded-2xl p-3 flex flex-wrap items-center justify-between gap-3 text-xs">
                         {/* Font Size */}
@@ -581,7 +619,14 @@ export const LetterheadEditor = ({ onLogout, onBack, onNavigate }) => {
                 </div>
 
                 {/* Right Column: Live A4 Letterhead Preview (Multi-page stack) */}
-                <div className="letterhead-preview-area flex-1 h-full bg-neutral-200/80 p-4 sm:p-8 overflow-y-auto flex flex-col items-center gap-8 z-10" data-lenis-prevent>
+                <div
+                    className={`letterhead-preview-area flex-1 h-full bg-neutral-200/80 p-4 sm:p-8 overflow-y-auto flex flex-col items-center gap-8 z-10 ${
+                        showPreview
+                            ? ''
+                            : 'lg:flex-none lg:fixed lg:-left-[99999px] lg:top-0 lg:w-[210mm] lg:h-auto lg:p-0 lg:bg-transparent lg:opacity-0 lg:pointer-events-none lg:overflow-hidden'
+                    }`}
+                    data-lenis-prevent
+                >
                     {/* Zoom / Scale bar */}
                     <div className="no-print sticky top-0 z-20 self-end flex items-center gap-2 bg-white/90 backdrop-blur-xs px-3.5 py-1.5 rounded-xl border border-neutral-300 shadow-2xs text-xs font-semibold text-neutral-700">
                         <span className="text-neutral-500 font-medium">Zoom:</span>

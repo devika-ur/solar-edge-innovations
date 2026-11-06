@@ -198,6 +198,12 @@ export const LetterheadEditorMobile = ({
                             Quotation Builder
                         </a>
                         <a
+                            href="/admin/agreement"
+                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
+                        >
+                            Agreement
+                        </a>
+                        <a
                             href="/admin/quotation-history"
                             className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
                         >

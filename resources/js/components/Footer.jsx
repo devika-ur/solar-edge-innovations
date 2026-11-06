@@ -131,9 +131,9 @@ export const Footer = () => {
                             <div className="flex items-start gap-2.5 text-neutral-400 leading-relaxed">
                                 <CiLocationOn size={18} className="text-green-700 flex-shrink-0 mt-0.5" />
                                 <span>
-                                    Elakamon, Ayiroor, Varkala,<br />
-                                    Varkala Paravoor Road,<br />
-                                    Kerala, India (Near Post Office)
+                                    476/5, SOLAREDGE INNOVATIONS,<br />
+                                    AYIROOR VARKALA ROAD,<br />
+                                    ELAKAMON, VARKALA 695310
                                 </span>
                             </div>
                         </div>

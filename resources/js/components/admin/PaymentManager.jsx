@@ -111,33 +111,32 @@ export const PaymentManager = ({ onNavigate, onUnauthorized }) => {
     };
 
     return (
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-5">
+        <div className="w-full px-4 sm:px-8 py-8 space-y-8 font-poppins">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200/80 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
                 <div>
-                    <h1 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-                        <CreditCard size={20} className="text-[#1A4D2E]" />
-                        <span>Payments</span>
+                    <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
+                        Payment Management
                     </h1>
-                    <p className="text-xs text-neutral-500 mt-0.5">
-                        Track customer payments and balances for quotations.
+                    <p className="text-xs sm:text-sm text-neutral-500 mt-1">
+                        Track customer payments, milestone receipts, and remaining balances for quotations.
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5 self-start sm:self-center">
                     <button
                         onClick={() => loadPayments(true)}
                         disabled={isLoading}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-medium border border-neutral-200/90 shadow-2xs transition-all cursor-pointer"
                         title="Refresh"
                     >
-                        <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+                        <RefreshCw size={13} className={isLoading ? 'animate-spin text-[#1A4D2E]' : 'text-neutral-500'} />
                         <span>Refresh</span>
                     </button>
 
                     <button
                         onClick={() => onNavigate && onNavigate('quotation')}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-medium shadow-xs transition-all cursor-pointer"
                     >
                         <FileText size={14} />
                         <span>New Quotation</span>
