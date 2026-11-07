@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
     ChevronLeft,
-    MoreVertical,
     FileText,
     LayoutGrid,
     Tag,
@@ -21,13 +20,10 @@ import {
     Trash2,
     Shield,
     Check,
-    X,
-    LogOut,
     ZoomIn,
     ZoomOut,
     Sparkles,
-    Layers,
-    Menu
+    Layers
 } from 'lucide-react';
 import { assets } from '../../assets/assets';
 import { QuotationPreview6Pages } from './QuotationPreview6Pages';
@@ -50,12 +46,6 @@ export const QuotationEditorMobile = ({
 
     // Mobile tabs inside 'details' mode: 'client', 'system', 'pricing', 'more'
     const [activeTab, setActiveTab] = useState('client');
-
-    // Mobile nav dropdown menu (hamburger)
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    // Quotation actions dropdown menu (three-dots icon)
-    const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
 
     // Zoom level for preview mode: 'fit' or 1.0 (100%)
     const [previewZoom, setPreviewZoom] = useState('fit');
@@ -202,8 +192,8 @@ export const QuotationEditorMobile = ({
                     </div>
                 </div>
 
-                {/* Right Profile & Menu */}
-                <div className="flex items-center gap-1.5">
+                {/* Right Profile */}
+                <div className="flex items-center">
                     <button
                         onClick={onLogout}
                         className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 hover:bg-neutral-200 rounded-xl text-xs font-bold text-neutral-700 cursor-pointer"
@@ -213,176 +203,10 @@ export const QuotationEditorMobile = ({
                         <User size={13} className="text-[#1A4D2E]" />
                         <span>admin</span>
                     </button>
-
-                    {/* Three-dots button for Quotation Actions (Image 1) */}
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setIsActionMenuOpen(!isActionMenuOpen);
-                            setIsMenuOpen(false);
-                        }}
-                        className={`p-1.5 rounded-xl border border-neutral-200 transition-all cursor-pointer ${
-                            isActionMenuOpen ? 'bg-neutral-100 text-[#1A4D2E]' : 'text-neutral-700 hover:bg-neutral-100'
-                        }`}
-                        title="Quotation Actions"
-                    >
-                        <MoreVertical size={18} />
-                    </button>
-
-                    {/* Hamburger button for Navigation Menu */}
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setIsMenuOpen(!isMenuOpen);
-                            setIsActionMenuOpen(false);
-                        }}
-                        className={`p-1.5 rounded-xl border border-neutral-200 transition-all cursor-pointer ${
-                            isMenuOpen ? 'bg-neutral-100 text-[#1A4D2E]' : 'text-neutral-700 hover:bg-neutral-100'
-                        }`}
-                        title="Toggle Navigation Menu"
-                    >
-                        {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
-                    </button>
                 </div>
             </div>
 
-            {/* Mobile Nav Dropdown if toggled (Floating on top with z-50, does NOT push content) */}
-            {isMenuOpen && (
-                <>
-                    <div
-                        className="fixed inset-0 top-[57px] bg-black/25 z-40 backdrop-blur-2xs"
-                        onClick={() => setIsMenuOpen(false)}
-                    />
-                    <div className="no-print fixed top-[57px] left-0 right-0 bg-white border-b border-neutral-200 shadow-2xl p-4 space-y-2 text-xs font-bold z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                        <button
-                            onClick={() => {
-                                setIsMenuOpen(false);
-                                if (onBack) onBack();
-                            }}
-                            className="w-full text-left py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700 cursor-pointer"
-                        >
-                            ← Back to Dashboard
-                        </button>
-                        <a
-                            href="/admin/quotation"
-                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
-                        >
-                            Quotation Builder
-                        </a>
-                        <a
-                            href="/admin/agreement"
-                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
-                        >
-                            Agreement
-                        </a>
-                        <a
-                            href="/admin/quotation-history"
-                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
-                        >
-                            Quotation History
-                        </a>
-                        <a
-                            href="/admin/letterhead"
-                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
-                        >
-                            Letterhead Creator
-                        </a>
-                        <a
-                            href="/admin/inquiries"
-                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
-                        >
-                            Enquiries
-                        </a>
-                        {onLogout && (
-                            <button
-                                onClick={() => {
-                                    setIsMenuOpen(false);
-                                    onLogout();
-                                }}
-                                className="w-full text-left py-2 px-3 rounded-lg text-red-600 hover:bg-red-50 cursor-pointer"
-                            >
-                                Logout
-                            </button>
-                        )}
-                    </div>
-                </>
-            )}
-
-            {/* Quotation Actions Popup Menu (Matches Image 1 exactly, floating on top with z-50) */}
-            {isActionMenuOpen && (
-                <>
-                    <div
-                        className="fixed inset-0 z-40 bg-black/20"
-                        onClick={() => setIsActionMenuOpen(false)}
-                    />
-                    <div className="no-print fixed top-[54px] right-3 w-56 bg-white rounded-2xl shadow-2xl border border-neutral-200 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-100">
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setIsActionMenuOpen(false);
-                                onSave(true);
-                            }}
-                            className="w-full px-4 py-2.5 text-left text-xs font-semibold text-neutral-800 hover:bg-neutral-50 flex items-center gap-2.5 cursor-pointer"
-                        >
-                            <Save size={16} className="text-emerald-600" />
-                            <span>Save Quotation</span>
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setIsActionMenuOpen(false);
-                                onGeneratePdf();
-                            }}
-                            disabled={isGeneratingPdf}
-                            className="w-full px-4 py-2.5 text-left text-xs font-semibold text-neutral-800 hover:bg-neutral-50 flex items-center gap-2.5 cursor-pointer"
-                        >
-                            <Download size={16} className="text-blue-600" />
-                            <span>Export PDF Document</span>
-                        </button>
-                        {onClear && (
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    setIsActionMenuOpen(false);
-                                    onClear();
-                                }}
-                                className="w-full px-4 py-2.5 text-left text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2.5 cursor-pointer"
-                            >
-                                <Trash2 size={16} />
-                                <span>Clear Form</span>
-                            </button>
-                        )}
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setIsActionMenuOpen(false);
-                                onReset();
-                            }}
-                            className="w-full px-4 py-2.5 text-left text-xs font-semibold text-neutral-800 hover:bg-neutral-50 flex items-center gap-2.5 cursor-pointer"
-                        >
-                            <RotateCcw size={16} className="text-amber-600" />
-                            <span>Reset to Default</span>
-                        </button>
-                        {onLogout && (
-                            <div className="border-t border-neutral-100 mt-1 pt-1">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setIsActionMenuOpen(false);
-                                        onLogout();
-                                    }}
-                                    className="w-full px-4 py-2.5 text-left text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2.5 cursor-pointer"
-                                >
-                                    <LogOut size={16} />
-                                    <span>Logout Admin</span>
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </>
-            )}
-
-            {/* Subheader: < Quotation Details + Page Count Badge + Actions */}
+            {/* Subheader: < Quotation Details + Page Count Badge */}
             <div className="no-print px-4 pt-3.5 pb-2 flex items-center justify-between">
                 <button
                     type="button"
@@ -393,25 +217,9 @@ export const QuotationEditorMobile = ({
                     <span>Quotation Details</span>
                 </button>
 
-                <div className="flex items-center gap-1.5">
-                    <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[#1A4D2E] text-xs font-bold">
-                        <Layers size={13} />
-                        <span>6 Pages</span>
-                    </div>
-
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setIsActionMenuOpen(!isActionMenuOpen);
-                            setIsMenuOpen(false);
-                        }}
-                        className={`p-1 rounded-lg border border-neutral-200 text-neutral-700 hover:bg-neutral-100 cursor-pointer ${
-                            isActionMenuOpen ? 'bg-neutral-100 text-[#1A4D2E]' : ''
-                        }`}
-                        title="Quotation Actions"
-                    >
-                        <MoreVertical size={16} />
-                    </button>
+                <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[#1A4D2E] text-xs font-bold">
+                    <Layers size={13} />
+                    <span>6 Pages</span>
                 </div>
             </div>
 

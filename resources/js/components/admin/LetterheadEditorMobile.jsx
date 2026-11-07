@@ -19,8 +19,6 @@ import {
     Download,
     Check,
     User,
-    Menu,
-    X,
     Loader2
 } from 'lucide-react';
 import { assets } from '../../assets/assets';
@@ -54,7 +52,6 @@ export const LetterheadEditorMobile = ({
     const [selectedPageIdx, setSelectedPageIdx] = useState(0);
     const [mobileZoom, setMobileZoom] = useState(1);
     const [copied, setCopied] = useState(false);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Simple undo/redo history stacks
     const [history, setHistory] = useState([content]);
@@ -152,8 +149,8 @@ export const LetterheadEditorMobile = ({
                     </div>
                 </div>
 
-                {/* Right Profile & Menu */}
-                <div className="flex items-center gap-2">
+                {/* Right Profile */}
+                <div className="flex items-center">
                     <button
                         onClick={onLogout}
                         className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 hover:bg-neutral-200 rounded-xl text-xs font-bold text-neutral-700 cursor-pointer"
@@ -163,72 +160,8 @@ export const LetterheadEditorMobile = ({
                         <User size={13} className="text-[#1A4D2E]" />
                         <span>admin</span>
                     </button>
-
-                    <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="p-1.5 rounded-xl border border-neutral-200 text-neutral-700 hover:bg-neutral-100 cursor-pointer"
-                        title="Toggle Navigation Menu"
-                    >
-                        {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
-                    </button>
                 </div>
             </div>
-
-            {/* Mobile Nav Dropdown if toggled (Floating on top with z-50, does NOT push content) */}
-            {isMenuOpen && (
-                <>
-                    <div
-                        className="fixed inset-0 top-[57px] bg-black/25 z-40 backdrop-blur-2xs"
-                        onClick={() => setIsMenuOpen(false)}
-                    />
-                    <div className="no-print fixed top-[57px] left-0 right-0 bg-white border-b border-neutral-200 shadow-2xl p-4 space-y-2 text-xs font-bold z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                        <button
-                            onClick={() => {
-                                setIsMenuOpen(false);
-                                if (onBack) onBack();
-                            }}
-                            className="w-full text-left py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700 cursor-pointer"
-                        >
-                            ← Back to Dashboard
-                        </button>
-                        <a
-                            href="/admin/quotation"
-                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
-                        >
-                            Quotation Builder
-                        </a>
-                        <a
-                            href="/admin/agreement"
-                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
-                        >
-                            Agreement
-                        </a>
-                        <a
-                            href="/admin/quotation-history"
-                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
-                        >
-                            Quotation History
-                        </a>
-                        <a
-                            href="/admin/inquiries"
-                            className="block py-2 px-3 rounded-lg hover:bg-neutral-100 text-neutral-700"
-                        >
-                            Enquiries
-                        </a>
-                        {onLogout && (
-                            <button
-                                onClick={() => {
-                                    setIsMenuOpen(false);
-                                    onLogout();
-                                }}
-                                className="w-full text-left py-2 px-3 rounded-lg text-red-600 hover:bg-red-50 cursor-pointer"
-                            >
-                                Logout
-                            </button>
-                        )}
-                    </div>
-                </>
-            )}
 
             {/* Subheader: < Letterhead Creator + Page Count Badge */}
             <div className="no-print px-4 pt-3.5 pb-2 flex items-center justify-between">
