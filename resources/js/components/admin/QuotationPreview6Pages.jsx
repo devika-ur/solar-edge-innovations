@@ -56,7 +56,7 @@ export const QuotationPreview6Pages = ({ data }) => {
     }
 
     return (
-        <div className="quotation-preview-container w-full flex flex-col items-center gap-8 py-4 font-sans bg-neutral-200/60 print:bg-white print:p-0 print:gap-0" data-lenis-prevent>
+        <div className="quotation-preview-container w-full flex flex-col items-center gap-8 py-4 font-sans bg-transparent print:bg-white print:p-0 print:gap-0" data-lenis-prevent>
             {/* ════════════════════════════════════════════════════════════
                 PAGE 1: COVER PAGE
             ════════════════════════════════════════════════════════════ */}

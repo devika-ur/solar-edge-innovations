@@ -80,7 +80,7 @@ export const LetterheadEditor = ({ onLogout, onBack, onNavigate }) => {
     const [textAlign, setTextAlign] = useState('left'); // 'left' or 'justify'
     const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
     const [copied, setCopied] = useState(false);
-    const [previewScale, setPreviewScale] = useState(1);
+    const [previewScale, setPreviewScale] = useState(0.85);
     const [showPreview, setShowPreview] = useState(true); // Desktop-only preview toggle (default: visible)
 
     // Paginated content array
@@ -325,7 +325,7 @@ export const LetterheadEditor = ({ onLogout, onBack, onNavigate }) => {
     }
 
     return (
-        <div className="w-full flex flex-col font-sans bg-[#F4F6F9] min-h-[calc(100vh-135px)] h-[calc(100vh-135px)] overflow-hidden relative" data-lenis-prevent>
+        <div className="w-full flex flex-col font-sans bg-[#F4F6F9] min-h-[calc(100vh-60px)] h-[calc(100vh-60px)] overflow-hidden relative" data-lenis-prevent>
             {/* Invisible DOM measurement container */}
             <div
                 ref={measureContainerRef}
@@ -494,9 +494,9 @@ export const LetterheadEditor = ({ onLogout, onBack, onNavigate }) => {
             <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
                 {/* Left Column: Editor Text Box & Typography Controls */}
                 <div
-                    className={`letterhead-editor-controls w-full h-full border-b lg:border-b-0 border-neutral-200/90 bg-white flex flex-col p-4 sm:p-5 gap-3.5 overflow-hidden z-20 ${
+                    className={`letterhead-editor-controls w-full h-full border-b lg:border-b-0 border-neutral-200/90 bg-white flex flex-col p-4 sm:p-5 gap-3.5 overflow-y-auto z-20 ${
                         showPreview
-                            ? 'lg:w-[480px] xl:w-[540px] 2xl:w-[600px] lg:border-r shrink-0'
+                            ? 'lg:w-[460px] xl:w-[500px] 2xl:w-[540px] lg:border-r shrink-0'
                             : 'lg:w-full lg:flex-1 lg:border-r-0'
                     }`}
                 >
@@ -631,7 +631,7 @@ export const LetterheadEditor = ({ onLogout, onBack, onNavigate }) => {
                     <div className="no-print sticky top-0 z-20 self-end flex items-center gap-2 bg-white/90 backdrop-blur-xs px-3.5 py-1.5 rounded-xl border border-neutral-300 shadow-2xs text-xs font-semibold text-neutral-700">
                         <span className="text-neutral-500 font-medium">Zoom:</span>
                         <button
-                            onClick={() => setPreviewScale((s) => Math.max(0.6, s - 0.1))}
+                            onClick={() => setPreviewScale((s) => Math.max(0.5, s - 0.1))}
                             className="p-1 hover:bg-neutral-100 rounded cursor-pointer"
                             title="Zoom Out"
                         >
@@ -641,17 +641,17 @@ export const LetterheadEditor = ({ onLogout, onBack, onNavigate }) => {
                             {Math.round(previewScale * 100)}%
                         </span>
                         <button
-                            onClick={() => setPreviewScale((s) => Math.min(1.4, s + 0.1))}
+                            onClick={() => setPreviewScale((s) => Math.min(1.3, s + 0.1))}
                             className="p-1 hover:bg-neutral-100 rounded cursor-pointer"
                             title="Zoom In"
                         >
                             <ZoomIn size={14} />
                         </button>
                         <button
-                            onClick={() => setPreviewScale(1)}
+                            onClick={() => setPreviewScale(0.85)}
                             className="ml-1 text-[10px] text-neutral-500 hover:text-neutral-900 underline cursor-pointer"
                         >
-                            Reset
+                            Fit
                         </button>
                     </div>
 

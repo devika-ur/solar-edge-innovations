@@ -196,7 +196,7 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
 
     return (
         <div
-            className="w-full flex flex-col font-sans bg-[#F4F6F9] min-h-[calc(100vh-135px)] h-[calc(100vh-135px)] overflow-hidden relative"
+            className="w-full flex flex-col font-sans bg-[#F4F6F9] min-h-[calc(100vh-60px)] h-[calc(100vh-60px)] overflow-hidden relative"
             data-lenis-prevent
         >
             {/* Top Action & Status Bar - Sticky at top */}

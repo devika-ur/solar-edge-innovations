@@ -15,7 +15,9 @@ import {
     X,
     Send,
     Check,
-    Copy
+    Copy,
+    Filter,
+    FilterX
 } from 'lucide-react';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { Pagination } from './Pagination';
@@ -26,6 +28,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all'); // 'all' | 'pending' | 'responded'
+    const [showFilter, setShowFilter] = useState(false);
     const [updatingStatusId, setUpdatingStatusId] = useState(null);
 
     // Detail Modal state
@@ -297,13 +300,25 @@ export const InquiryManager = ({ onUnauthorized }) => {
 
                 <div className="flex items-center gap-2.5 self-start sm:self-center">
                     <button
-                        onClick={() => loadInquiries(true)}
-                        disabled={isLoading}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-medium border border-neutral-200/90 shadow-2xs transition-all cursor-pointer disabled:opacity-60"
-                        title="Refresh inquiries list"
+                        type="button"
+                        onClick={() => setShowFilter((prev) => !prev)}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
+                            showFilter
+                                ? 'bg-neutral-100 border-neutral-300 text-neutral-800'
+                                : 'bg-white hover:bg-neutral-50 border-neutral-200/90 text-neutral-700'
+                        }`}
                     >
-                        <RefreshCw size={13} className={isLoading ? 'animate-spin text-[#1A4D2E]' : 'text-neutral-500'} />
-                        <span>Refresh</span>
+                        {showFilter ? (
+                            <>
+                                <FilterX size={14} className="text-neutral-500" />
+                                <span>Hide Filter</span>
+                            </>
+                        ) : (
+                            <>
+                                <Filter size={14} className="text-[#1A4D2E]" />
+                                <span>Show Filter</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </div>
@@ -394,66 +409,68 @@ export const InquiryManager = ({ onUnauthorized }) => {
             </div>
 
             {/* Filter and Search Bar */}
-            <div className="bg-white rounded-2xl border border-neutral-200/80 p-4 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-                {/* Status Tab Filters */}
-                <div className="flex items-center gap-1.5 p-1 bg-neutral-100 rounded-xl border border-neutral-200/60 overflow-x-auto">
-                    <button
-                        onClick={() => setStatusFilter('all')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                            statusFilter === 'all'
-                                ? 'bg-[#1A4D2E] text-white shadow-xs'
-                                : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
-                        }`}
-                    >
-                        All ({counts.total})
-                    </button>
-                    <button
-                        onClick={() => setStatusFilter('pending')}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                            statusFilter === 'pending'
-                                ? 'bg-[#1A4D2E] text-white shadow-xs'
-                                : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
-                        }`}
-                    >
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                        Pending ({counts.pending})
-                    </button>
-                    <button
-                        onClick={() => setStatusFilter('responded')}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
-                            statusFilter === 'responded'
-                                ? 'bg-[#1A4D2E] text-white shadow-xs'
-                                : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
-                        }`}
-                    >
-                        <Check size={12} />
-                        Responded ({counts.responded})
-                    </button>
-                </div>
-
-                {/* Search Bar */}
-                <div className="relative flex-1 md:max-w-md">
-                    <Search
-                        size={15}
-                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
-                    />
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search by customer name, phone, email, place..."
-                        className="w-full pl-9 pr-8 py-2 text-xs bg-neutral-50 hover:bg-neutral-100/60 focus:bg-white border border-neutral-200 rounded-xl focus:outline-none focus:border-[#1A4D2E] focus:ring-2 focus:ring-[#1A4D2E]/10 transition-all font-sans"
-                    />
-                    {searchQuery && (
+            {showFilter && (
+                <div className="bg-white rounded-2xl border border-neutral-200/80 p-4 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                    {/* Status Tab Filters */}
+                    <div className="flex items-center gap-1.5 p-1 bg-neutral-100 rounded-xl border border-neutral-200/60 overflow-x-auto">
                         <button
-                            onClick={() => setSearchQuery('')}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 p-0.5 rounded cursor-pointer"
+                            onClick={() => setStatusFilter('all')}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                                statusFilter === 'all'
+                                    ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
+                            }`}
                         >
-                            <X size={13} />
+                            All ({counts.total})
                         </button>
-                    )}
+                        <button
+                            onClick={() => setStatusFilter('pending')}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                                statusFilter === 'pending'
+                                    ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
+                            }`}
+                        >
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                            Pending ({counts.pending})
+                        </button>
+                        <button
+                            onClick={() => setStatusFilter('responded')}
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                                statusFilter === 'responded'
+                                    ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
+                            }`}
+                        >
+                            <Check size={12} />
+                            Responded ({counts.responded})
+                        </button>
+                    </div>
+
+                    {/* Search Bar */}
+                    <div className="relative flex-1 md:max-w-md">
+                        <Search
+                            size={15}
+                            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none"
+                        />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search by customer name, phone, email, place..."
+                            className="w-full pl-9 pr-8 py-2 text-xs bg-neutral-50 hover:bg-neutral-100/60 focus:bg-white border border-neutral-200 rounded-xl focus:outline-none focus:border-[#1A4D2E] focus:ring-2 focus:ring-[#1A4D2E]/10 transition-all font-sans"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 p-0.5 rounded cursor-pointer"
+                            >
+                                <X size={13} />
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Inquiries Table / Cards Container */}
             <div className="bg-white rounded-3xl border border-neutral-200/80 shadow-2xs overflow-hidden">

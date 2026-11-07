@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import toast from 'react-hot-toast';
-import { BarChart3, RefreshCw } from 'lucide-react';
+import { BarChart3, Filter, FilterX } from 'lucide-react';
 import { ReportFilters } from './ReportFilters';
 import { PaymentHistoryReport } from './PaymentHistoryReport';
 import { QuotationHistoryReport } from './QuotationHistoryReport';
@@ -35,6 +35,9 @@ export const ReportManager = ({ onUnauthorized }) => {
     const [reportData, setReportData] = useState(null);
     const [summary, setSummary] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    // 5. Show / Hide Filter section toggle
+    const [showFilter, setShowFilter] = useState(false);
 
     // Fetch clients list on mount for autocomplete/selector
     const loadClientsList = async () => {
@@ -284,30 +287,44 @@ export const ReportManager = ({ onUnauthorized }) => {
                 <div className="flex items-center gap-2.5 self-start sm:self-center">
                     <button
                         type="button"
-                        onClick={() => generateReport()}
-                        disabled={isLoading}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-medium border border-neutral-200/90 shadow-2xs transition-all cursor-pointer"
+                        onClick={() => setShowFilter((prev) => !prev)}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
+                            showFilter
+                                ? 'bg-neutral-100 border-neutral-300 text-neutral-800'
+                                : 'bg-white hover:bg-neutral-50 border-neutral-200/90 text-neutral-700'
+                        }`}
                     >
-                        <RefreshCw size={13} className={isLoading ? 'animate-spin text-[#1A4D2E]' : 'text-neutral-500'} />
-                        <span>Refresh Data</span>
+                        {showFilter ? (
+                            <>
+                                <FilterX size={14} className="text-neutral-500" />
+                                <span>Hide Filter</span>
+                            </>
+                        ) : (
+                            <>
+                                <Filter size={14} className="text-[#1A4D2E]" />
+                                <span>Show Filter</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </div>
 
             {/* Filter Controls Component */}
-            <ReportFilters
-                reportType={reportType}
-                onReportTypeChange={setReportType}
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onGenerate={() => generateReport()}
-                onReset={handleReset}
-                onExportExcel={handleExportExcel}
-                onExportPdf={handleExportPdf}
-                isLoading={isLoading}
-                hasData={hasDataToExport}
-                clientsList={filteredClientsList}
-            />
+            {showFilter && (
+                <ReportFilters
+                    reportType={reportType}
+                    onReportTypeChange={setReportType}
+                    filters={filters}
+                    onFilterChange={handleFilterChange}
+                    onGenerate={() => generateReport()}
+                    onReset={handleReset}
+                    onExportExcel={handleExportExcel}
+                    onExportPdf={handleExportPdf}
+                    isLoading={isLoading}
+                    hasData={hasDataToExport}
+                    clientsList={filteredClientsList}
+                />
+            )}
 
             {/* Report Content View */}
             {reportType === 'payment_history' && (

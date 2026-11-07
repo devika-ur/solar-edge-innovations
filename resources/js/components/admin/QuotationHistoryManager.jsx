@@ -18,6 +18,7 @@ import {
     IndianRupee,
     X,
     Filter,
+    FilterX,
     Clock,
     Plus,
     CheckCircle,
@@ -37,6 +38,7 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
     const [datePreset, setDatePreset] = useState('all'); // 'all' | 'today' | 'week' | 'month' | 'custom'
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
+    const [showFilter, setShowFilter] = useState(false);
 
     // Delete Modal state
     const [quotationToDelete, setQuotationToDelete] = useState(null);
@@ -184,13 +186,25 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
 
                 <div className="flex items-center gap-2.5 self-start sm:self-center">
                     <button
-                        onClick={() => loadQuotations(true)}
-                        disabled={isLoading}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-medium border border-neutral-200/90 shadow-2xs transition-all cursor-pointer disabled:opacity-50"
-                        title="Refresh data"
+                        type="button"
+                        onClick={() => setShowFilter((prev) => !prev)}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
+                            showFilter
+                                ? 'bg-neutral-100 border-neutral-300 text-neutral-800'
+                                : 'bg-white hover:bg-neutral-50 border-neutral-200/90 text-neutral-700'
+                        }`}
                     >
-                        <RefreshCw size={13} className={isLoading ? "animate-spin text-[#1A4D2E]" : "text-neutral-500"} />
-                        <span>Refresh</span>
+                        {showFilter ? (
+                            <>
+                                <FilterX size={14} className="text-neutral-500" />
+                                <span>Hide Filter</span>
+                            </>
+                        ) : (
+                            <>
+                                <Filter size={14} className="text-[#1A4D2E]" />
+                                <span>Show Filter</span>
+                            </>
+                        )}
                     </button>
 
                     {onNavigate && (
@@ -230,94 +244,96 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
             </div>
 
             {/* Filter Controls Bar */}
-            <div className="bg-white p-5 rounded-3xl border border-neutral-200/80 shadow-2xs space-y-4">
-                <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-                    {/* Search Input */}
-                    <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md relative">
-                        <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            placeholder="Search client, ref #, phone, city, capacity..."
-                            className="w-full pl-10 pr-24 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:border-[#1A4D2E] focus:ring-2 focus:ring-emerald-500/10 outline-none transition-all"
-                        />
-                        <button
-                            type="submit"
-                            className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs"
-                        >
-                            Search
-                        </button>
-                    </form>
-
-                    {/* Date Presets */}
-                    <div className="flex flex-wrap items-center gap-1.5">
-                        <span className="text-xs font-bold text-neutral-500 mr-1 flex items-center gap-1">
-                            <Calendar size={13} />
-                            Date:
-                        </span>
-                        {[
-                            { id: 'all', label: 'All Time' },
-                            { id: 'today', label: 'Today' },
-                            { id: 'week', label: 'Last 7 Days' },
-                            { id: 'month', label: 'This Month' },
-                            { id: 'custom', label: 'Custom Range' },
-                        ].map((p) => (
+            {showFilter && (
+                <div className="bg-white p-5 rounded-3xl border border-neutral-200/80 shadow-2xs space-y-4">
+                    <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+                        {/* Search Input */}
+                        <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md relative">
+                            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                placeholder="Search client, ref #, phone, city, capacity..."
+                                className="w-full pl-10 pr-24 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs text-neutral-900 placeholder:text-neutral-400 focus:bg-white focus:border-[#1A4D2E] focus:ring-2 focus:ring-emerald-500/10 outline-none transition-all"
+                            />
                             <button
-                                key={p.id}
-                                onClick={() => handlePresetChange(p.id)}
-                                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                                    datePreset === p.id
-                                        ? 'bg-[#1A4D2E] text-white shadow-xs'
-                                        : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                                }`}
+                                type="submit"
+                                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs"
                             >
-                                {p.label}
+                                Search
                             </button>
-                        ))}
+                        </form>
+
+                        {/* Date Presets */}
+                        <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-xs font-bold text-neutral-500 mr-1 flex items-center gap-1">
+                                <Calendar size={13} />
+                                Date:
+                            </span>
+                            {[
+                                { id: 'all', label: 'All Time' },
+                                { id: 'today', label: 'Today' },
+                                { id: 'week', label: 'Last 7 Days' },
+                                { id: 'month', label: 'This Month' },
+                                { id: 'custom', label: 'Custom Range' },
+                            ].map((p) => (
+                                <button
+                                    key={p.id}
+                                    onClick={() => handlePresetChange(p.id)}
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                                        datePreset === p.id
+                                            ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                                    }`}
+                                >
+                                    {p.label}
+                                </button>
+                            ))}
+                        </div>
                     </div>
+
+                    {/* Custom Date Range Picker */}
+                    {(datePreset === 'custom' || startDate || endDate) && (
+                        <div className="pt-3 border-t border-neutral-100 flex flex-wrap items-center gap-3 animate-in fade-in duration-150">
+                            <div className="flex items-center gap-2">
+                                <label className="text-xs font-bold text-neutral-600">From:</label>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => {
+                                        setDatePreset('custom');
+                                        setStartDate(e.target.value);
+                                    }}
+                                    className="px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs outline-none focus:border-[#1A4D2E]"
+                                />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <label className="text-xs font-bold text-neutral-600">To:</label>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => {
+                                        setDatePreset('custom');
+                                        setEndDate(e.target.value);
+                                    }}
+                                    className="px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs outline-none focus:border-[#1A4D2E]"
+                                />
+                            </div>
+
+                            {(startDate || endDate || searchQuery) && (
+                                <button
+                                    onClick={handleResetFilters}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200/80 rounded-xl transition-all cursor-pointer ml-auto"
+                                >
+                                    <X size={13} />
+                                    <span>Reset Filters</span>
+                                </button>
+                            )}
+                        </div>
+                    )}
                 </div>
-
-                {/* Custom Date Range Picker */}
-                {(datePreset === 'custom' || startDate || endDate) && (
-                    <div className="pt-3 border-t border-neutral-100 flex flex-wrap items-center gap-3 animate-in fade-in duration-150">
-                        <div className="flex items-center gap-2">
-                            <label className="text-xs font-bold text-neutral-600">From:</label>
-                            <input
-                                type="date"
-                                value={startDate}
-                                onChange={(e) => {
-                                    setDatePreset('custom');
-                                    setStartDate(e.target.value);
-                                }}
-                                className="px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs outline-none focus:border-[#1A4D2E]"
-                            />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <label className="text-xs font-bold text-neutral-600">To:</label>
-                            <input
-                                type="date"
-                                value={endDate}
-                                onChange={(e) => {
-                                    setDatePreset('custom');
-                                    setEndDate(e.target.value);
-                                }}
-                                className="px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs outline-none focus:border-[#1A4D2E]"
-                            />
-                        </div>
-
-                        {(startDate || endDate || searchQuery) && (
-                            <button
-                                onClick={handleResetFilters}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200/80 rounded-xl transition-all cursor-pointer ml-auto"
-                            >
-                                <X size={13} />
-                                <span>Reset Filters</span>
-                            </button>
-                        )}
-                    </div>
-                )}
-            </div>
+            )}
 
             {/* Quotations List */}
             {isLoading ? (

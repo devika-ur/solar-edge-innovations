@@ -22,8 +22,11 @@ import {
     DollarSign,
     Shield,
     Trash2,
+    Check,
     Eye,
-    EyeOff
+    EyeOff,
+    ZoomIn,
+    ZoomOut
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -59,6 +62,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
     const isProgrammaticScrollRef = useRef(false);
     const scrollTimeoutRef = useRef(null);
     const rightPanelRef = useRef(null);
+    const [previewScale, setPreviewScale] = useState(0.85);
     const [showPreview, setShowPreview] = useState(true); // Desktop-only preview toggle (default: visible)
 
     // Synchronize document.title with Client Name and Date so browser "Save as PDF" / Print uses it automatically
@@ -214,6 +218,10 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
 
     // Helper: capture 6-page A4 preview and render jsPDF document
     const generatePdfDocument = async (onProgress) => {
+        const savedScale = previewScale;
+        setPreviewScale(1);
+        await new Promise((resolve) => setTimeout(resolve, 80));
+
         try {
             const pages = document.querySelectorAll('.quotation-preview-container .quotation-page, .quotation-page');
             if (!pages || pages.length === 0) {
@@ -286,6 +294,8 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
         } catch (err) {
             console.error("Error in generatePdfDocument:", err);
             return null;
+        } finally {
+            setPreviewScale(savedScale);
         }
     };
 
@@ -625,7 +635,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
     }
 
     return (
-        <div className="w-full flex flex-col font-sans bg-neutral-100 min-h-[calc(100vh-135px)] h-[calc(100vh-135px)] overflow-hidden relative" data-lenis-prevent>
+        <div className="w-full flex flex-col font-sans bg-neutral-100 min-h-[calc(100vh-60px)] h-[calc(100vh-60px)] overflow-hidden relative" data-lenis-prevent>
             {/* Print Stylesheet Injection */}
             <style>{`
                 @media print {
@@ -663,6 +673,11 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                         overflow: visible !important;
                         background: white !important;
                         display: block !important;
+                    }
+
+                    .preview-scale-wrapper {
+                        transform: none !important;
+                        width: 210mm !important;
                     }
 
                     .quotation-preview-container {
@@ -839,12 +854,12 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
             </div>
 
             {/* Split Screen Workspace Area */}
-            <div className="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+            <div className="flex-1 flex flex-col lg:flex-row overflow-hidden min-h-0">
                 {/* Left Column: Form Controls */}
                 <div
-                    className={`w-full md:w-[460px] h-full border-r border-neutral-200 bg-white flex flex-col overflow-hidden quotation-editor-left-panel z-20 ${
+                    className={`quotation-editor-left-panel w-full h-full border-b lg:border-b-0 border-neutral-200/90 bg-white flex flex-col overflow-hidden z-20 ${
                         showPreview
-                            ? 'lg:w-[500px] xl:w-[540px] shrink-0'
+                            ? 'lg:w-[460px] xl:w-[500px] 2xl:w-[540px] lg:border-r shrink-0'
                             : 'lg:w-full lg:flex-1 lg:border-r-0'
                     }`}
                     data-lenis-prevent
@@ -869,14 +884,52 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                 {/* Right Column: Live Preview */}
                 <div
                     ref={rightPanelRef}
-                    className={`flex-1 h-full overflow-y-auto quotation-preview-right-panel p-4 md:p-8 bg-neutral-200/80 ${
+                    className={`quotation-preview-right-panel flex-1 h-full bg-neutral-200/80 p-4 sm:p-8 overflow-y-auto flex flex-col items-center gap-8 z-10 ${
                         showPreview
                             ? ''
                             : 'lg:flex-none lg:fixed lg:-left-[99999px] lg:top-0 lg:w-[210mm] lg:h-auto lg:p-0 lg:bg-transparent lg:opacity-0 lg:pointer-events-none lg:overflow-hidden'
                     }`}
                     data-lenis-prevent
                 >
-                    <QuotationPreview6Pages data={quotationData} />
+                    {/* Zoom / Scale bar */}
+                    <div className="no-print sticky top-0 z-20 self-end flex items-center gap-2 bg-white/90 backdrop-blur-xs px-3.5 py-1.5 rounded-xl border border-neutral-300 shadow-2xs text-xs font-semibold text-neutral-700">
+                        <span className="text-neutral-500 font-medium">Zoom:</span>
+                        <button
+                            onClick={() => setPreviewScale((s) => Math.max(0.5, s - 0.1))}
+                            className="p-1 hover:bg-neutral-100 rounded cursor-pointer"
+                            title="Zoom Out"
+                        >
+                            <ZoomOut size={14} />
+                        </button>
+                        <span className="font-mono text-[11px] w-12 text-center font-bold">
+                            {Math.round(previewScale * 100)}%
+                        </span>
+                        <button
+                            onClick={() => setPreviewScale((s) => Math.min(1.3, s + 0.1))}
+                            className="p-1 hover:bg-neutral-100 rounded cursor-pointer"
+                            title="Zoom In"
+                        >
+                            <ZoomIn size={14} />
+                        </button>
+                        <button
+                            onClick={() => setPreviewScale(0.85)}
+                            className="ml-1 text-[10px] text-neutral-500 hover:text-neutral-900 underline cursor-pointer"
+                        >
+                            Fit
+                        </button>
+                    </div>
+
+                    {/* Scale Wrapper with vertical page stack */}
+                    <div
+                        className="preview-scale-wrapper w-full flex flex-col items-center"
+                        style={{
+                            transform: `scale(${previewScale})`,
+                            transformOrigin: 'top center',
+                            transition: 'transform 0.15s ease-out'
+                        }}
+                    >
+                        <QuotationPreview6Pages data={quotationData} />
+                    </div>
                 </div>
             </div>
 

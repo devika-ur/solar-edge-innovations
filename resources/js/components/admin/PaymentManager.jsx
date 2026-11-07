@@ -10,7 +10,9 @@ import {
     X,
     FileText,
     Pencil,
-    Calendar
+    Calendar,
+    Filter,
+    FilterX
 } from 'lucide-react';
 import { Pagination } from './Pagination';
 
@@ -38,6 +40,7 @@ export const PaymentManager = ({ onNavigate, onUnauthorized }) => {
     // Filters
     const [searchQuery, setSearchQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [showFilter, setShowFilter] = useState(false);
 
     // Modals
     const [selectedPaymentForAdd, setSelectedPaymentForAdd] = useState(null);
@@ -125,13 +128,25 @@ export const PaymentManager = ({ onNavigate, onUnauthorized }) => {
 
                 <div className="flex items-center gap-2.5 self-start sm:self-center">
                     <button
-                        onClick={() => loadPayments(true)}
-                        disabled={isLoading}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-medium border border-neutral-200/90 shadow-2xs transition-all cursor-pointer"
-                        title="Refresh"
+                        type="button"
+                        onClick={() => setShowFilter((prev) => !prev)}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
+                            showFilter
+                                ? 'bg-neutral-100 border-neutral-300 text-neutral-800'
+                                : 'bg-white hover:bg-neutral-50 border-neutral-200/90 text-neutral-700'
+                        }`}
                     >
-                        <RefreshCw size={13} className={isLoading ? 'animate-spin text-[#1A4D2E]' : 'text-neutral-500'} />
-                        <span>Refresh</span>
+                        {showFilter ? (
+                            <>
+                                <FilterX size={14} className="text-neutral-500" />
+                                <span>Hide Filter</span>
+                            </>
+                        ) : (
+                            <>
+                                <Filter size={14} className="text-[#1A4D2E]" />
+                                <span>Show Filter</span>
+                            </>
+                        )}
                     </button>
 
                     <button
@@ -167,50 +182,52 @@ export const PaymentManager = ({ onNavigate, onUnauthorized }) => {
                 </div>
             </div>
 
-            {/* Simple Filter Bar */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                {/* Search */}
-                <div className="relative flex-1 max-w-md">
-                    <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search customer, quotation ref, phone..."
-                        className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-white border border-neutral-200 rounded-lg focus:outline-hidden focus:border-[#1A4D2E]"
-                    />
-                    {searchQuery && (
-                        <button
-                            onClick={() => setSearchQuery('')}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
-                        >
-                            <X size={14} />
-                        </button>
-                    )}
-                </div>
+            {/* Filter Container */}
+            {showFilter && (
+                <div className="bg-white rounded-2xl border border-neutral-200/80 p-4 shadow-2xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                    {/* Search */}
+                    <div className="relative flex-1 max-w-md">
+                        <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search customer, quotation ref, phone..."
+                            className="w-full pl-9 pr-8 py-2 text-xs bg-neutral-50 hover:bg-neutral-100/60 focus:bg-white border border-neutral-200 rounded-xl focus:outline-none focus:border-[#1A4D2E] focus:ring-2 focus:ring-[#1A4D2E]/10 transition-all font-sans"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 p-0.5 rounded cursor-pointer"
+                            >
+                                <X size={14} />
+                            </button>
+                        )}
+                    </div>
 
-                {/* Status Tabs */}
-                <div className="flex items-center gap-1 bg-neutral-100 p-1 rounded-lg">
-                    {[
-                        { id: 'all', label: 'All' },
-                        { id: 'pending', label: 'Pending' },
-                        { id: 'partially_paid', label: 'Partially Paid' },
-                        { id: 'paid', label: 'Paid' },
-                    ].map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setStatusFilter(tab.id)}
-                            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors cursor-pointer ${
-                                statusFilter === tab.id
-                                    ? 'bg-white text-neutral-900 font-bold shadow-2xs'
-                                    : 'text-neutral-600 hover:text-neutral-900'
-                            }`}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+                    {/* Status Tabs */}
+                    <div className="flex items-center gap-1.5 p-1 bg-neutral-100 rounded-xl border border-neutral-200/60 overflow-x-auto">
+                        {[
+                            { id: 'all', label: 'All' },
+                            { id: 'pending', label: 'Pending' },
+                            { id: 'partially_paid', label: 'Partially Paid' },
+                            { id: 'paid', label: 'Paid' },
+                        ].map((tab) => (
+                            <button
+                                key={tab.id}
+                                onClick={() => setStatusFilter(tab.id)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+                                    statusFilter === tab.id
+                                        ? 'bg-[#1A4D2E] text-white shadow-xs'
+                                        : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
+                                }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Table */}
             <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-2xs">

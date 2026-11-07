@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { AdminLogin } from '../components/admin/AdminLogin';
+import { AdminSidebar, ADMIN_NAV_ITEMS } from '../components/admin/AdminSidebar';
 import { DashboardOverview } from '../components/admin/DashboardOverview';
 import { ProjectGalleryManager } from '../components/admin/ProjectGalleryManager';
 import { FaqManager } from '../components/admin/FaqManager';
@@ -13,24 +14,12 @@ import { ReportManager } from '../components/admin/reports/ReportManager';
 import { AgreementEditor } from '../components/admin/AgreementEditor';
 import { Toaster, toast } from 'react-hot-toast';
 import {
-    LayoutDashboard,
-    FolderGit2,
-    HelpCircle,
-    FileText,
-    FileSignature,
-    History,
-    CreditCard,
-    ScrollText,
     LogOut,
     Globe,
     User,
-    Sparkles,
     AlertTriangle,
-    Mail,
     X,
-    BarChart3,
-    ChevronLeft,
-    ChevronRight
+    Menu
 } from 'lucide-react';
 import { assets } from '../assets/assets';
 
@@ -58,75 +47,40 @@ const AdminPage = () => {
 
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [pendingInquiriesCount, setPendingInquiriesCount] = useState(0);
-    const [canScrollLeft, setCanScrollLeft] = useState(false);
-    const [canScrollRight, setCanScrollRight] = useState(false);
 
-    const navRef = useRef(null);
-
-    const updateScrollControls = () => {
-        if (!navRef.current) return;
-        const { scrollLeft, scrollWidth, clientWidth } = navRef.current;
-        setCanScrollLeft(scrollLeft > 6);
-        setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 6);
-    };
-
-    // Auto-scroll active tab into view when activeTab changes or on mount
-    const scrollActiveTabIntoView = (behavior = 'smooth') => {
-        if (!navRef.current) return;
-        const activeBtn = navRef.current.querySelector('[data-active="true"]');
-        if (activeBtn) {
-            const nav = navRef.current;
-            const btnLeft = activeBtn.offsetLeft;
-            const btnRight = btnLeft + activeBtn.offsetWidth;
-            const navScrollLeft = nav.scrollLeft;
-            const navVisibleRight = navScrollLeft + nav.clientWidth;
-
-            if (btnLeft < navScrollLeft + 20) {
-                nav.scrollTo({ left: Math.max(0, btnLeft - 24), behavior });
-            } else if (btnRight > navVisibleRight - 20) {
-                nav.scrollTo({ left: btnRight - nav.clientWidth + 24, behavior });
-            }
+    // Sidebar Collapsed Rail State (persisted in localStorage)
+    const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(() => {
+        try {
+            return localStorage.getItem('solar_admin_sidebar_collapsed') === 'true';
+        } catch {
+            return false;
         }
-        updateScrollControls();
+    });
+
+    const toggleSidebarCollapse = (val) => {
+        setIsSidebarCollapsed((prev) => {
+            const next = typeof val === 'boolean' ? val : !prev;
+            try {
+                localStorage.setItem('solar_admin_sidebar_collapsed', String(next));
+            } catch {}
+            return next;
+        });
     };
 
-    useEffect(() => {
-        scrollActiveTabIntoView('smooth');
-        const timer1 = setTimeout(() => scrollActiveTabIntoView('smooth'), 100);
-        const timer2 = setTimeout(() => scrollActiveTabIntoView('smooth'), 300);
-        return () => {
-            clearTimeout(timer1);
-            clearTimeout(timer2);
-        };
-    }, [activeTab]);
+    // Mobile slide-over drawer state (< md screens)
+    const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+    const mainRef = useRef(null);
 
-    // Enable horizontal scrolling on navigation tabs via mouse wheel and track scroll position
+    // Keyboard shortcut (⌘B or Ctrl+B) to toggle rail / expanded sidebar
     useEffect(() => {
-        const navEl = navRef.current;
-        if (!navEl) return;
-        updateScrollControls();
-
-        const handleWheel = (e) => {
-            if (e.deltaY !== 0 && navEl.scrollWidth > navEl.clientWidth) {
+        const handleKeyDown = (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
                 e.preventDefault();
-                navEl.scrollLeft += e.deltaY;
-                updateScrollControls();
+                toggleSidebarCollapse();
             }
         };
-
-        const handleScroll = () => {
-            updateScrollControls();
-        };
-
-        navEl.addEventListener('wheel', handleWheel, { passive: false });
-        navEl.addEventListener('scroll', handleScroll, { passive: true });
-        window.addEventListener('resize', updateScrollControls);
-
-        return () => {
-            navEl.removeEventListener('wheel', handleWheel);
-            navEl.removeEventListener('scroll', handleScroll);
-            window.removeEventListener('resize', updateScrollControls);
-        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
 
     // Fetch pending count periodically or on mount / tab change
@@ -180,6 +134,9 @@ const AdminPage = () => {
     }, []);
 
     useEffect(() => {
+        if (mainRef.current) {
+            mainRef.current.scrollTo(0, 0);
+        }
         window.scrollTo(0, 0);
     }, [activeTab]);
 
@@ -244,28 +201,12 @@ const AdminPage = () => {
         );
     }
 
-    const navigationItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        {
-            id: 'inquiries',
-            label: 'Enquiry',
-            icon: Mail,
-            badge: pendingInquiriesCount > 0 ? pendingInquiriesCount : null,
-        },
-        { id: 'projects', label: 'Projects & Gallery', icon: FolderGit2 },
-        { id: 'faqs', label: 'Website FAQs', icon: HelpCircle },
-        { id: 'letterhead', label: 'Letterhead', icon: ScrollText },
-        { id: 'quotation', label: 'Quotation Builder', icon: FileText },
-        { id: 'agreement', label: 'Agreement', icon: FileSignature },
-        { id: 'quotation-history', label: 'Quotation History', icon: History },
-        { id: 'payments', label: 'Payments', icon: CreditCard },
-        { id: 'reports', label: 'Reports', icon: BarChart3 },
-    ];
-
+    const activeTabItem = ADMIN_NAV_ITEMS.find((item) => item.id === activeTab) || ADMIN_NAV_ITEMS[0];
+    const ActiveTabIcon = activeTabItem.icon;
     const isDocumentTab = activeTab === 'quotation' || activeTab === 'letterhead' || activeTab === 'agreement';
 
     return (
-        <div className={`w-full min-h-screen bg-[#F8FAFC] flex flex-col font-poppins admin-poppins-theme`}>
+        <div className="w-full h-screen bg-[#F8FAFC] flex font-poppins admin-poppins-theme overflow-hidden">
             {/* Global Hot Toast Container */}
             <Toaster
                 position="top-right"
@@ -296,126 +237,91 @@ const AdminPage = () => {
                 }}
             />
 
-            {/* Top Navigation Bar */}
-            <header className={`sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-neutral-200/90 shadow-sm ${activeTab === 'quotation' || activeTab === 'letterhead' ? 'hidden md:block' : 'block'}`}>
-                {/* Top Row: Brand & Action Controls */}
-                <div className="px-4 sm:px-8 py-3 sm:py-3.5 flex items-center justify-between gap-4">
-                    {/* Brand */}
-                    <div className="flex items-center gap-3.5">
-                        <img src={assets.logo} alt="Solar Edge Logo" className="h-10 sm:h-12 object-contain transition-transform hover:scale-105" />
-                        <div>
-                            <span className="text-base sm:text-lg font-semibold text-neutral-900 block leading-tight tracking-tight">
-                                Solar Edge Innovations
-                            </span>
-                            <span className="text-xs text-emerald-700 font-medium tracking-wide uppercase flex items-center gap-1 mt-0.5">
-                                <Sparkles size={12} />
-                                Admin Panel
-                            </span>
+            {/* Admin Sidebar (Collapsible Rail on desktop, Slide-over Drawer on mobile) */}
+            <AdminSidebar
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                pendingInquiriesCount={pendingInquiriesCount}
+                isCollapsed={isSidebarCollapsed}
+                setIsCollapsed={toggleSidebarCollapse}
+                isMobileOpen={isMobileSidebarOpen}
+                setIsMobileOpen={setIsMobileSidebarOpen}
+                onLogout={() => setIsLogoutModalOpen(true)}
+            />
+
+            {/* Main Content Column */}
+            <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+                {/* Single-Row Clean Top Header */}
+                <header className="h-[60px] bg-white/95 backdrop-blur-md border-b border-neutral-200/90 px-4 sm:px-6 flex items-center justify-between shrink-0 z-20 shadow-2xs">
+                    {/* Left: Mobile hamburger menu toggle + Current Tab Name */}
+                    <div className="flex items-center gap-3">
+                        {/* Hamburger button for mobile (< md) */}
+                        <button
+                            type="button"
+                            onClick={() => setIsMobileSidebarOpen(true)}
+                            aria-label="Open navigation menu"
+                            className="md:hidden p-2 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 transition-colors cursor-pointer"
+                        >
+                            <Menu size={20} />
+                        </button>
+
+                        {/* Current Active Tab Info */}
+                        <div className="flex items-center gap-2.5">
+                            <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#1A4D2E] flex items-center justify-center shrink-0 border border-emerald-100/60">
+                                <ActiveTabIcon size={16} />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-sm sm:text-base font-bold text-neutral-900 leading-tight">
+                                    {activeTabItem.label}
+                                </h1>
+                                {activeTabItem.id === 'inquiries' && pendingInquiriesCount > 0 && (
+                                    <span className="bg-amber-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-2xs">
+                                        {pendingInquiriesCount} pending
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
 
-                    {/* Right Actions (View Website, admin badge, Logout) */}
-                    <div className="flex items-center gap-2.5">
+                    {/* Right: Actions */}
+                    <div className="flex items-center gap-2 sm:gap-2.5">
                         <a
                             href="/projects"
                             target="_blank"
                             rel="noreferrer"
-                            className="hidden md:inline-flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm text-neutral-700 hover:text-[#1A4D2E] font-semibold border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm text-neutral-700 hover:text-[#1A4D2E] font-semibold border border-neutral-200 rounded-xl hover:bg-neutral-50 transition-colors"
                             title="View Public Website Projects"
                         >
-                            <Globe size={15} />
-                            <span>View Website</span>
+                            <Globe size={14} />
+                            <span className="hidden sm:inline">View Website</span>
                         </a>
 
-                        <button
-                            onClick={() => setIsLogoutModalOpen(true)}
-                            className="hidden lg:flex items-center gap-2 px-3.5 py-1.5 bg-neutral-100 hover:bg-neutral-200/80 rounded-xl text-xs sm:text-sm font-semibold text-neutral-700 cursor-pointer transition-all"
-                            title="Logged in as admin (Click to Log Out)"
+                        <div
+                            className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-neutral-100 rounded-xl text-xs sm:text-sm font-semibold text-neutral-700 select-none"
+                            title="Logged in as admin"
                         >
-                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                            <User size={15} className="text-[#1A4D2E]" />
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <User size={14} className="text-[#1A4D2E]" />
                             <span>admin</span>
-                        </button>
+                        </div>
 
                         <button
                             onClick={() => setIsLogoutModalOpen(true)}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm text-neutral-700 hover:text-neutral-900 font-semibold bg-neutral-100 hover:bg-neutral-200/80 rounded-xl transition-all cursor-pointer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm text-neutral-700 hover:text-red-600 font-semibold bg-neutral-100 hover:bg-red-50 rounded-xl transition-all cursor-pointer"
                             title="Log out of admin session"
                         >
-                            <LogOut size={15} />
+                            <LogOut size={14} />
                             <span className="hidden sm:inline">Logout</span>
                         </button>
                     </div>
-                </div>
+                </header>
 
-                {/* Sub-bar / Primary Navigation Row */}
-                <div className="w-full px-4 sm:px-8 pb-3 pt-0 border-t border-neutral-100 sm:border-t-0 flex items-center relative admin-nav-container group/nav">
-                    {/* Left Scroll Indicator Button */}
-                    {canScrollLeft && (
-                        <button
-                            type="button"
-                            onClick={() => navRef.current?.scrollBy({ left: -220, behavior: 'smooth' })}
-                            aria-label="Scroll tabs left"
-                            className="hidden sm:flex absolute left-6 sm:left-10 z-10 w-7 h-7 items-center justify-center rounded-full bg-white text-neutral-700 shadow-md border border-neutral-200/90 hover:bg-[#1A4D2E] hover:text-white transition-all cursor-pointer opacity-0 group-hover/nav:opacity-100"
-                        >
-                            <ChevronLeft size={16} />
-                        </button>
-                    )}
-
-                    <nav
-                        ref={navRef}
-                        className="w-full flex items-center gap-1 sm:gap-1.5 bg-neutral-100 p-1.5 pb-2.5 rounded-2xl border border-neutral-200/80 overflow-x-auto admin-nav-scrollbar"
-                    >
-                        {navigationItems.map((item) => {
-                            const Icon = item.icon;
-                            const isActive = activeTab === item.id;
-                            return (
-                                <button
-                                    key={item.id}
-                                    data-active={isActive ? "true" : "false"}
-                                    onClick={(e) => {
-                                        handleTabChange(item.id);
-                                        e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-                                    }}
-                                    className={`inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-[13px] transition-all cursor-pointer whitespace-nowrap shrink-0 ${isActive
-                                            ? 'bg-[#1A4D2E] text-white shadow-xs font-semibold'
-                                            : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 font-medium'
-                                        }`}
-                                >
-                                    <Icon size={15} />
-                                    <span>{item.label}</span>
-                                    {item.badge != null && (
-                                        <span
-                                            className={`px-1.5 py-0.5 rounded-full text-[11px] font-semibold leading-none ${
-                                                isActive
-                                                    ? 'bg-amber-400 text-neutral-950 font-mono shadow-xs'
-                                                    : 'bg-amber-500 text-white font-mono'
-                                            }`}
-                                        >
-                                            {item.badge}
-                                        </span>
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </nav>
-
-                    {/* Right Scroll Indicator Button */}
-                    {canScrollRight && (
-                        <button
-                            type="button"
-                            onClick={() => navRef.current?.scrollBy({ left: 220, behavior: 'smooth' })}
-                            aria-label="Scroll tabs right"
-                            className="hidden sm:flex absolute right-6 sm:right-10 z-10 w-7 h-7 items-center justify-center rounded-full bg-white text-neutral-700 shadow-md border border-neutral-200/90 hover:bg-[#1A4D2E] hover:text-white transition-all cursor-pointer opacity-0 group-hover/nav:opacity-100"
-                        >
-                            <ChevronRight size={16} />
-                        </button>
-                    )}
-                </div>
-            </header>
-
-            {/* Main Content Area */}
-            <main className={`flex-1 ${isDocumentTab ? 'font-sans' : 'font-poppins'} ${isDocumentTab ? 'pb-0' : 'pb-12'}`}>
+                {/* Main Content Area */}
+                <main
+                    ref={mainRef}
+                    className={`flex-1 overflow-y-auto min-h-0 ${isDocumentTab ? 'font-sans' : 'font-poppins'} ${isDocumentTab ? 'pb-0' : 'pb-12'}`}
+                    data-lenis-prevent
+                >
                 {activeTab === 'dashboard' && <DashboardOverview onNavigate={handleTabChange} onUnauthorized={handleUnauthorized} />}
                 {activeTab === 'inquiries' && <InquiryManager onUnauthorized={handleUnauthorized} />}
                 {activeTab === 'projects' && <ProjectGalleryManager onUnauthorized={handleUnauthorized} />}
@@ -460,6 +366,7 @@ const AdminPage = () => {
                     />
                 )}
             </main>
+        </div>
 
             {/* Logout Confirmation Modal Popup */}
             {isLogoutModalOpen && (

@@ -14,6 +14,7 @@ import {
     AlertCircle,
     Check,
     Filter,
+    FilterX,
     ChevronDown
 } from 'lucide-react';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
@@ -23,6 +24,7 @@ export const FaqManager = ({ onUnauthorized }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [showFilter, setShowFilter] = useState(false);
     
     // Modal states
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -236,12 +238,25 @@ export const FaqManager = ({ onUnauthorized }) => {
 
                 <div className="flex items-center gap-2.5 self-start sm:self-center">
                     <button
-                        onClick={loadFaqs}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-medium border border-neutral-200/90 shadow-2xs transition-all cursor-pointer"
-                        title="Reload FAQs"
+                        type="button"
+                        onClick={() => setShowFilter((prev) => !prev)}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
+                            showFilter
+                                ? 'bg-neutral-100 border-neutral-300 text-neutral-800'
+                                : 'bg-white hover:bg-neutral-50 border-neutral-200/90 text-neutral-700'
+                        }`}
                     >
-                        <RefreshCw size={13} className={isLoading ? 'animate-spin text-[#1A4D2E]' : 'text-neutral-500'} />
-                        <span>Refresh</span>
+                        {showFilter ? (
+                            <>
+                                <FilterX size={14} className="text-neutral-500" />
+                                <span>Hide Filter</span>
+                            </>
+                        ) : (
+                            <>
+                                <Filter size={14} className="text-[#1A4D2E]" />
+                                <span>Show Filter</span>
+                            </>
+                        )}
                     </button>
                     <button
                         onClick={openCreateModal}
@@ -254,68 +269,70 @@ export const FaqManager = ({ onUnauthorized }) => {
             </div>
 
             {/* Filters Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-neutral-200/80 shadow-xs">
-                {/* Search */}
-                <div className="relative flex-1 max-w-md">
-                    <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search questions or answers..."
-                        className="w-full pl-9 pr-8 py-2 rounded-xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-800 placeholder-neutral-400 focus:bg-white focus:border-[#1A4D2E] focus:ring-1 focus:ring-[#1A4D2E]/20 outline-none transition-all font-medium"
-                    />
-                    {searchQuery && (
-                        <button
-                            onClick={() => setSearchQuery('')}
-                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 p-1 rounded-lg transition-colors cursor-pointer"
-                            title="Clear search"
-                        >
-                            <X size={13} />
-                        </button>
-                    )}
-                </div>
-
-                {/* Category Dropdown */}
-                <div className="flex items-center gap-2 self-start sm:self-center">
-                    <div className="relative min-w-[210px] sm:min-w-[240px]">
-                        <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 flex items-center">
-                            <Filter size={14} className={selectedCategory !== 'All' ? 'text-[#1A4D2E]' : 'text-neutral-400'} />
-                        </div>
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className={`w-full appearance-none pl-9 pr-9 py-2 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#1A4D2E]/20 transition-all cursor-pointer ${
-                                selectedCategory !== 'All'
-                                    ? 'bg-emerald-50/60 border-emerald-300 text-[#1A4D2E]'
-                                    : 'bg-neutral-50 hover:bg-neutral-100/80 border-neutral-200 text-neutral-700'
-                            }`}
-                        >
-                            <option value="All">All Categories ({faqs.length})</option>
-                            {categories.filter(c => c !== 'All').map((cat) => {
-                                const count = faqs.filter(f => (f.category || '').toLowerCase() === cat.toLowerCase()).length;
-                                return (
-                                    <option key={cat} value={cat}>
-                                        {cat} {count > 0 ? `(${count})` : ''}
-                                    </option>
-                                );
-                            })}
-                        </select>
-                        <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400" />
+            {showFilter && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-neutral-200/80 shadow-xs">
+                    {/* Search */}
+                    <div className="relative flex-1 max-w-md">
+                        <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search questions or answers..."
+                            className="w-full pl-9 pr-8 py-2 rounded-xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-800 placeholder-neutral-400 focus:bg-white focus:border-[#1A4D2E] focus:ring-1 focus:ring-[#1A4D2E]/20 outline-none transition-all font-medium"
+                        />
+                        {searchQuery && (
+                            <button
+                                onClick={() => setSearchQuery('')}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 p-1 rounded-lg transition-colors cursor-pointer"
+                                title="Clear search"
+                            >
+                                <X size={13} />
+                            </button>
+                        )}
                     </div>
 
-                    {selectedCategory !== 'All' && (
-                        <button
-                            onClick={() => setSelectedCategory('All')}
-                            className="inline-flex items-center gap-1 px-2.5 py-2 text-xs font-medium text-neutral-600 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200/70 rounded-xl transition-all cursor-pointer"
-                            title="Reset to All Categories"
-                        >
-                            <X size={13} />
-                            <span>Clear</span>
-                        </button>
-                    )}
+                    {/* Category Dropdown */}
+                    <div className="flex items-center gap-2 self-start sm:self-center">
+                        <div className="relative min-w-[210px] sm:min-w-[240px]">
+                            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400 flex items-center">
+                                <Filter size={14} className={selectedCategory !== 'All' ? 'text-[#1A4D2E]' : 'text-neutral-400'} />
+                            </div>
+                            <select
+                                value={selectedCategory}
+                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                className={`w-full appearance-none pl-9 pr-9 py-2 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#1A4D2E]/20 transition-all cursor-pointer ${
+                                    selectedCategory !== 'All'
+                                        ? 'bg-emerald-50/60 border-emerald-300 text-[#1A4D2E]'
+                                        : 'bg-neutral-50 hover:bg-neutral-100/80 border-neutral-200 text-neutral-700'
+                                }`}
+                            >
+                                <option value="All">All Categories ({faqs.length})</option>
+                                {categories.filter(c => c !== 'All').map((cat) => {
+                                    const count = faqs.filter(f => (f.category || '').toLowerCase() === cat.toLowerCase()).length;
+                                    return (
+                                        <option key={cat} value={cat}>
+                                            {cat} {count > 0 ? `(${count})` : ''}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                            <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400" />
+                        </div>
+
+                        {selectedCategory !== 'All' && (
+                            <button
+                                onClick={() => setSelectedCategory('All')}
+                                className="inline-flex items-center gap-1 px-2.5 py-2 text-xs font-medium text-neutral-600 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200/70 rounded-xl transition-all cursor-pointer"
+                                title="Reset to All Categories"
+                            >
+                                <X size={13} />
+                                <span>Clear</span>
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Error Message */}
             {errorMessage && (
