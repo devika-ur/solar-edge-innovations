@@ -69,11 +69,11 @@ export const QuotationPreview6Pages = ({ data }) => {
 
                     {/* Main Title Banner */}
                     <div className="flex flex-col items-center gap-3 z-10 mb-4">
-                        <h1 className="text-4xl font-extrabold tracking-tight text-[#0D4379] font-sans uppercase">
+                        <h1 className="text-4xl font-extrabold tracking-tight text-[#0D4379] font-sans uppercase break-words [overflow-wrap:anywhere]">
                             {data.systemTitle || "SOLAR POWERPLANT"}
                         </h1>
                         <div className="inline-block relative">
-                            <p className="text-xl font-medium tracking-[0.2em] text-[#1D63A4] uppercase">
+                            <p className="text-xl font-medium tracking-[0.2em] text-[#1D63A4] uppercase break-words [overflow-wrap:anywhere]">
                                 {data.systemSubtitle || "Grid Tie System"}
                             </p>
                             <span className="block w-28 h-0.5 bg-[#4084C5] mx-auto mt-2" />
@@ -85,7 +85,7 @@ export const QuotationPreview6Pages = ({ data }) => {
                         <p className="text-xs font-bold tracking-[0.25em] text-[#0D4379] uppercase">
                             CLIENT NAME
                         </p>
-                        <p className="text-2xl font-extrabold text-[#154675] tracking-wide uppercase">
+                        <p className="text-2xl font-extrabold text-[#154675] tracking-wide uppercase break-words [overflow-wrap:anywhere]">
                             {data.clientInfo.name || "CLIENT NAME"}
                         </p>
                     </div>
@@ -95,7 +95,7 @@ export const QuotationPreview6Pages = ({ data }) => {
                         <p className="text-xs font-bold tracking-[0.25em] text-[#0D4379] uppercase">
                             SYSTEM CAPACITY
                         </p>
-                        <p className="text-2xl font-extrabold text-[#154675] tracking-wide uppercase">
+                        <p className="text-2xl font-extrabold text-[#154675] tracking-wide uppercase break-words [overflow-wrap:anywhere]">
                             {data.clientInfo.capacity || "SYSTEM CAPACITY"}
                         </p>
                     </div>
@@ -186,13 +186,19 @@ export const QuotationPreview6Pages = ({ data }) => {
 
                         {/* Manufacturers Styled Table */}
                         <div className="w-full border border-[#7AAAD8] rounded-xl overflow-hidden">
-                            <table className="w-full text-left border-collapse text-[11px]">
+                            <table className="w-full table-fixed text-left border-collapse text-[11px]">
+                                <colgroup>
+                                    <col style={{ width: '12%' }} />
+                                    <col style={{ width: '44%' }} />
+                                    <col style={{ width: '24%' }} />
+                                    <col style={{ width: '20%' }} />
+                                </colgroup>
                                 <thead>
                                     <tr className="bg-[#134D8B] text-white text-xs font-bold uppercase tracking-wider">
-                                        <th className="py-2.5 px-3 text-center border-r border-blue-400/40 w-16 whitespace-nowrap">SL NO</th>
-                                        <th className="py-2.5 px-4 border-r border-blue-400/40">ITEM</th>
-                                        <th className="py-2.5 px-4 text-center border-r border-blue-400/40">MANUFACTURER</th>
-                                        <th className="py-2.5 px-4 text-center w-36">COUNTRY OF ORIGIN</th>
+                                        <th className="py-2.5 px-3 text-center border-r border-blue-400/40 whitespace-nowrap">SL NO</th>
+                                        <th className="py-2.5 px-4 border-r border-blue-400/40 break-words [overflow-wrap:anywhere]">ITEM</th>
+                                        <th className="py-2.5 px-4 text-center border-r border-blue-400/40 break-words [overflow-wrap:anywhere]">MANUFACTURER</th>
+                                        <th className="py-2.5 px-4 text-center break-words [overflow-wrap:anywhere]">COUNTRY OF ORIGIN</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-[#BED6EE] text-neutral-800">
@@ -202,16 +208,16 @@ export const QuotationPreview6Pages = ({ data }) => {
                                             : FIRST_PAGE_MFG + (chunkIdx - 1) * NEXT_PAGE_MFG + idx + 1;
                                         return (
                                             <tr key={row.id || globalIndex} className={idx % 2 === 0 ? "bg-white" : "bg-[#F4F9FF]"}>
-                                                <td className="py-2.5 px-3 text-center font-bold text-[#0D4379] border-r border-[#BED6EE]">
+                                                <td className="py-2.5 px-3 text-center font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">
                                                     {globalIndex}
                                                 </td>
-                                                <td className="py-2.5 px-4 font-bold text-[#144778] border-r border-[#BED6EE] leading-snug">
+                                                <td className="py-2.5 px-4 font-bold text-[#144778] border-r border-[#BED6EE] leading-snug break-words [overflow-wrap:anywhere]">
                                                     {row.item}
                                                 </td>
-                                                <td className="py-2.5 px-4 text-center font-extrabold text-[#0D4379] uppercase border-r border-[#BED6EE]">
+                                                <td className="py-2.5 px-4 text-center font-extrabold text-[#0D4379] uppercase border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">
                                                     {row.manufacturer}
                                                 </td>
-                                                <td className="py-2.5 px-4 text-center font-bold text-[#0D4379]">
+                                                <td className="py-2.5 px-4 text-center font-bold text-[#0D4379] break-words [overflow-wrap:anywhere]">
                                                     {row.origin}
                                                 </td>
                                             </tr>
@@ -241,27 +247,31 @@ export const QuotationPreview6Pages = ({ data }) => {
                         </h2>
 
                         <div className="w-full border border-[#7AAAD8] rounded-xl overflow-hidden text-xs">
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full table-fixed text-left border-collapse">
+                                <colgroup>
+                                    <col style={{ width: '33.33%' }} />
+                                    <col style={{ width: '66.67%' }} />
+                                </colgroup>
                                 <tbody className="divide-y divide-[#BED6EE]">
                                     <tr className="bg-[#EEF6FE]">
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] w-1/3 border-r border-[#BED6EE]">Client</td>
-                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] uppercase">{data.clientInfo.name}</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">Client</td>
+                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] uppercase break-words [overflow-wrap:anywhere] leading-snug">{data.clientInfo.name}</td>
                                     </tr>
                                     <tr className="bg-white">
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">Address</td>
-                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] uppercase">{data.clientInfo.address}</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">Address</td>
+                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] uppercase break-words [overflow-wrap:anywhere] leading-snug">{data.clientInfo.address}</td>
                                     </tr>
                                     <tr className="bg-[#EEF6FE]">
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">Contact No</td>
-                                        <td className="py-3 px-6 font-extrabold text-[#0D4379]">{data.clientInfo.contactNo}</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">Contact No</td>
+                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">{data.clientInfo.contactNo}</td>
                                     </tr>
                                     <tr className="bg-white">
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">Capacity</td>
-                                        <td className="py-3 px-6 font-extrabold text-[#0D4379]">{data.clientInfo.capacity}</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">Capacity</td>
+                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">{data.clientInfo.capacity}</td>
                                     </tr>
                                     <tr className="bg-[#EEF6FE]">
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">Type</td>
-                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] uppercase">{data.clientInfo.type}</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">Type</td>
+                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] uppercase break-words [overflow-wrap:anywhere]">{data.clientInfo.type}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -276,22 +286,26 @@ export const QuotationPreview6Pages = ({ data }) => {
 
                         {/* Solar PV Modules Table */}
                         <div className="w-full border border-[#7AAAD8] rounded-xl overflow-hidden mb-4 text-xs">
-                            <div className="bg-[#134D8B] text-white py-2.5 px-4 font-bold text-center uppercase tracking-wider break-words">
+                            <div className="bg-[#134D8B] text-white py-2.5 px-4 font-bold text-center uppercase tracking-wider break-words [overflow-wrap:anywhere]">
                                 Solar PV Modules - {data.technicalSpecs.solarPvModules.brand}
                             </div>
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full table-fixed text-left border-collapse">
+                                <colgroup>
+                                    <col style={{ width: '33.33%' }} />
+                                    <col style={{ width: '66.67%' }} />
+                                </colgroup>
                                 <tbody className="divide-y divide-[#BED6EE]">
                                     <tr className="bg-[#EEF6FE]">
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] w-1/3 border-r border-[#BED6EE]">Type / Model</td>
-                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] uppercase leading-tight">{data.technicalSpecs.solarPvModules.model}</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">Type / Model</td>
+                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] uppercase leading-tight break-words [overflow-wrap:anywhere]">{data.technicalSpecs.solarPvModules.model}</td>
                                     </tr>
                                     <tr className="bg-white">
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">QTY</td>
-                                        <td className="py-3 px-6 font-extrabold text-[#0D4379]">{data.technicalSpecs.solarPvModules.qty}</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">QTY</td>
+                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">{data.technicalSpecs.solarPvModules.qty}</td>
                                     </tr>
                                     <tr className="bg-[#EEF6FE]">
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">WARRANTY</td>
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] leading-snug">{data.technicalSpecs.solarPvModules.warranty}</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">WARRANTY</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] leading-snug break-words [overflow-wrap:anywhere]">{data.technicalSpecs.solarPvModules.warranty}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -299,22 +313,26 @@ export const QuotationPreview6Pages = ({ data }) => {
 
                         {/* On Grid Inverter Table */}
                         <div className="w-full border border-[#7AAAD8] rounded-xl overflow-hidden text-xs">
-                            <div className="bg-[#134D8B] text-white py-2.5 px-4 font-bold text-center uppercase tracking-wider break-words">
+                            <div className="bg-[#134D8B] text-white py-2.5 px-4 font-bold text-center uppercase tracking-wider break-words [overflow-wrap:anywhere]">
                                 ON GRID INVERTER - {data.technicalSpecs.inverter.brand}
                             </div>
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full table-fixed text-left border-collapse">
+                                <colgroup>
+                                    <col style={{ width: '33.33%' }} />
+                                    <col style={{ width: '66.67%' }} />
+                                </colgroup>
                                 <tbody className="divide-y divide-[#BED6EE]">
                                     <tr className="bg-[#EEF6FE]">
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] w-1/3 border-r border-[#BED6EE]">QTY</td>
-                                        <td className="py-3 px-6 font-extrabold text-[#0D4379]">{data.technicalSpecs.inverter.qty}</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">QTY</td>
+                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">{data.technicalSpecs.inverter.qty}</td>
                                     </tr>
                                     <tr className="bg-white">
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">Warranty</td>
-                                        <td className="py-3 px-6 font-bold text-[#0D4379]">{data.technicalSpecs.inverter.warranty}</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">Warranty</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] break-words [overflow-wrap:anywhere]">{data.technicalSpecs.inverter.warranty}</td>
                                     </tr>
                                     <tr className="bg-[#EEF6FE]">
-                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">ADDITIONAL WORK</td>
-                                        <td className="py-3 px-6 font-extrabold text-[#0D4379]">{data.technicalSpecs.inverter.additionalWork}</td>
+                                        <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">ADDITIONAL WORK</td>
+                                        <td className="py-3 px-6 font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">{data.technicalSpecs.inverter.additionalWork}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -343,28 +361,32 @@ export const QuotationPreview6Pages = ({ data }) => {
                             <>
                                 {/* Header System Banner */}
                                 <div className="bg-[#F0F4F8] border border-[#D0E2F3] rounded-2xl p-4 text-center">
-                                    <h2 className="text-base font-extrabold text-[#0D4379] uppercase leading-tight break-words">
+                                    <h2 className="text-base font-extrabold text-[#0D4379] uppercase leading-tight break-words [overflow-wrap:anywhere]">
                                         {data.pricing.headerTitle}
                                     </h2>
                                 </div>
 
                                 {/* Table 1: Roof Type & Total Payable */}
                                 <div className="w-full border border-[#7AAAD8] rounded-xl overflow-hidden text-xs">
-                                    <table className="w-full text-center border-collapse">
+                                    <table className="w-full table-fixed text-center border-collapse">
+                                        <colgroup>
+                                            <col style={{ width: '50%' }} />
+                                            <col style={{ width: '50%' }} />
+                                        </colgroup>
                                         <thead>
                                             <tr className="bg-[#134D8B] text-white font-bold uppercase tracking-wider">
-                                                <th className="py-3 px-4 w-1/2 border-r border-blue-400/40">ROOF TYPE</th>
-                                                <th className="py-3 px-4 w-1/2">TOTAL PROJECT PAYABLE</th>
+                                                <th className="py-3 px-4 border-r border-blue-400/40 break-words [overflow-wrap:anywhere]">ROOF TYPE</th>
+                                                <th className="py-3 px-4 break-words [overflow-wrap:anywhere]">TOTAL PROJECT PAYABLE</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr className="bg-[#F4F9FF]">
-                                                <td className="py-4 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">
+                                                <td className="py-4 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere] leading-snug">
                                                     {data.pricing.roofTypeLabel}
                                                 </td>
-                                                <td className="py-4 px-6 font-extrabold text-[#0D4379]">
-                                                    <span className="text-xl block">{data.pricing.totalPayable}</span>
-                                                    <span className="text-xs font-semibold text-neutral-600 block mt-0.5">{data.pricing.amountInWords}</span>
+                                                <td className="py-4 px-6 font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">
+                                                    <span className="text-xl block break-words [overflow-wrap:anywhere]">{data.pricing.totalPayable}</span>
+                                                    <span className="text-xs font-semibold text-neutral-600 block mt-0.5 break-words [overflow-wrap:anywhere]">{data.pricing.amountInWords}</span>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -375,17 +397,21 @@ export const QuotationPreview6Pages = ({ data }) => {
 
                         {/* Table 2: KSEB Permits & Fees */}
                         <div className="w-full border border-[#7AAAD8] rounded-xl overflow-hidden text-xs">
-                            <div className="bg-[#134D8B] text-white py-3 px-4 font-bold uppercase tracking-wider">
+                            <div className="bg-[#134D8B] text-white py-3 px-4 font-bold uppercase tracking-wider break-words [overflow-wrap:anywhere]">
                                 OTHER FEES PAY TO OBTAIN PERMITS FROM KSEB {permitFeeChunks.length > 1 ? `(PART ${chunkIdx + 1})` : ''}
                             </div>
-                            <table className="w-full text-left border-collapse">
+                            <table className="w-full table-fixed text-left border-collapse">
+                                <colgroup>
+                                    <col style={{ width: '50%' }} />
+                                    <col style={{ width: '50%' }} />
+                                </colgroup>
                                 <tbody className="divide-y divide-[#BED6EE]">
                                     {feeChunk.map((feeRow, idx) => (
                                         <tr key={feeRow.id || idx} className={idx % 2 === 0 ? "bg-[#F4F9FF]" : "bg-white"}>
-                                            <td className="py-3 px-6 font-bold text-[#0D4379] w-1/2 border-r border-[#BED6EE]">
+                                            <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere] leading-snug">
                                                 {feeRow.item}
                                             </td>
-                                            <td className="py-3 px-6 font-extrabold text-[#0D4379] leading-snug">
+                                            <td className="py-3 px-6 font-extrabold text-[#0D4379] leading-snug break-words [overflow-wrap:anywhere]">
                                                 {feeRow.fee}
                                             </td>
                                         </tr>
@@ -397,31 +423,36 @@ export const QuotationPreview6Pages = ({ data }) => {
                         {/* Table 3: Battery Details (3 columns: BATTERY DETAILS, QUANTITY, PRICE) */}
                         {chunkIdx === permitFeeChunks.length - 1 && (
                             <div id="preview-page-battery" className="w-full border border-[#7AAAD8] rounded-xl overflow-hidden text-xs">
-                                <table className="w-full text-left border-collapse">
+                                <table className="w-full table-fixed text-left border-collapse">
+                                    <colgroup>
+                                        <col style={{ width: '56%' }} />
+                                        <col style={{ width: '18%' }} />
+                                        <col style={{ width: '26%' }} />
+                                    </colgroup>
                                     <thead>
                                         <tr className="bg-[#134D8B] text-white font-bold uppercase tracking-wider">
-                                            <th className="py-2.5 px-6 border-r border-blue-400/40">BATTERY DETAILS</th>
-                                            <th className="py-2.5 px-4 w-28 text-center border-r border-blue-400/40">QUANTITY</th>
-                                            <th className="py-2.5 px-6 w-36 text-right">PRICE</th>
+                                            <th className="py-2.5 px-4 sm:px-6 border-r border-blue-400/40 break-words [overflow-wrap:anywhere]">BATTERY DETAILS</th>
+                                            <th className="py-2.5 px-2 text-center border-r border-blue-400/40 break-words [overflow-wrap:anywhere]">QUANTITY</th>
+                                            <th className="py-2.5 px-4 sm:px-6 text-right break-words [overflow-wrap:anywhere]">PRICE</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[#BED6EE]">
                                         {(!data.batteryDetails || data.batteryDetails.length === 0) ? (
                                             <tr className="bg-[#F4F9FF]">
-                                                <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">&nbsp;</td>
-                                                <td className="py-3 px-4 text-center font-bold text-[#0D4379] border-r border-[#BED6EE]">&nbsp;</td>
-                                                <td className="py-3 px-6 text-right font-extrabold text-[#0D4379]">&nbsp;</td>
+                                                <td className="py-3 px-4 sm:px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">&nbsp;</td>
+                                                <td className="py-3 px-2 text-center font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">&nbsp;</td>
+                                                <td className="py-3 px-4 sm:px-6 text-right font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">&nbsp;</td>
                                             </tr>
                                         ) : (
                                             data.batteryDetails.map((battery, idx) => (
                                                 <tr key={battery.id || idx} className={idx % 2 === 0 ? "bg-[#F4F9FF]" : "bg-white"}>
-                                                    <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">
+                                                    <td className="py-3 px-4 sm:px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere] leading-snug">
                                                         {battery.batteryDetails || battery.name || '\u00A0'}
                                                     </td>
-                                                    <td className="py-3 px-4 text-center font-bold text-[#0D4379] border-r border-[#BED6EE]">
+                                                    <td className="py-3 px-2 text-center font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">
                                                         {battery.quantity || '\u00A0'}
                                                     </td>
-                                                    <td className="py-3 px-6 text-right font-extrabold text-[#0D4379]">
+                                                    <td className="py-3 px-4 sm:px-6 text-right font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">
                                                         {battery.price || '\u00A0'}
                                                     </td>
                                                 </tr>
@@ -435,7 +466,7 @@ export const QuotationPreview6Pages = ({ data }) => {
                         {/* If this is the last permit fee page, render Subsidy Note & Warranty */}
                         {chunkIdx === permitFeeChunks.length - 1 && (
                             <>
-                                <p className="text-xs text-[#0D4379] font-semibold leading-relaxed">
+                                <p className="text-xs text-[#0D4379] font-semibold leading-relaxed break-words [overflow-wrap:anywhere]">
                                     {data.subsidyNote}
                                 </p>
 
@@ -444,10 +475,10 @@ export const QuotationPreview6Pages = ({ data }) => {
                                         WARRANTY
                                     </h3>
                                     <div className="flex flex-col gap-2 text-xs text-[#0D4379]">
-                                        <p className="font-bold">{data.warranties.panel}</p>
-                                        <p className="font-bold">{data.warranties.inverter}</p>
-                                        <p className="font-bold">{data.warranties.isolator}</p>
-                                        <p className="font-bold">{data.warranties.acdb}</p>
+                                        <p className="font-bold break-words [overflow-wrap:anywhere]">{data.warranties.panel}</p>
+                                        <p className="font-bold break-words [overflow-wrap:anywhere]">{data.warranties.inverter}</p>
+                                        <p className="font-bold break-words [overflow-wrap:anywhere]">{data.warranties.isolator}</p>
+                                        <p className="font-bold break-words [overflow-wrap:anywhere]">{data.warranties.acdb}</p>
                                     </div>
                                 </div>
                             </>
@@ -478,9 +509,9 @@ export const QuotationPreview6Pages = ({ data }) => {
 
                         <div className="flex flex-col gap-2.5 text-[11px] text-neutral-800 leading-relaxed">
                             {termsChunk.map((term, idx) => (
-                                <p key={idx} className="text-justify">
+                                <p key={idx} className="text-justify break-words [overflow-wrap:anywhere]">
                                     <strong className="text-[#0D4379] font-bold">{term.label}: </strong>
-                                    <span className="text-neutral-700">{term.text}</span>
+                                    <span className="text-neutral-700 break-words [overflow-wrap:anywhere]">{term.text}</span>
                                 </p>
                             ))}
                         </div>

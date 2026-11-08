@@ -824,7 +824,7 @@ export const QuotationFormControls = ({
                                             newArr[idx].item = e.target.value;
                                             updateField('permitFees', newArr);
                                         }}
-                                        className="flex-1 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-semibold text-xs outline-none"
+                                        className="flex-1 min-w-0 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-semibold text-xs outline-none"
                                     />
                                     <input
                                         type="text"
@@ -835,11 +835,11 @@ export const QuotationFormControls = ({
                                             newArr[idx].fee = e.target.value;
                                             updateField('permitFees', newArr);
                                         }}
-                                        className="w-1/2 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold text-xs outline-none"
+                                        className="w-1/2 min-w-0 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold text-xs outline-none"
                                     />
                                     <button
                                         onClick={() => removePermitFee(idx)}
-                                        className="text-neutral-400 hover:text-red-600 p-1 transition-colors cursor-pointer"
+                                        className="text-neutral-400 hover:text-red-600 p-1 transition-colors cursor-pointer shrink-0"
                                         title="Remove Fee Row"
                                     >
                                         <Trash2 className="w-3.5 h-3.5" />
@@ -919,7 +919,7 @@ export const QuotationFormControls = ({
                                                 newArr[idx] = { ...newArr[idx], batteryDetails: e.target.value };
                                                 updateField('batteryDetails', newArr);
                                             }}
-                                            className="flex-1 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-semibold text-xs outline-none focus:border-emerald-600"
+                                            className="flex-1 min-w-0 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-semibold text-xs outline-none focus:border-emerald-600"
                                         />
                                         <input
                                             type="text"
@@ -930,7 +930,7 @@ export const QuotationFormControls = ({
                                                 newArr[idx] = { ...newArr[idx], quantity: e.target.value };
                                                 updateField('batteryDetails', newArr);
                                             }}
-                                            className="w-20 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold text-xs text-center outline-none focus:border-emerald-600"
+                                            className="w-20 shrink-0 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold text-xs text-center outline-none focus:border-emerald-600"
                                         />
                                         <input
                                             type="text"
@@ -941,12 +941,12 @@ export const QuotationFormControls = ({
                                                 newArr[idx] = { ...newArr[idx], price: e.target.value };
                                                 updateField('batteryDetails', newArr);
                                             }}
-                                            className="w-28 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold text-xs text-right outline-none focus:border-emerald-600"
+                                            className="w-28 shrink-0 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold text-xs text-right outline-none focus:border-emerald-600"
                                         />
                                         <button
                                             type="button"
                                             onClick={() => removeBattery(idx)}
-                                            className="text-neutral-400 hover:text-red-600 p-1.5 transition-colors cursor-pointer"
+                                            className="text-neutral-400 hover:text-red-600 p-1.5 transition-colors cursor-pointer shrink-0"
                                             title="Remove Battery Row"
                                         >
                                             <Trash2 className="w-3.5 h-3.5" />
