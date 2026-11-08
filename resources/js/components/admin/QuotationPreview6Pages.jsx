@@ -356,12 +356,12 @@ export const QuotationPreview6Pages = ({ data }) => {
                     <WatermarkOverlay />
                     <QuotationHeader />
 
-                    <div className="px-10 py-5 flex-1 flex flex-col gap-4 relative z-10">
+                    <div className="px-10 py-3 flex-1 flex flex-col gap-2.5 relative z-10">
                         {chunkIdx === 0 && (
                             <>
                                 {/* Header System Banner */}
-                                <div className="bg-[#F0F4F8] border border-[#D0E2F3] rounded-2xl p-4 text-center">
-                                    <h2 className="text-base font-extrabold text-[#0D4379] uppercase leading-tight break-words [overflow-wrap:anywhere]">
+                                <div className="bg-[#F0F4F8] border border-[#D0E2F3] rounded-xl py-2 px-3 text-center">
+                                    <h2 className="text-sm font-extrabold text-[#0D4379] uppercase leading-tight break-words [overflow-wrap:anywhere]">
                                         {data.pricing.headerTitle}
                                     </h2>
                                 </div>
@@ -375,17 +375,17 @@ export const QuotationPreview6Pages = ({ data }) => {
                                         </colgroup>
                                         <thead>
                                             <tr className="bg-[#134D8B] text-white font-bold uppercase tracking-wider">
-                                                <th className="py-3 px-4 border-r border-blue-400/40 break-words [overflow-wrap:anywhere]">ROOF TYPE</th>
-                                                <th className="py-3 px-4 break-words [overflow-wrap:anywhere]">TOTAL PROJECT PAYABLE</th>
+                                                <th className="py-2 px-4 border-r border-blue-400/40 break-words [overflow-wrap:anywhere]">ROOF TYPE</th>
+                                                <th className="py-2 px-4 break-words [overflow-wrap:anywhere]">TOTAL PROJECT PAYABLE</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr className="bg-[#F4F9FF]">
-                                                <td className="py-4 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere] leading-snug">
+                                                <td className="py-2 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere] leading-snug">
                                                     {data.pricing.roofTypeLabel}
                                                 </td>
-                                                <td className="py-4 px-6 font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">
-                                                    <span className="text-xl block break-words [overflow-wrap:anywhere]">{data.pricing.totalPayable}</span>
+                                                <td className="py-2 px-6 font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">
+                                                    <span className="text-lg block break-words [overflow-wrap:anywhere]">{data.pricing.totalPayable}</span>
                                                     <span className="text-xs font-semibold text-neutral-600 block mt-0.5 break-words [overflow-wrap:anywhere]">{data.pricing.amountInWords}</span>
                                                 </td>
                                             </tr>
@@ -397,7 +397,7 @@ export const QuotationPreview6Pages = ({ data }) => {
 
                         {/* Table 2: KSEB Permits & Fees */}
                         <div className="w-full border border-[#7AAAD8] rounded-xl overflow-hidden text-xs">
-                            <div className="bg-[#134D8B] text-white py-3 px-4 font-bold uppercase tracking-wider break-words [overflow-wrap:anywhere]">
+                            <div className="bg-[#134D8B] text-white py-2 px-4 font-bold uppercase tracking-wider break-words [overflow-wrap:anywhere]">
                                 OTHER FEES PAY TO OBTAIN PERMITS FROM KSEB {permitFeeChunks.length > 1 ? `(PART ${chunkIdx + 1})` : ''}
                             </div>
                             <table className="w-full table-fixed text-left border-collapse">
@@ -408,10 +408,10 @@ export const QuotationPreview6Pages = ({ data }) => {
                                 <tbody className="divide-y divide-[#BED6EE]">
                                     {feeChunk.map((feeRow, idx) => (
                                         <tr key={feeRow.id || idx} className={idx % 2 === 0 ? "bg-[#F4F9FF]" : "bg-white"}>
-                                            <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere] leading-snug">
+                                            <td className="py-2 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere] leading-snug">
                                                 {feeRow.item}
                                             </td>
-                                            <td className="py-3 px-6 font-extrabold text-[#0D4379] leading-snug break-words [overflow-wrap:anywhere]">
+                                            <td className="py-2 px-6 font-extrabold text-[#0D4379] leading-snug break-words [overflow-wrap:anywhere]">
                                                 {feeRow.fee}
                                             </td>
                                         </tr>
@@ -431,28 +431,28 @@ export const QuotationPreview6Pages = ({ data }) => {
                                     </colgroup>
                                     <thead>
                                         <tr className="bg-[#134D8B] text-white font-bold uppercase tracking-wider">
-                                            <th className="py-2.5 px-4 sm:px-6 border-r border-blue-400/40 break-words [overflow-wrap:anywhere]">BATTERY DETAILS</th>
-                                            <th className="py-2.5 px-2 text-center border-r border-blue-400/40 break-words [overflow-wrap:anywhere]">QUANTITY</th>
-                                            <th className="py-2.5 px-4 sm:px-6 text-right break-words [overflow-wrap:anywhere]">PRICE</th>
+                                            <th className="py-2 px-4 sm:px-6 border-r border-blue-400/40 break-words [overflow-wrap:anywhere]">BATTERY DETAILS</th>
+                                            <th className="py-2 px-2 text-center border-r border-blue-400/40 break-words [overflow-wrap:anywhere]">QUANTITY</th>
+                                            <th className="py-2 px-4 sm:px-6 text-right break-words [overflow-wrap:anywhere]">PRICE</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-[#BED6EE]">
                                         {(!data.batteryDetails || data.batteryDetails.length === 0) ? (
                                             <tr className="bg-[#F4F9FF]">
-                                                <td className="py-3 px-4 sm:px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">&nbsp;</td>
-                                                <td className="py-3 px-2 text-center font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">&nbsp;</td>
-                                                <td className="py-3 px-4 sm:px-6 text-right font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">&nbsp;</td>
+                                                <td className="py-2 px-4 sm:px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">&nbsp;</td>
+                                                <td className="py-2 px-2 text-center font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">&nbsp;</td>
+                                                <td className="py-2 px-4 sm:px-6 text-right font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">&nbsp;</td>
                                             </tr>
                                         ) : (
                                             data.batteryDetails.map((battery, idx) => (
                                                 <tr key={battery.id || idx} className={idx % 2 === 0 ? "bg-[#F4F9FF]" : "bg-white"}>
-                                                    <td className="py-3 px-4 sm:px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere] leading-snug">
+                                                    <td className="py-2 px-4 sm:px-6 font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere] leading-snug">
                                                         {battery.batteryDetails || battery.name || '\u00A0'}
                                                     </td>
-                                                    <td className="py-3 px-2 text-center font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">
+                                                    <td className="py-2 px-2 text-center font-bold text-[#0D4379] border-r border-[#BED6EE] break-words [overflow-wrap:anywhere]">
                                                         {battery.quantity || '\u00A0'}
                                                     </td>
-                                                    <td className="py-3 px-4 sm:px-6 text-right font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">
+                                                    <td className="py-2 px-4 sm:px-6 text-right font-extrabold text-[#0D4379] break-words [overflow-wrap:anywhere]">
                                                         {battery.price || '\u00A0'}
                                                     </td>
                                                 </tr>
@@ -466,15 +466,15 @@ export const QuotationPreview6Pages = ({ data }) => {
                         {/* If this is the last permit fee page, render Subsidy Note & Warranty */}
                         {chunkIdx === permitFeeChunks.length - 1 && (
                             <>
-                                <p className="text-xs text-[#0D4379] font-semibold leading-relaxed break-words [overflow-wrap:anywhere]">
+                                <p className="text-[11px] text-[#0D4379] font-semibold leading-normal break-words [overflow-wrap:anywhere]">
                                     {data.subsidyNote}
                                 </p>
 
-                                <div className="pt-2">
-                                    <h3 className="text-base font-extrabold text-[#0D4379] tracking-wide uppercase border-b-2 border-[#134D8B] pb-1 inline-block mb-3">
+                                <div className="pt-1">
+                                    <h3 className="text-sm font-extrabold text-[#0D4379] tracking-wide uppercase border-b-2 border-[#134D8B] pb-0.5 inline-block mb-1.5">
                                         WARRANTY
                                     </h3>
-                                    <div className="flex flex-col gap-2 text-xs text-[#0D4379]">
+                                    <div className="flex flex-col gap-1 text-[11px] text-[#0D4379]">
                                         <p className="font-bold break-words [overflow-wrap:anywhere]">{data.warranties.panel}</p>
                                         <p className="font-bold break-words [overflow-wrap:anywhere]">{data.warranties.inverter}</p>
                                         <p className="font-bold break-words [overflow-wrap:anywhere]">{data.warranties.isolator}</p>

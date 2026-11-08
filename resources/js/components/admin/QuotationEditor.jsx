@@ -84,7 +84,10 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
         activeTabRef.current = tabId;
 
         const panel = rightPanelRef.current;
-        const targetEl = document.getElementById(tabId === 'battery' ? 'preview-page-battery' : `preview-page-${tabId}`);
+        // Both Pricing (Table 1, Table 2) and Battery Details (Table 3) live on Page 5.
+        // Always scroll to the top of Page 5 (preview-page-pricing) so the user sees all tables intact.
+        const targetId = (tabId === 'battery' || tabId === 'pricing') ? 'preview-page-pricing' : `preview-page-${tabId}`;
+        const targetEl = document.getElementById(targetId);
         if (targetEl && panel && showPreview) {
             isProgrammaticScrollRef.current = true;
             if (scrollTimeoutRef.current) {
@@ -93,7 +96,10 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
 
             const panelRect = panel.getBoundingClientRect();
             const targetRect = targetEl.getBoundingClientRect();
-            const targetScrollTop = panel.scrollTop + (targetRect.top - panelRect.top) - 16;
+            // In a CSS-scaled container (transform: scale(s)), targetRect and panelRect
+            // are in scaled viewport pixels. Divide by previewScale to get true unscaled scroll distance.
+            const scale = previewScale || 1;
+            const targetScrollTop = panel.scrollTop + (targetRect.top - panelRect.top) / scale - 16;
 
             panel.scrollTo({
                 top: Math.max(0, targetScrollTop),
@@ -179,6 +185,11 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                 }
 
                 if (currentSection && activeTabRef.current !== currentSection) {
+                    // Both pricing & battery sections reside on Page 5 (data-section="pricing").
+                    // If the user actively selected either tab, don't overwrite it while viewing Page 5.
+                    if (currentSection === 'pricing' && (activeTabRef.current === 'pricing' || activeTabRef.current === 'battery')) {
+                        return;
+                    }
                     activeTabRef.current = currentSection;
                     setActiveTab(currentSection);
                 }
