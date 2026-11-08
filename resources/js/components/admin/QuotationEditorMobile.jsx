@@ -18,6 +18,7 @@ import {
     RotateCcw,
     Plus,
     Trash2,
+    Battery,
     Shield,
     Check,
     ZoomIn,
@@ -146,6 +147,27 @@ export const QuotationEditorMobile = ({
     const removePermitFee = (index) => {
         const newData = JSON.parse(JSON.stringify(data));
         newData.permitFees.splice(index, 1);
+        onChange(newData);
+    };
+
+    // Add / remove battery item
+    const addBattery = () => {
+        const newData = JSON.parse(JSON.stringify(data));
+        if (!newData.batteryDetails) newData.batteryDetails = [];
+        newData.batteryDetails.push({
+            id: Date.now(),
+            batteryDetails: "",
+            quantity: "",
+            price: ""
+        });
+        onChange(newData);
+        toast.success("Battery item added!");
+    };
+
+    const removeBattery = (index) => {
+        const newData = JSON.parse(JSON.stringify(data));
+        if (!newData.batteryDetails) return;
+        newData.batteryDetails.splice(index, 1);
         onChange(newData);
     };
 
@@ -291,11 +313,12 @@ export const QuotationEditorMobile = ({
 
                     {/* Sub-tabs for Form Sections */}
                     <div className="px-4 py-1.5 bg-transparent sticky top-[61px] z-20">
-                        <div className="grid grid-cols-4 gap-1.5 bg-neutral-100 p-1 rounded-2xl border border-neutral-200/70">
+                        <div className="grid grid-cols-5 gap-1 bg-neutral-100 p-1 rounded-2xl border border-neutral-200/70">
                             {[
-                                { id: 'client', label: 'Client & Ref', icon: FileText },
+                                { id: 'client', label: 'Client', icon: FileText },
                                 { id: 'system', label: 'System', icon: LayoutGrid },
                                 { id: 'pricing', label: 'Pricing', icon: Tag },
+                                { id: 'battery', label: 'Battery', icon: Battery },
                                 { id: 'more', label: 'More', icon: Sliders }
                             ].map((item) => {
                                 const Icon = item.icon;
@@ -305,13 +328,13 @@ export const QuotationEditorMobile = ({
                                         key={item.id}
                                         type="button"
                                         onClick={() => setActiveTab(item.id)}
-                                        className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                                        className={`flex flex-col items-center justify-center py-2 px-0.5 rounded-xl text-[10px] sm:text-[11px] font-bold transition-all cursor-pointer ${
                                             isActive
                                                 ? 'bg-white text-[#1A4D2E] shadow-2xs border border-neutral-200 font-extrabold'
                                                 : 'text-neutral-500 hover:text-neutral-900'
                                         }`}
                                     >
-                                        <Icon size={16} className={`mb-1 ${isActive ? 'text-[#1A4D2E]' : 'text-neutral-400'}`} />
+                                        <Icon size={15} className={`mb-1 ${isActive ? 'text-[#1A4D2E]' : 'text-neutral-400'}`} />
                                         <span className="truncate max-w-full leading-tight">{item.label}</span>
                                     </button>
                                 );
@@ -731,6 +754,115 @@ export const QuotationEditorMobile = ({
                                             </div>
                                         </div>
                                     ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ──────── TAB 4: BATTERY DETAILS (Page 5) ──────── */}
+                        {activeTab === 'battery' && (
+                            <div className="space-y-4 animate-in fade-in duration-150">
+                                <div className="bg-white border border-neutral-200 rounded-2xl p-3.5 space-y-3 shadow-2xs">
+                                    <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
+                                        <h3 className="text-xs font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
+                                            <Battery size={14} className="text-emerald-700" />
+                                            <span>Battery Details (Page 5)</span>
+                                        </h3>
+                                        <button
+                                            type="button"
+                                            onClick={addBattery}
+                                            className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                                        >
+                                            <Plus size={13} />
+                                            <span>Add Row</span>
+                                        </button>
+                                    </div>
+
+                                    {(!data.batteryDetails || data.batteryDetails.length === 0) ? (
+                                        <div className="py-6 px-3 bg-neutral-50 rounded-xl border border-dashed border-neutral-200 text-center">
+                                            <p className="text-xs font-bold text-neutral-700">Table is currently blank</p>
+                                            <p className="text-[11px] text-neutral-500 mt-1 mb-3">
+                                                Renders on Page 5 with 3 blank columns (Battery Details, Quantity, Price). Add rows if this quote includes batteries.
+                                            </p>
+                                            <button
+                                                type="button"
+                                                onClick={addBattery}
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-neutral-300 rounded-lg text-xs font-bold text-neutral-700 hover:bg-neutral-100 cursor-pointer shadow-2xs"
+                                            >
+                                                <Plus size={13} className="text-emerald-700" />
+                                                <span>Add Battery Row</span>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2.5">
+                                            {data.batteryDetails.map((battery, idx) => (
+                                                <div key={battery.id || idx} className="p-2.5 bg-neutral-50 rounded-xl border border-neutral-200 space-y-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[11px] font-black text-emerald-800 uppercase tracking-wider">
+                                                            Battery #{idx + 1}
+                                                        </span>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => removeBattery(idx)}
+                                                            className="text-neutral-400 hover:text-red-600 p-1 transition-colors cursor-pointer"
+                                                            title="Remove Row"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                        </button>
+                                                    </div>
+                                                    <div>
+                                                        <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-1">
+                                                            Battery Details
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="e.g. 150Ah Tubular Battery"
+                                                            value={battery.batteryDetails || battery.name || ''}
+                                                            onChange={(e) => {
+                                                                const newArr = [...data.batteryDetails];
+                                                                newArr[idx] = { ...newArr[idx], batteryDetails: e.target.value };
+                                                                updateField('batteryDetails', newArr);
+                                                            }}
+                                                            className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-lg text-xs font-semibold text-neutral-800 outline-none focus:border-emerald-600"
+                                                        />
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2">
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-1">
+                                                                Quantity
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                placeholder="e.g. 2 Nos"
+                                                                value={battery.quantity || ''}
+                                                                onChange={(e) => {
+                                                                    const newArr = [...data.batteryDetails];
+                                                                    newArr[idx] = { ...newArr[idx], quantity: e.target.value };
+                                                                    updateField('batteryDetails', newArr);
+                                                                }}
+                                                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-lg text-xs font-bold text-neutral-800 outline-none focus:border-emerald-600"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-1">
+                                                                Price
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                placeholder="e.g. Rs. 30,000"
+                                                                value={battery.price || ''}
+                                                                onChange={(e) => {
+                                                                    const newArr = [...data.batteryDetails];
+                                                                    newArr[idx] = { ...newArr[idx], price: e.target.value };
+                                                                    updateField('batteryDetails', newArr);
+                                                                }}
+                                                                className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-lg text-xs font-bold text-neutral-800 outline-none focus:border-emerald-600"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

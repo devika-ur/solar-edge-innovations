@@ -394,6 +394,44 @@ export const QuotationPreview6Pages = ({ data }) => {
                             </table>
                         </div>
 
+                        {/* Table 3: Battery Details (3 columns: BATTERY DETAILS, QUANTITY, PRICE) */}
+                        {chunkIdx === permitFeeChunks.length - 1 && (
+                            <div id="preview-page-battery" className="w-full border border-[#7AAAD8] rounded-xl overflow-hidden text-xs">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-[#134D8B] text-white font-bold uppercase tracking-wider">
+                                            <th className="py-2.5 px-6 border-r border-blue-400/40">BATTERY DETAILS</th>
+                                            <th className="py-2.5 px-4 w-28 text-center border-r border-blue-400/40">QUANTITY</th>
+                                            <th className="py-2.5 px-6 w-36 text-right">PRICE</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-[#BED6EE]">
+                                        {(!data.batteryDetails || data.batteryDetails.length === 0) ? (
+                                            <tr className="bg-[#F4F9FF]">
+                                                <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">&nbsp;</td>
+                                                <td className="py-3 px-4 text-center font-bold text-[#0D4379] border-r border-[#BED6EE]">&nbsp;</td>
+                                                <td className="py-3 px-6 text-right font-extrabold text-[#0D4379]">&nbsp;</td>
+                                            </tr>
+                                        ) : (
+                                            data.batteryDetails.map((battery, idx) => (
+                                                <tr key={battery.id || idx} className={idx % 2 === 0 ? "bg-[#F4F9FF]" : "bg-white"}>
+                                                    <td className="py-3 px-6 font-bold text-[#0D4379] border-r border-[#BED6EE]">
+                                                        {battery.batteryDetails || battery.name || '\u00A0'}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-center font-bold text-[#0D4379] border-r border-[#BED6EE]">
+                                                        {battery.quantity || '\u00A0'}
+                                                    </td>
+                                                    <td className="py-3 px-6 text-right font-extrabold text-[#0D4379]">
+                                                        {battery.price || '\u00A0'}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+
                         {/* If this is the last permit fee page, render Subsidy Note & Warranty */}
                         {chunkIdx === permitFeeChunks.length - 1 && (
                             <>

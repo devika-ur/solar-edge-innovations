@@ -10,6 +10,7 @@ import {
     DollarSign,
     Shield,
     Sliders,
+    Battery,
     LogOut,
     Loader2,
     Download
@@ -101,6 +102,27 @@ export const QuotationFormControls = ({
         onChange(newData);
     };
 
+    // Add battery details row
+    const addBattery = () => {
+        const newData = JSON.parse(JSON.stringify(data));
+        if (!newData.batteryDetails) newData.batteryDetails = [];
+        newData.batteryDetails.push({
+            id: Date.now(),
+            batteryDetails: "",
+            quantity: "",
+            price: ""
+        });
+        onChange(newData);
+    };
+
+    // Remove battery details row
+    const removeBattery = (index) => {
+        const newData = JSON.parse(JSON.stringify(data));
+        if (!newData.batteryDetails) return;
+        newData.batteryDetails.splice(index, 1);
+        onChange(newData);
+    };
+
     const mfgPageCount = Math.max(1, Math.ceil((data.manufacturers?.length || 0) / 10));
     const permitFeePageCount = (data.permitFees && data.permitFees.length > 4) ? (1 + Math.ceil((data.permitFees.length - 4) / 6)) : 1;
     const termsPageCount = (data.termsAndConditions && data.termsAndConditions.length > 14) ? Math.ceil(data.termsAndConditions.length / 14) : 1;
@@ -174,6 +196,7 @@ export const QuotationFormControls = ({
                         { id: 'manufacturers', label: 'Manufacturers', icon: Sliders },
                         { id: 'technical', label: 'Technical', icon: Wrench },
                         { id: 'pricing', label: 'Pricing & Fees', icon: DollarSign },
+                        { id: 'battery', label: 'Battery Details', icon: Battery },
                         { id: 'terms', label: 'Terms & Warranty', icon: Shield }
                     ].map((tab) => {
                         const Icon = tab.icon;
@@ -838,7 +861,105 @@ export const QuotationFormControls = ({
                 )}
 
                 {/* ════════════════════════════════════════════════════════════
-                    TAB 5: TERMS & WARRANTY (Page 5 & Page 6)
+                    TAB 5: BATTERY DETAILS (Page 5)
+                ════════════════════════════════════════════════════════════ */}
+                {activeTab === 'battery' && (
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between bg-neutral-50 p-3.5 rounded-xl border border-neutral-200">
+                            <div>
+                                <h3 className="font-bold text-neutral-800 text-xs sm:text-sm flex items-center gap-1.5">
+                                    <Battery className="w-4 h-4 text-emerald-700" />
+                                    <span>Battery Details Table</span>
+                                </h3>
+                                <p className="text-[11px] text-neutral-500 mt-0.5">
+                                    Renders on Page 5 after KSEB Permits table ({(!data.batteryDetails || data.batteryDetails.length === 0) ? 'Blank by default' : `${data.batteryDetails.length} rows`})
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={addBattery}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                            >
+                                <Plus className="w-3.5 h-3.5" />
+                                <span>Add Battery Row</span>
+                            </button>
+                        </div>
+
+                        {(!data.batteryDetails || data.batteryDetails.length === 0) ? (
+                            <div className="p-6 bg-neutral-50 border border-dashed border-neutral-300 rounded-xl text-center space-y-2">
+                                <p className="font-bold text-neutral-700 text-xs">Table is currently blank</p>
+                                <p className="text-[11px] text-neutral-500 max-w-sm mx-auto">
+                                    The 3-column Battery Details table (Battery Details, Quantity, Price) is shown on Page 5. You can add battery specifications below or leave it blank.
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={addBattery}
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border border-neutral-300 hover:bg-neutral-100 text-neutral-700 rounded-lg text-xs font-bold transition-all cursor-pointer shadow-2xs mt-1"
+                                >
+                                    <Plus className="w-3.5 h-3.5 text-emerald-700" />
+                                    <span>Add First Battery Row</span>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-2.5">
+                                <div className="grid grid-cols-12 gap-2 px-1 text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
+                                    <span className="col-span-6">Battery Details</span>
+                                    <span className="col-span-2 text-center">Quantity</span>
+                                    <span className="col-span-3 text-right">Price</span>
+                                    <span className="col-span-1"></span>
+                                </div>
+                                {data.batteryDetails.map((row, idx) => (
+                                    <div key={row.id || idx} className="p-2.5 bg-neutral-50 border border-neutral-200 rounded-xl flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Battery details / Brand / Capacity"
+                                            value={row.batteryDetails || row.name || ''}
+                                            onChange={(e) => {
+                                                const newArr = [...data.batteryDetails];
+                                                newArr[idx] = { ...newArr[idx], batteryDetails: e.target.value };
+                                                updateField('batteryDetails', newArr);
+                                            }}
+                                            className="flex-1 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-semibold text-xs outline-none focus:border-emerald-600"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Qty"
+                                            value={row.quantity || ''}
+                                            onChange={(e) => {
+                                                const newArr = [...data.batteryDetails];
+                                                newArr[idx] = { ...newArr[idx], quantity: e.target.value };
+                                                updateField('batteryDetails', newArr);
+                                            }}
+                                            className="w-20 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold text-xs text-center outline-none focus:border-emerald-600"
+                                        />
+                                        <input
+                                            type="text"
+                                            placeholder="Price"
+                                            value={row.price || ''}
+                                            onChange={(e) => {
+                                                const newArr = [...data.batteryDetails];
+                                                newArr[idx] = { ...newArr[idx], price: e.target.value };
+                                                updateField('batteryDetails', newArr);
+                                            }}
+                                            className="w-28 px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold text-xs text-right outline-none focus:border-emerald-600"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeBattery(idx)}
+                                            className="text-neutral-400 hover:text-red-600 p-1.5 transition-colors cursor-pointer"
+                                            title="Remove Battery Row"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* ════════════════════════════════════════════════════════════
+                    TAB 6: TERMS & WARRANTY (Page 5 & Page 6)
                 ════════════════════════════════════════════════════════════ */}
                 {activeTab === 'terms' && (
                     <div className="space-y-4">

@@ -20,6 +20,7 @@ import {
     Sliders,
     Wrench,
     DollarSign,
+    Battery,
     Shield,
     Trash2,
     Check,
@@ -83,7 +84,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
         activeTabRef.current = tabId;
 
         const panel = rightPanelRef.current;
-        const targetEl = document.getElementById(`preview-page-${tabId}`);
+        const targetEl = document.getElementById(tabId === 'battery' ? 'preview-page-battery' : `preview-page-${tabId}`);
         if (targetEl && panel && showPreview) {
             isProgrammaticScrollRef.current = true;
             if (scrollTimeoutRef.current) {
@@ -442,7 +443,8 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                     headerTitle: '',
                     totalPayable: '',
                     amountInWords: ''
-                }
+                },
+                batteryDetails: []
             };
 
             setQuotationData(clearedData);
@@ -826,7 +828,8 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                         { id: 'manufacturers', label: '2. Manufacturers', icon: Sliders },
                         { id: 'technical', label: '3. Technical Specs', icon: Wrench },
                         { id: 'pricing', label: '4. Pricing & Fees', icon: DollarSign },
-                        { id: 'terms', label: '5. Terms & Warranty', icon: Shield }
+                        { id: 'battery', label: '5. Battery Details', icon: Battery },
+                        { id: 'terms', label: '6. Terms & Warranty', icon: Shield }
                     ].map((tab) => {
                         const Icon = tab.icon;
                         const isActive = activeTab === tab.id;
