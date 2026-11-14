@@ -108,9 +108,13 @@ class PaymentController extends Controller
                 ];
             });
 
-            // Calculate overall master stats across all active quotations
+            // Calculate overall master stats ONLY for eligible quotations in payment management
+            // (i.e. approved quotations that have agreements created or completed payment)
             $allActiveMasters = QuotationPayment::whereHas('quotation', function ($q) {
-                $q->active();
+                $q->active()->where(function ($sq) {
+                    $sq->whereIn('workflow_status', ['agreement_created', 'completed'])
+                       ->orWhereHas('agreement');
+                });
             })->get();
 
             $totalQuotations = $allActiveMasters->count();
