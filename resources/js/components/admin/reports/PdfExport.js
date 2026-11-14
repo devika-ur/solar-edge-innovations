@@ -82,6 +82,7 @@ export const exportToPdf = ({
             if (filters.quotationNumber) filterParts.push(`Quotation No: ${filters.quotationNumber}`);
             if (filters.status && filters.status !== 'all') filterParts.push(`Payment Status: ${filters.status}`);
             if (filters.quotationStatus && filters.quotationStatus !== 'all') filterParts.push(`Quotation Status: ${filters.quotationStatus}`);
+            if (filters.agreementStatus && filters.agreementStatus !== 'all') filterParts.push(`Agreement: ${filters.agreementStatus === 'created' ? 'Created' : 'Pending'}`);
 
             if (filterParts.length > 0) {
                 doc.setFontSize(8);

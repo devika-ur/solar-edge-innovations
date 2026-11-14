@@ -49,11 +49,16 @@ export const ADMIN_NAV_SECTIONS = [
         ],
     },
     {
-        title: 'REPORTS & CONTENT MANAGEMENT',
+        title: 'CONTENT MANAGEMENT',
         items: [
-            { id: 'reports', label: 'Reports', icon: BarChart3 },
             { id: 'faqs', label: 'Website FAQs', icon: HelpCircle },
             { id: 'letterhead', label: 'Letterhead', icon: ScrollText },
+        ],
+    },
+    {
+        title: 'REPORTS',
+        items: [
+            { id: 'reports', label: 'Reports', icon: BarChart3 },
         ],
     },
 ];

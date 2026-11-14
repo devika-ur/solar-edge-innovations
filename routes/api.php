@@ -128,6 +128,10 @@ Route::middleware('admin.session')->group(function () {
     Route::get('/admin-reports-quotation-history.php', [AdminReportController::class, 'quotationHistory']);
     Route::get('/reports/quotation-history', [AdminReportController::class, 'quotationHistory']);
 
+    Route::get('/admin/reports/approved-quotations', [AdminReportController::class, 'approvedQuotations']);
+    Route::get('/admin-reports-approved-quotations.php', [AdminReportController::class, 'approvedQuotations']);
+    Route::get('/reports/approved-quotations', [AdminReportController::class, 'approvedQuotations']);
+
     Route::get('/admin/reports/client-payment-history', [AdminReportController::class, 'clientPaymentHistory']);
     Route::get('/admin-reports-client-payment-history.php', [AdminReportController::class, 'clientPaymentHistory']);
     Route::get('/reports/client-payment-history', [AdminReportController::class, 'clientPaymentHistory']);

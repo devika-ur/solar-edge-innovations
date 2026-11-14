@@ -4,6 +4,7 @@ import { BarChart3, Filter, FilterX } from 'lucide-react';
 import { ReportFilters } from './ReportFilters';
 import { PaymentHistoryReport } from './PaymentHistoryReport';
 import { QuotationHistoryReport } from './QuotationHistoryReport';
+import { ApprovedQuotationsReport } from './ApprovedQuotationsReport';
 import { exportToExcel } from './ExcelExport';
 import { exportToPdf } from './PdfExport';
 
@@ -11,20 +12,23 @@ import { exportToPdf } from './PdfExport';
  * ReportManager Component
  * 
  * Central hub for the "Reports" tab.
- * Connects dedicated report APIs to table rendering and direct Excel/PDF exports.
+ * Connects dedicated report APIs (Payment History, Quotation History, Approved Quotations)
+ * to table rendering and direct Excel/PDF exports with fast date presets.
  */
 export const ReportManager = ({ onUnauthorized }) => {
-    // 1. Report Type
+    // 1. Report Type: 'payment_history' | 'quotation_history' | 'approved_quotations'
     const [reportType, setReportType] = useState('payment_history');
 
     // 2. Filter State
     const [filters, setFilters] = useState({
+        datePreset: 'all',
         fromDate: '',
         toDate: '',
         customer: '',
         quotationNumber: '',
         status: 'all',
         quotationStatus: 'all',
+        agreementStatus: 'all',
         customerSearch: '',
     });
 
@@ -81,12 +85,14 @@ export const ReportManager = ({ onUnauthorized }) => {
     // Reset all filters
     const handleReset = () => {
         setFilters({
+            datePreset: 'all',
             fromDate: '',
             toDate: '',
             customer: '',
             quotationNumber: '',
             status: 'all',
             quotationStatus: 'all',
+            agreementStatus: 'all',
             customerSearch: '',
         });
         toast.success('Filters cleared.');
@@ -105,12 +111,15 @@ export const ReportManager = ({ onUnauthorized }) => {
             if (filters.quotationNumber) params.append('quotationNumber', filters.quotationNumber);
             if (filters.status && filters.status !== 'all') params.append('status', filters.status);
             if (filters.quotationStatus && filters.quotationStatus !== 'all') params.append('quotationStatus', filters.quotationStatus);
+            if (filters.agreementStatus && filters.agreementStatus !== 'all') params.append('agreementStatus', filters.agreementStatus);
 
             let endpoint = '';
             if (type === 'payment_history') {
                 endpoint = `/api/admin-reports-payment-history.php?${params.toString()}`;
             } else if (type === 'quotation_history') {
                 endpoint = `/api/admin-reports-quotation-history.php?${params.toString()}`;
+            } else if (type === 'approved_quotations') {
+                endpoint = `/api/admin-reports-approved-quotations.php?${params.toString()}`;
             }
 
             const res = await fetch(endpoint, {
@@ -145,12 +154,15 @@ export const ReportManager = ({ onUnauthorized }) => {
         if (currentFilters.quotationNumber) params.append('quotationNumber', currentFilters.quotationNumber);
         if (currentFilters.status && currentFilters.status !== 'all') params.append('status', currentFilters.status);
         if (currentFilters.quotationStatus && currentFilters.quotationStatus !== 'all') params.append('quotationStatus', currentFilters.quotationStatus);
+        if (currentFilters.agreementStatus && currentFilters.agreementStatus !== 'all') params.append('agreementStatus', currentFilters.agreementStatus);
 
         let endpoint = '';
         if (type === 'payment_history') {
             endpoint = `/api/admin-reports-payment-history.php?${params.toString()}`;
         } else if (type === 'quotation_history') {
             endpoint = `/api/admin-reports-quotation-history.php?${params.toString()}`;
+        } else if (type === 'approved_quotations') {
+            endpoint = `/api/admin-reports-approved-quotations.php?${params.toString()}`;
         }
 
         const res = await fetch(endpoint, { credentials: 'include' });
@@ -175,6 +187,7 @@ export const ReportManager = ({ onUnauthorized }) => {
         filters.quotationNumber,
         filters.status,
         filters.quotationStatus,
+        filters.agreementStatus,
     ]);
 
     // Check if we have active data to export
@@ -182,6 +195,17 @@ export const ReportManager = ({ onUnauthorized }) => {
         if (!reportData) return false;
         return Array.isArray(reportData) && reportData.length > 0;
     }, [reportData]);
+
+    // Build filename tag based on dates or preset
+    const getDateTag = () => {
+        if (filters.datePreset && filters.datePreset !== 'all' && filters.datePreset !== 'custom') {
+            return `${filters.datePreset}_${filters.fromDate || new Date().toISOString().slice(0, 10)}`;
+        }
+        if (filters.fromDate && filters.toDate) {
+            return `${filters.fromDate}_to_${filters.toDate}`;
+        }
+        return new Date().toISOString().slice(0, 10);
+    };
 
     // 1. Export Excel Handler
     const handleExportExcel = async () => {
@@ -194,9 +218,7 @@ export const ReportManager = ({ onUnauthorized }) => {
                 return;
             }
 
-            const dateTag = filters.fromDate && filters.toDate
-                ? `${filters.fromDate}_to_${filters.toDate}`
-                : new Date().toISOString().slice(0, 10);
+            const dateTag = getDateTag();
 
             if (reportType === 'payment_history') {
                 const columns = [
@@ -249,6 +271,31 @@ export const ReportManager = ({ onUnauthorized }) => {
                     filters,
                 });
                 toast.success('Quotation History exported to Excel successfully!');
+            } else if (reportType === 'approved_quotations') {
+                const columns = [
+                    { key: 'approval_date', label: 'Approval Date' },
+                    { key: 'quotation_number', label: 'Quotation Number' },
+                    { key: 'customer_name', label: 'Customer Name' },
+                    { key: 'customer_contact', label: 'Contact' },
+                    { key: 'customer_address', label: 'Address' },
+                    { key: 'system_capacity', label: 'Capacity' },
+                    { key: 'system_type', label: 'System Type' },
+                    { key: 'quotation_total_amount', label: 'Total Amount', format: 'currency' },
+                    { key: 'amount_paid', label: 'Amount Paid', format: 'currency' },
+                    { key: 'amount_to_pay', label: 'Amount to Pay', format: 'currency' },
+                    { key: 'payment_status', label: 'Payment Status' },
+                    { key: 'agreement_status', label: 'Agreement Status' },
+                ];
+
+                exportToExcel({
+                    title: 'Approved Quotations Report',
+                    filename: `approved_quotations_${dateTag}`,
+                    data: exportData,
+                    columns,
+                    summary: exportSummary,
+                    filters,
+                });
+                toast.success('Approved Quotations exported to Excel successfully!');
             }
         } catch {
             toast.error('Failed to export Excel report.');
@@ -268,9 +315,7 @@ export const ReportManager = ({ onUnauthorized }) => {
                 return;
             }
 
-            const dateTag = filters.fromDate && filters.toDate
-                ? `${filters.fromDate}_to_${filters.toDate}`
-                : new Date().toISOString().slice(0, 10);
+            const dateTag = getDateTag();
 
             if (reportType === 'payment_history') {
                 const columns = [
@@ -320,6 +365,30 @@ export const ReportManager = ({ onUnauthorized }) => {
                     orientation: 'landscape',
                 });
                 toast.success('Quotation History exported to PDF successfully!');
+            } else if (reportType === 'approved_quotations') {
+                const columns = [
+                    { key: 'approval_date', label: 'Date' },
+                    { key: 'quotation_number', label: 'Quotation No' },
+                    { key: 'customer_name', label: 'Customer Name' },
+                    { key: 'customer_contact', label: 'Contact' },
+                    { key: 'system_capacity', label: 'Capacity' },
+                    { key: 'quotation_total_amount', label: 'Total Amount', format: 'currency' },
+                    { key: 'amount_paid', label: 'Amount Paid', format: 'currency' },
+                    { key: 'amount_to_pay', label: 'Amount to Pay', format: 'currency' },
+                    { key: 'payment_status', label: 'Payment Status' },
+                    { key: 'agreement_status', label: 'Agreement' },
+                ];
+
+                exportToPdf({
+                    title: 'Approved Quotations Report',
+                    filename: `approved_quotations_${dateTag}`,
+                    data: exportData,
+                    columns,
+                    summary: exportSummary,
+                    filters,
+                    orientation: 'landscape',
+                });
+                toast.success('Approved Quotations exported to PDF successfully!');
             }
         } catch {
             toast.error('Failed to export PDF report.');
@@ -394,6 +463,14 @@ export const ReportManager = ({ onUnauthorized }) => {
 
             {reportType === 'quotation_history' && (
                 <QuotationHistoryReport
+                    data={reportData || []}
+                    summary={summary}
+                    isLoading={isLoading}
+                />
+            )}
+
+            {reportType === 'approved_quotations' && (
+                <ApprovedQuotationsReport
                     data={reportData || []}
                     summary={summary}
                     isLoading={isLoading}

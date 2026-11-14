@@ -613,4 +613,191 @@ class ReportController extends Controller
             'data' => $clients,
         ]);
     }
+
+    /**
+     * Dedicated Approved Quotations Report API (Non-paginated).
+     * Returns approved quotations with agreement status, payment progress, and date filters.
+     */
+    public function approvedQuotations(Request $request): JsonResponse
+    {
+        $this->ensureMastersSynced();
+
+        $fromDate = $this->parseDate($request->query('fromDate') ?: $request->query('start_date'));
+        $toDate = $this->parseDate($request->query('toDate') ?: $request->query('end_date'), true);
+        $customer = trim((string)($request->query('customer') ?: $request->query('customerId') ?: ''));
+        $quotationNumber = trim((string)($request->query('quotationNumber') ?: $request->query('ref_no') ?: ''));
+        $paymentStatus = $this->normalizeStatus($request->query('status') ?: $request->query('paymentStatus'));
+        $agreementStatus = trim((string)$request->query('agreementStatus', 'all'));
+
+        // Query active quotations that are approved or proceeded forward
+        $query = Quotation::active()
+            ->whereIn('workflow_status', ['approved', 'agreement_created', 'completed'])
+            ->with(['payment', 'agreement']);
+
+        // Date filter: prioritizes approved_at, falling back to created_at
+        if ($fromDate && $toDate) {
+            $query->where(function ($q) use ($fromDate, $toDate) {
+                $q->whereBetween('approved_at', [$fromDate, $toDate])
+                  ->orWhere(function ($sq) use ($fromDate, $toDate) {
+                      $sq->whereNull('approved_at')
+                         ->whereBetween('created_at', [$fromDate, $toDate]);
+                  });
+            });
+        } elseif ($fromDate) {
+            $query->where(function ($q) use ($fromDate) {
+                $q->where('approved_at', '>=', $fromDate)
+                  ->orWhere(function ($sq) use ($fromDate) {
+                      $sq->whereNull('approved_at')
+                         ->where('created_at', '>=', $fromDate);
+                  });
+            });
+        } elseif ($toDate) {
+            $query->where(function ($q) use ($toDate) {
+                $q->where('approved_at', '<=', $toDate)
+                  ->orWhere(function ($sq) use ($toDate) {
+                      $sq->whereNull('approved_at')
+                         ->where('created_at', '<=', $toDate);
+                  });
+            });
+        }
+
+        // Customer filter
+        if (!empty($customer)) {
+            $query->where(function ($q) use ($customer) {
+                $q->where('client_name', 'like', "%{$customer}%")
+                    ->orWhere('client_phone', 'like', "%{$customer}%")
+                    ->orWhere('client_address', 'like', "%{$customer}%")
+                    ->orWhere('id', $customer);
+            });
+        }
+
+        // Quotation Number filter
+        if (!empty($quotationNumber)) {
+            $query->where('ref_no', 'like', "%{$quotationNumber}%");
+        }
+
+        // Payment Status filter
+        if ($paymentStatus) {
+            if ($paymentStatus === 'pending') {
+                $query->where(function ($q) {
+                    $q->whereDoesntHave('payment')
+                      ->orWhereHas('payment', function ($pq) {
+                          $pq->where('status', 'pending');
+                      });
+                });
+            } else {
+                $query->whereHas('payment', function ($q) use ($paymentStatus) {
+                    $q->where('status', $paymentStatus);
+                });
+            }
+        }
+
+        // Agreement filter: 'created' | 'pending'
+        if ($agreementStatus === 'created') {
+            $query->where(function ($q) {
+                $q->where('workflow_status', 'agreement_created')
+                  ->orWhere('workflow_status', 'completed')
+                  ->orWhereHas('agreement');
+            });
+        } elseif ($agreementStatus === 'pending') {
+            $query->where(function ($q) {
+                $q->where('workflow_status', 'approved')
+                  ->whereDoesntHave('agreement');
+            });
+        }
+
+        $quotations = $query->orderBy('approved_at', 'desc')->orderBy('id', 'desc')->get();
+
+        $records = [];
+        $totalQuotationAmount = 0.0;
+        $totalAmountPaid = 0.0;
+        $withAgreementCount = 0;
+        $pendingAgreementCount = 0;
+        $statusCounts = ['pending' => 0, 'partially_paid' => 0, 'paid' => 0];
+
+        foreach ($quotations as $quote) {
+            $payment = $quote->payment;
+            $total = (float)($payment?->total_amount ?: QuotationPayment::parseAmount($quote->total_amount));
+            $paid = (float)($payment?->amount_paid ?: 0);
+            $balance = (float)($payment?->balance_amount ?: max(0.0, $total - $paid));
+            $curStatus = $payment?->status ?: ($balance <= 0 && $total > 0 ? 'paid' : ($paid > 0 ? 'partially_paid' : 'pending'));
+
+            $hasAgreement = !empty($quote->agreement) || in_array($quote->workflow_status, ['agreement_created', 'completed']);
+            if ($hasAgreement) {
+                $withAgreementCount++;
+            } else {
+                $pendingAgreementCount++;
+            }
+
+            $totalQuotationAmount += $total;
+            $totalAmountPaid += $paid;
+            if (isset($statusCounts[$curStatus])) {
+                $statusCounts[$curStatus]++;
+            }
+
+            $statusLabel = match ($curStatus) {
+                'paid' => 'Paid',
+                'partially_paid' => 'Partially Paid',
+                default => 'Pending',
+            };
+
+            $quoteDate = $quote->quotation_date ?: ($quote->created_at ? $quote->created_at->format('d/m/Y') : '-');
+            $approvalDate = $quote->approved_at ? $quote->approved_at->format('d/m/Y') : ($quote->updated_at ? $quote->updated_at->format('d/m/Y') : $quoteDate);
+            $approvalDateFormatted = $quote->approved_at ? $quote->approved_at->format('d M Y, h:i A') : $approvalDate;
+
+            $records[] = [
+                'quotation_id' => (int)$quote->id,
+                'quotation_number' => $quote->ref_no ?: 'N/A',
+                'quotation_date' => $quoteDate,
+                'approval_date' => $approvalDate,
+                'approval_date_formatted' => $approvalDateFormatted,
+                'customer_id' => $quote->client_phone ?: (string)$quote->id,
+                'customer_name' => $quote->client_name ?: 'Unnamed Customer',
+                'customer_contact' => $quote->client_phone ?: '-',
+                'customer_address' => $quote->client_address ?: '-',
+                'system_capacity' => $quote->capacity ?: '-',
+                'system_type' => $quote->system_type ?: '-',
+                'quotation_total_amount' => $total,
+                'amount_paid' => $paid,
+                'amount_to_pay' => $balance,
+                'payment_status' => $statusLabel,
+                'payment_status_raw' => $curStatus,
+                'agreement_status' => $hasAgreement ? 'Agreement Created' : 'Pending Agreement',
+                'agreement_status_raw' => $hasAgreement ? 'created' : 'pending',
+                'workflow_status' => $quote->workflow_status ?: 'approved',
+                'workflow_status_label' => match ($quote->workflow_status) {
+                    'agreement_created' => 'Agreement Created',
+                    'completed' => 'Completed',
+                    default => 'Approved by Client',
+                },
+            ];
+        }
+
+        $totalBalance = max(0.0, $totalQuotationAmount - $totalAmountPaid);
+
+        return response()->json([
+            'success' => true,
+            'report_type' => 'approved_quotations',
+            'data' => $records,
+            'summary' => [
+                'totalQuotations' => count($records),
+                'totalQuotationAmount' => round($totalQuotationAmount, 2),
+                'totalAmountPaid' => round($totalAmountPaid, 2),
+                'totalAmountToPay' => round($totalBalance, 2),
+                'withAgreementCount' => $withAgreementCount,
+                'pendingAgreementCount' => $pendingAgreementCount,
+                'statusCounts' => $statusCounts,
+            ],
+            'filters' => [
+                'fromDate' => $request->query('fromDate') ?: '',
+                'toDate' => $request->query('toDate') ?: '',
+                'customer' => $customer,
+                'quotationNumber' => $quotationNumber,
+                'status' => $paymentStatus ?: 'all',
+                'agreementStatus' => $agreementStatus,
+            ],
+            'generated_at' => Carbon::now()->toIso8601String(),
+            'generated_at_formatted' => Carbon::now()->format('d M Y, h:i A'),
+        ]);
+    }
 }

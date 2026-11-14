@@ -8,13 +8,15 @@ import {
     Play,
     Filter,
     User,
-    CheckCircle2
+    CheckCircle2,
+    FileSignature
 } from 'lucide-react';
 
 /**
  * ReportFilters Component
  * 
- * Renders server-side filter inputs and export action buttons.
+ * Renders server-side filter inputs, quick date presets (Today, Yesterday, One Week, One Month, Custom),
+ * and export action buttons.
  */
 export const ReportFilters = ({
     reportType,
@@ -30,6 +32,51 @@ export const ReportFilters = ({
     clientsList = [],
 }) => {
     const isQuotationReport = reportType === 'quotation_history';
+    const isApprovedReport = reportType === 'approved_quotations';
+
+    const handlePresetClick = (preset) => {
+        onFilterChange('datePreset', preset);
+        const today = new Date();
+        const formatDate = (d) => {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        if (preset === 'all') {
+            onFilterChange('fromDate', '');
+            onFilterChange('toDate', '');
+        } else if (preset === 'today') {
+            const todayStr = formatDate(today);
+            onFilterChange('fromDate', todayStr);
+            onFilterChange('toDate', todayStr);
+        } else if (preset === 'yesterday') {
+            const yest = new Date();
+            yest.setDate(today.getDate() - 1);
+            const yestStr = formatDate(yest);
+            onFilterChange('fromDate', yestStr);
+            onFilterChange('toDate', yestStr);
+        } else if (preset === 'week') {
+            const pastWeek = new Date();
+            pastWeek.setDate(today.getDate() - 7);
+            onFilterChange('fromDate', formatDate(pastWeek));
+            onFilterChange('toDate', formatDate(today));
+        } else if (preset === 'month') {
+            const pastMonth = new Date();
+            pastMonth.setDate(today.getDate() - 30);
+            onFilterChange('fromDate', formatDate(pastMonth));
+            onFilterChange('toDate', formatDate(today));
+        } else if (preset === 'custom') {
+            if (!filters.fromDate) onFilterChange('fromDate', formatDate(today));
+            if (!filters.toDate) onFilterChange('toDate', formatDate(today));
+        }
+    };
+
+    const handleCustomDateChange = (field, val) => {
+        onFilterChange('datePreset', 'custom');
+        onFilterChange(field, val);
+    };
 
     return (
         <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs p-4 sm:p-5 space-y-4">
@@ -45,6 +92,7 @@ export const ReportFilters = ({
                     >
                         <option value="payment_history">Payment History Report</option>
                         <option value="quotation_history">Quotation History Report</option>
+                        <option value="approved_quotations">Approved Quotations Report</option>
                     </select>
                 </div>
 
@@ -53,8 +101,40 @@ export const ReportFilters = ({
                 </div>
             </div>
 
+            {/* Date Presets Row */}
+            <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] font-semibold text-neutral-500 mr-1 flex items-center gap-1">
+                    <Calendar size={12} className="text-[#1A4D2E]" />
+                    Date Filter:
+                </span>
+                {[
+                    { id: 'all', label: 'All Time' },
+                    { id: 'today', label: 'Today' },
+                    { id: 'yesterday', label: 'Yesterday' },
+                    { id: 'week', label: 'One Week' },
+                    { id: 'month', label: 'One Month' },
+                    { id: 'custom', label: 'Custom Date' },
+                ].map((preset) => {
+                    const isActive = (filters.datePreset || 'all') === preset.id;
+                    return (
+                        <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => handlePresetClick(preset.id)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer ${
+                                isActive
+                                    ? 'bg-[#1A4D2E] text-white shadow-2xs'
+                                    : 'bg-neutral-100 hover:bg-neutral-200/70 text-neutral-600'
+                            }`}
+                        >
+                            {preset.label}
+                        </button>
+                    );
+                })}
+            </div>
+
             {/* Filter Inputs Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-1">
                 {/* Date From */}
                 <div className="space-y-1">
                     <label className="text-[11px] font-semibold text-neutral-600 flex items-center gap-1">
@@ -64,7 +144,7 @@ export const ReportFilters = ({
                     <input
                         type="date"
                         value={filters.fromDate}
-                        onChange={(e) => onFilterChange('fromDate', e.target.value)}
+                        onChange={(e) => handleCustomDateChange('fromDate', e.target.value)}
                         className="w-full px-2.5 py-1.5 bg-neutral-50 hover:bg-white focus:bg-white border border-neutral-300 rounded-lg text-xs font-medium text-neutral-800 outline-none focus:border-[#1A4D2E]"
                     />
                 </div>
@@ -78,7 +158,7 @@ export const ReportFilters = ({
                     <input
                         type="date"
                         value={filters.toDate}
-                        onChange={(e) => onFilterChange('toDate', e.target.value)}
+                        onChange={(e) => handleCustomDateChange('toDate', e.target.value)}
                         className="w-full px-2.5 py-1.5 bg-neutral-50 hover:bg-white focus:bg-white border border-neutral-300 rounded-lg text-xs font-medium text-neutral-800 outline-none focus:border-[#1A4D2E]"
                     />
                 </div>
@@ -161,6 +241,25 @@ export const ReportFilters = ({
                             <option value="rejected">Rejected by Client</option>
                             <option value="agreement_created">Agreement Created</option>
                             <option value="completed">Completed</option>
+                        </select>
+                    </div>
+                )}
+
+                {/* Agreement Filter (only for approved quotations report) */}
+                {isApprovedReport && (
+                    <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-neutral-600 flex items-center gap-1">
+                            <FileSignature size={11} className="text-neutral-400" />
+                            <span>Agreement Status</span>
+                        </label>
+                        <select
+                            value={filters.agreementStatus || 'all'}
+                            onChange={(e) => onFilterChange('agreementStatus', e.target.value)}
+                            className="w-full px-2.5 py-1.5 bg-neutral-50 hover:bg-white focus:bg-white border border-neutral-300 rounded-lg text-xs font-medium text-neutral-800 outline-none cursor-pointer focus:border-[#1A4D2E]"
+                        >
+                            <option value="all">All Agreements</option>
+                            <option value="created">Agreement Created</option>
+                            <option value="pending">Pending Agreement</option>
                         </select>
                     </div>
                 )}

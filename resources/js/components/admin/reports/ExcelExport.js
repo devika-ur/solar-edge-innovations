@@ -51,6 +51,7 @@ export const exportToExcel = ({
             if (filters.quotationNumber) filterParts.push(`Quotation: ${filters.quotationNumber}`);
             if (filters.status && filters.status !== 'all') filterParts.push(`Payment Status: ${filters.status}`);
             if (filters.quotationStatus && filters.quotationStatus !== 'all') filterParts.push(`Quotation Status: ${filters.quotationStatus}`);
+            if (filters.agreementStatus && filters.agreementStatus !== 'all') filterParts.push(`Agreement: ${filters.agreementStatus === 'created' ? 'Agreement Created' : 'Pending Agreement'}`);
 
             if (filterParts.length > 0) {
                 aoa.push([`Filters: ${filterParts.join(' | ')}`]);
