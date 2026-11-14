@@ -19,9 +19,11 @@ import {
     Filter,
     ArrowRight,
     AlertCircle,
-    Check
+    Check,
+    Trash2
 } from 'lucide-react';
 import { Pagination } from './Pagination';
+import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 
 export const ApprovedQuotationsManager = ({ onNavigate, onUnauthorized }) => {
     const [quotations, setQuotations] = useState([]);
@@ -39,6 +41,10 @@ export const ApprovedQuotationsManager = ({ onNavigate, onUnauthorized }) => {
     // PDF Preview Modal
     const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
     const [previewPdfTitle, setPreviewPdfTitle] = useState('');
+
+    // Delete Modal state
+    const [quotationToDelete, setQuotationToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -131,6 +137,40 @@ export const ApprovedQuotationsManager = ({ onNavigate, onUnauthorized }) => {
         setEndDate('');
         setAgreementFilter('all');
         setCurrentPage(1);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!quotationToDelete) return;
+        setIsDeleting(true);
+        try {
+            const res = await fetch(`/api/admin-quotations-handle.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    id: quotationToDelete.id,
+                    action: 'delete'
+                })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                toast.success('Approved quotation deleted successfully.');
+                setQuotations((prev) => prev.filter((q) => q.id !== quotationToDelete.id));
+                setStats((prev) => ({
+                    ...prev,
+                    total_approved: Math.max(0, prev.total_approved - 1),
+                    with_agreement: quotationToDelete.has_agreement ? Math.max(0, prev.with_agreement - 1) : prev.with_agreement,
+                    pending_agreement: !quotationToDelete.has_agreement ? Math.max(0, prev.pending_agreement - 1) : prev.pending_agreement
+                }));
+                setQuotationToDelete(null);
+            } else {
+                toast.error(data.message || 'Failed to delete quotation.');
+            }
+        } catch {
+            toast.error('Network error deleting quotation.');
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     // Filter by agreement status locally if toggled
@@ -453,17 +493,28 @@ export const ApprovedQuotationsManager = ({ onNavigate, onUnauthorized }) => {
                                             )}
                                         </td>
 
-                                        {/* Action Button: Generate Agreement */}
+                                        {/* Action Buttons: Generate Agreement & Delete */}
                                         <td className="py-4 px-4 sm:px-6 text-right">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleGenerateAgreement(quote)}
-                                                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-bold transition-all shadow-xs hover:shadow-md cursor-pointer"
-                                                title="Generate Agreement for this client"
-                                            >
-                                                <FileSignature size={14} />
-                                                <span>Generate Agreement</span>
-                                            </button>
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleGenerateAgreement(quote)}
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
+                                                    title="Generate Agreement for this client"
+                                                >
+                                                    <FileSignature size={13} />
+                                                    <span>Generate Agreement</span>
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setQuotationToDelete(quote)}
+                                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white hover:bg-rose-50 text-neutral-500 hover:text-rose-600 border border-neutral-200 hover:border-rose-200 text-xs font-semibold transition-all cursor-pointer shadow-2xs"
+                                                    title="Delete this approved quotation"
+                                                >
+                                                    <Trash2 size={13} />
+                                                    <span>Delete</span>
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -526,14 +577,23 @@ export const ApprovedQuotationsManager = ({ onNavigate, onUnauthorized }) => {
                                     )}
                                 </div>
 
-                                <div className="pt-2 border-t border-neutral-100 flex items-center justify-end">
+                                <div className="pt-2 border-t border-neutral-100 flex items-center gap-2">
                                     <button
                                         type="button"
                                         onClick={() => handleGenerateAgreement(quote)}
-                                        className="w-full py-2.5 px-3 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                                        className="flex-1 py-2 px-3 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
                                     >
-                                        <FileSignature size={14} />
+                                        <FileSignature size={13} />
                                         <span>Generate Agreement</span>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setQuotationToDelete(quote)}
+                                        className="py-2 px-3 rounded-xl bg-white hover:bg-rose-50 text-neutral-500 hover:text-rose-600 border border-neutral-200 text-xs font-semibold transition-all flex items-center justify-center gap-1 cursor-pointer shadow-2xs"
+                                        title="Delete this approved quotation"
+                                    >
+                                        <Trash2 size={13} />
+                                        <span>Delete</span>
                                     </button>
                                 </div>
                             </div>
@@ -550,6 +610,15 @@ export const ApprovedQuotationsManager = ({ onNavigate, onUnauthorized }) => {
                     />
                 </div>
             )}
+
+            <ConfirmDeleteModal
+                isOpen={!!quotationToDelete}
+                onClose={() => setQuotationToDelete(null)}
+                onConfirm={handleConfirmDelete}
+                title="Delete Approved Quotation"
+                message={`Are you sure you want to delete approved quotation #${quotationToDelete?.ref_no} for ${quotationToDelete?.client_name}? Any associated agreements and payments will also be permanently removed. This action cannot be undone.`}
+                isDeleting={isDeleting}
+            />
         </div>
     );
 };

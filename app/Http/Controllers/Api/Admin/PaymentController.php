@@ -19,6 +19,11 @@ class PaymentController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
+            // Clean up any orphaned payment records whose quotation was deleted or is no longer active
+            QuotationPayment::whereDoesntHave('quotation', function ($q) {
+                $q->active();
+            })->delete();
+
             // Auto-sync quotations that have an agreement created and do not yet have a payment master record
             $eligibleQuotations = Quotation::active()
                 ->where(function ($q) {

@@ -663,13 +663,28 @@ class QuotationController extends Controller
                     @File::delete(public_path($quotation->pdf_path));
                 }
 
+                // If quotation had an agreement, delete agreement PDF and record
+                if ($quotation->agreement) {
+                    if ($quotation->agreement->pdf_path && File::exists(public_path($quotation->agreement->pdf_path))) {
+                        @File::delete(public_path($quotation->agreement->pdf_path));
+                    }
+                    $quotation->agreement()->delete();
+                }
+
+                // Remove associated payment master and payment history so deleted quotation never shows in payments
+                $payment = QuotationPayment::where('quotation_id', $quotation->id)->first();
+                if ($payment) {
+                    $payment->paymentHistories()->delete();
+                    $payment->delete();
+                }
+
                 $quotation->status = 'deleted';
                 $quotation->save();
                 $quotation->delete(); // Soft delete
 
                 return response()->json([
                     'success' => true,
-                    'message' => "Quotation #{$quotation->ref_no} ({$quotation->client_name}) deleted from history.",
+                    'message' => "Quotation #{$quotation->ref_no} ({$quotation->client_name}) deleted.",
                 ]);
             }
 
