@@ -207,10 +207,7 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
     };
 
     // Reopen Quotation Handler
-    const handleReopenQuotation = async (quote) => {
-        if (!window.confirm(`Reopen quotation #${quote.ref_no} for editing? This resets its status to 'Quotation Approval Pending'.`)) {
-            return;
-        }
+    const handleReopenQuotation = async (quote, callback = null) => {
         try {
             const res = await fetch(`/api/admin-quotations-reopen.php`, {
                 method: 'POST',
@@ -222,6 +219,7 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
             if (res.ok && data.success) {
                 toast.success(`Quotation #${quote.ref_no} reopened for editing!`);
                 loadQuotations();
+                if (callback) callback();
             } else {
                 toast.error(data.message || 'Failed to reopen quotation.');
             }
@@ -233,7 +231,13 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
     // Edit Quotation Click
     const handleEditQuotation = (quote) => {
         if (!quote.is_editable) {
-            toast.error(`Quotation is ${quote.workflow_status_label}. Editing is disabled unless explicitly reopened.`);
+            if (window.confirm(`Quotation #${quote.ref_no} is currently marked as '${quote.workflow_status_label}'. Reopen it to make changes?`)) {
+                handleReopenQuotation(quote, () => {
+                    if (onNavigate) {
+                        onNavigate('quotation', { editId: quote.id });
+                    }
+                });
+            }
             return;
         }
         if (onNavigate) {
@@ -623,39 +627,16 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                                                     </td>
 
                                                     {/* Workflow Actions */}
-                                                    <td className="py-4 px-4 sm:px-6 text-right">
-                                                        <div className="flex items-center justify-end gap-1.5 flex-wrap">
-                                                            {/* 1. Edit Quotation (Active only if approval_pending) */}
-                                                            {quote.is_editable ? (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleEditQuotation(quote)}
-                                                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 text-xs font-semibold transition-all cursor-pointer"
-                                                                    title="Edit quotation fields"
-                                                                >
-                                                                    <Edit3 size={12} />
-                                                                    <span>Edit</span>
-                                                                </button>
-                                                            ) : (
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleReopenQuotation(quote)}
-                                                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-neutral-50 hover:bg-amber-50 text-neutral-500 hover:text-amber-700 border border-neutral-200 text-xs font-semibold transition-all cursor-pointer"
-                                                                    title="Reopen quotation for editing"
-                                                                >
-                                                                    <RotateCcw size={11} />
-                                                                    <span>Reopen</span>
-                                                                </button>
-                                                            )}
-
-                                                            {/* 2. Client Approval / Rejection Actions (if still pending) */}
+                                                    <td className="py-3 px-4 sm:px-6 text-right">
+                                                        <div className="flex flex-col items-end gap-1.5">
+                                                            {/* Top: Approve & Reject (Shown ONLY if approval_pending) */}
                                                             {quote.workflow_status === 'approval_pending' && (
-                                                                <>
+                                                                <div className="flex items-center gap-1.5">
                                                                     <button
                                                                         type="button"
                                                                         disabled={isApprovingId === quote.id}
                                                                         onClick={() => handleApproveQuotation(quote)}
-                                                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-all cursor-pointer border border-emerald-200/60"
+                                                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-all cursor-pointer border border-emerald-200/80 shadow-2xs"
                                                                         title="Mark approved by client"
                                                                     >
                                                                         <CheckCircle2 size={12} className={isApprovingId === quote.id ? 'animate-spin' : ''} />
@@ -668,37 +649,37 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                                                                             setQuotationToReject(quote);
                                                                             setRejectionReason('');
                                                                         }}
-                                                                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all cursor-pointer border border-rose-200/60"
+                                                                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition-all cursor-pointer border border-rose-200/80 shadow-2xs"
                                                                         title="Mark rejected by client"
                                                                     >
                                                                         <XCircle size={12} />
                                                                         <span>Reject</span>
                                                                     </button>
-                                                                </>
+                                                                </div>
                                                             )}
 
-                                                            {/* 3. If Approved -> Generate Agreement */}
-                                                            {quote.workflow_status === 'approved' && onNavigate && (
+                                                            {/* Below: Edit & Delete (Always shown; if approved or rejected, only these two appear) */}
+                                                            <div className="flex items-center gap-1.5">
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => onNavigate('agreement', { quotation: quote, quotationId: quote.id })}
-                                                                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-bold transition-all shadow-xs cursor-pointer"
-                                                                    title="Generate Model RTS Agreement"
+                                                                    onClick={() => handleEditQuotation(quote)}
+                                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 text-xs font-semibold transition-all cursor-pointer border border-neutral-200/60 shadow-2xs"
+                                                                    title="Edit quotation"
                                                                 >
-                                                                    <FileSignature size={12} />
-                                                                    <span>Agreement</span>
+                                                                    <Edit3 size={12} />
+                                                                    <span>Edit</span>
                                                                 </button>
-                                                            )}
 
-                                                            {/* Delete */}
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setQuotationToDelete(quote)}
-                                                                className="p-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-600 hover:text-neutral-900 transition-all flex items-center justify-center cursor-pointer"
-                                                                title="Delete quotation"
-                                                            >
-                                                                <Trash2 size={13} />
-                                                            </button>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => setQuotationToDelete(quote)}
+                                                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-neutral-100 hover:bg-red-50 text-neutral-600 hover:text-red-600 transition-all cursor-pointer border border-neutral-200/60 shadow-2xs"
+                                                                    title="Delete quotation"
+                                                                >
+                                                                    <Trash2 size={12} />
+                                                                    <span className="text-[11px] font-medium">Delete</span>
+                                                                </button>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -753,60 +734,53 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                                             </div>
 
                                             {/* Action bar on Mobile */}
-                                            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-neutral-100">
-                                                <div className="flex items-center gap-1.5">
-                                                    {quote.is_editable && (
+                                            <div className="flex flex-col gap-2 pt-2 border-t border-neutral-100">
+                                                {/* Top: Approve & Reject (Shown ONLY if approval_pending) */}
+                                                {quote.workflow_status === 'approval_pending' && (
+                                                    <div className="flex items-center gap-2">
                                                         <button
                                                             type="button"
-                                                            onClick={() => handleEditQuotation(quote)}
-                                                            className="py-1 px-2.5 rounded-xl bg-neutral-100 text-neutral-700 font-semibold text-xs flex items-center gap-1"
+                                                            disabled={isApprovingId === quote.id}
+                                                            onClick={() => handleApproveQuotation(quote)}
+                                                            className="flex-1 py-1.5 px-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center justify-center gap-1 shadow-2xs"
                                                         >
-                                                            <Edit3 size={11} />
-                                                            <span>Edit</span>
+                                                            <CheckCircle2 size={12} className={isApprovingId === quote.id ? 'animate-spin' : ''} />
+                                                            <span>Approve</span>
                                                         </button>
-                                                    )}
-                                                    {quote.workflow_status === 'approval_pending' && (
-                                                        <>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleApproveQuotation(quote)}
-                                                                className="py-1 px-2.5 rounded-xl bg-emerald-50 text-emerald-800 font-bold text-xs flex items-center gap-1"
-                                                            >
-                                                                <CheckCircle2 size={11} />
-                                                                <span>Approve</span>
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => {
-                                                                    setQuotationToReject(quote);
-                                                                    setRejectionReason('');
-                                                                }}
-                                                                className="py-1 px-2.5 rounded-xl bg-rose-50 text-rose-700 font-bold text-xs flex items-center gap-1"
-                                                            >
-                                                                <XCircle size={11} />
-                                                                <span>Reject</span>
-                                                            </button>
-                                                        </>
-                                                    )}
-                                                    {quote.workflow_status === 'approved' && onNavigate && (
                                                         <button
                                                             type="button"
-                                                            onClick={() => onNavigate('agreement', { quotation: quote, quotationId: quote.id })}
-                                                            className="py-1 px-3 rounded-xl bg-[#1A4D2E] text-white font-bold text-xs flex items-center gap-1"
+                                                            onClick={() => {
+                                                                setQuotationToReject(quote);
+                                                                setRejectionReason('');
+                                                            }}
+                                                            className="flex-1 py-1.5 px-2.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 font-bold text-xs flex items-center justify-center gap-1 shadow-2xs"
                                                         >
-                                                            <FileSignature size={11} />
-                                                            <span>Generate Agreement</span>
+                                                            <XCircle size={12} />
+                                                            <span>Reject</span>
                                                         </button>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                )}
 
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setQuotationToDelete(quote)}
-                                                    className="p-1.5 rounded-xl bg-neutral-100 text-neutral-600 hover:text-red-600"
-                                                >
-                                                    <Trash2 size={13} />
-                                                </button>
+                                                {/* Below: Edit & Delete (Always shown; if approved or rejected, only these two appear) */}
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleEditQuotation(quote)}
+                                                        className="flex-1 py-1.5 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border border-neutral-200 font-semibold text-xs flex items-center justify-center gap-1 shadow-2xs"
+                                                    >
+                                                        <Edit3 size={12} />
+                                                        <span>Edit</span>
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setQuotationToDelete(quote)}
+                                                        className="py-1.5 px-3 rounded-xl bg-neutral-100 hover:bg-red-50 text-neutral-600 hover:text-red-600 border border-neutral-200 text-xs font-semibold flex items-center justify-center gap-1 shadow-2xs"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                        <span>Delete</span>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
