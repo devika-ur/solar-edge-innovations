@@ -223,3 +223,4 @@ export const ApprovedQuotationsReport = ({ data = [], summary = {}, isLoading = 
 };
 
 export default ApprovedQuotationsReport;
+

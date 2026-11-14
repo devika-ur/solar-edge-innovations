@@ -15,14 +15,28 @@ class ReportController extends Controller
 {
     /**
      * Ensure active quotations are synced to quotation_payments masters.
+     * Only quotations that have agreements created or are completed should have payment records.
      */
     protected function ensureMastersSynced(): void
     {
         try {
-            $activeQuotations = Quotation::active()->get();
+            // Clean up any orphaned or ineligible payment records (quotations that are deleted or don't have agreements)
+            QuotationPayment::whereDoesntHave('quotation', function ($q) {
+                $q->active()->where(function ($sq) {
+                    $sq->whereIn('workflow_status', ['agreement_created', 'completed'])
+                       ->orWhereHas('agreement');
+                });
+            })->delete();
+
+            $eligibleQuotations = Quotation::active()
+                ->where(function ($q) {
+                    $q->whereIn('workflow_status', ['agreement_created', 'completed'])
+                      ->orWhereHas('agreement');
+                })
+                ->get();
             $existingMasterLookup = array_flip(QuotationPayment::pluck('quotation_id')->all());
 
-            foreach ($activeQuotations as $quote) {
+            foreach ($eligibleQuotations as $quote) {
                 if (!isset($existingMasterLookup[$quote->id])) {
                     QuotationPayment::syncForQuotation($quote);
                 }
@@ -96,7 +110,10 @@ class ReportController extends Controller
         if ($status !== 'pending') {
             $txQuery = PaymentHistory::with(['quotation', 'quotationPayment'])
                 ->whereHas('quotation', function ($q) {
-                    $q->active();
+                    $q->active()->where(function ($sq) {
+                        $sq->whereIn('workflow_status', ['agreement_created', 'completed'])
+                           ->orWhereHas('agreement');
+                    });
                 });
 
             // Date filtering on payment_date
@@ -179,11 +196,14 @@ class ReportController extends Controller
         }
 
         // 2. If status is 'pending' OR status is empty/'all' without narrow payment-date filter,
-        // also include quotations that have 0 payments so the report is comprehensive.
+        // also include quotations with saved agreements that have pending/0 payments so the report is comprehensive.
         if ($status === 'pending' || (empty($status) && !$fromDate && !$toDate)) {
             $pendingQuery = QuotationPayment::with(['quotation'])
                 ->whereHas('quotation', function ($q) {
-                    $q->active();
+                    $q->active()->where(function ($sq) {
+                        $sq->whereIn('workflow_status', ['agreement_created', 'completed'])
+                           ->orWhereHas('agreement');
+                    });
                 })
                 ->where(function ($q) {
                     $q->where('status', 'pending')->orWhere('amount_paid', '<=', 0);
@@ -205,6 +225,9 @@ class ReportController extends Controller
             foreach ($pendingMasters as $master) {
                 $quote = $master->quotation;
                 $quoteId = (int)$master->quotation_id;
+                if (isset($distinctQuoteIds[$quoteId])) {
+                    continue;
+                }
                 $quoteTotal = (float)$master->total_amount;
 
                 $distinctQuoteIds[$quoteId] = true;
