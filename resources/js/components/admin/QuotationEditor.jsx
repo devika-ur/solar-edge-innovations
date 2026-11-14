@@ -55,34 +55,41 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate, editId: propEdit
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-    // Load initial quotation data from localStorage or default
+    // Load initial quotation data - clean form when not editing
     const [quotationData, setQuotationData] = useState(() => {
         const todayFormatted = getTodayFormatted();
-        const saved = localStorage.getItem('solar_quotation_data');
-        if (saved) {
+        if (!activeEditId) {
             try {
-                const parsed = JSON.parse(saved);
-                if (parsed.clientInfo?.name === 'SUNIL') {
-                    parsed.clientInfo.name = '';
-                }
-                if (!parsed.batteryDetails || parsed.batteryDetails.length === 0) {
-                    parsed.batteryDetails = [
-                        {
-                            id: 1,
-                            batteryDetails: "",
-                            quantity: "",
-                            price: ""
-                        }
-                    ];
-                }
-                // Automatically default date to current date for new drafts
-                if (!parsed.id) {
-                    parsed.date = todayFormatted;
-                }
-                return parsed;
+                localStorage.removeItem('solar_quotation_data');
             } catch (e) {
-                console.error("Failed to parse saved quotation data", e);
+                // Ignore localStorage errors
             }
+            return {
+                ...defaultQuotationData,
+                refNo: '',
+                date: todayFormatted,
+                clientInfo: {
+                    name: '',
+                    address: '',
+                    contactNo: '',
+                    capacity: '',
+                    type: 'ON GRID'
+                },
+                pricing: {
+                    ...defaultQuotationData.pricing,
+                    headerTitle: '',
+                    totalPayable: '',
+                    amountInWords: ''
+                },
+                batteryDetails: [
+                    {
+                        id: 1,
+                        batteryDetails: "",
+                        quantity: "",
+                        price: ""
+                    }
+                ]
+            };
         }
         return {
             ...defaultQuotationData,

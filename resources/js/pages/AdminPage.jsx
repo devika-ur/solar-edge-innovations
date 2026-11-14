@@ -57,9 +57,13 @@ const AdminPage = () => {
 
     const handleTabChange = (tabId, extra = null) => {
         if (VALID_TABS.includes(tabId)) {
-            if (extra) {
-                setWorkflowContext((prev) => ({ ...prev, [tabId]: extra }));
-            }
+            setWorkflowContext((prev) => {
+                const next = { ...prev, [tabId]: extra };
+                if (tabId !== 'quotation') {
+                    delete next['quotation'];
+                }
+                return next;
+            });
             navigate(`/admin/${tabId}`);
         }
     };
@@ -353,6 +357,7 @@ const AdminPage = () => {
                 {activeTab === 'faqs' && <FaqManager onUnauthorized={handleUnauthorized} />}
                 {activeTab === 'quotation' && (
                     <QuotationEditor
+                        key={workflowContext['quotation']?.editId ? `edit-${workflowContext['quotation'].editId}` : 'new-quotation'}
                         editId={workflowContext['quotation']?.editId}
                         onLogout={() => setIsLogoutModalOpen(true)}
                         onBack={() => handleTabChange('dashboard')}
