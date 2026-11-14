@@ -205,7 +205,7 @@ export const ApplicationTrackingManager = ({ onNavigate, onUnauthorized, initial
     // Render individual applicant detail tracking view
     if (selectedApplicant) {
         return (
-            <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto font-poppins animate-in fade-in duration-200">
+            <div className="w-full px-4 sm:px-8 py-8 space-y-6 font-poppins max-w-7xl mx-auto animate-in fade-in duration-200">
                 {/* Back Button & Header */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-neutral-200/80 shadow-2xs">
                     <div className="flex items-center gap-3">
