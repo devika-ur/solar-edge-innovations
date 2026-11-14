@@ -66,8 +66,15 @@ export const defaultQuotationData = {
         { id: 4, item: "KSEB Registration fee", fee: "Single Phase (Rs. 4,900) / Three Phase (Rs. 10,000): CUSTOMER SIDE" }
     ],
 
-    // Battery Details Table (Page 5 - kept blank by default)
-    batteryDetails: [],
+    // Battery Details Table (Page 5 - 1 default row for immediate entry)
+    batteryDetails: [
+        {
+            id: 1,
+            batteryDetails: "",
+            quantity: "",
+            price: ""
+        }
+    ],
 
     // Subsidy & Warranty Notes (Page 5)
     subsidyNote: "Government subsidy will be provided within 35 days after completion of work and KSEB connection is obtained.",

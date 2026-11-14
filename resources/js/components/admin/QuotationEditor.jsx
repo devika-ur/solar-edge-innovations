@@ -53,6 +53,16 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                 if (parsed.clientInfo?.name === 'SUNIL') {
                     parsed.clientInfo.name = '';
                 }
+                if (!parsed.batteryDetails || parsed.batteryDetails.length === 0) {
+                    parsed.batteryDetails = [
+                        {
+                            id: 1,
+                            batteryDetails: "",
+                            quantity: "",
+                            price: ""
+                        }
+                    ];
+                }
                 return parsed;
             } catch (e) {
                 console.error("Failed to parse saved quotation data", e);
@@ -492,7 +502,14 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                     totalPayable: '',
                     amountInWords: ''
                 },
-                batteryDetails: []
+                batteryDetails: [
+                    {
+                        id: 1,
+                        batteryDetails: "",
+                        quantity: "",
+                        price: ""
+                    }
+                ]
             };
 
             setQuotationData(clearedData);
