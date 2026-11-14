@@ -101,6 +101,8 @@ Route::middleware('admin.session')->group(function () {
     Route::post('/admin-quotations-reopen.php', [AdminQuotationController::class, 'reopen']);
     Route::post('/admin/quotations/delete', [AdminQuotationController::class, 'handle']);
     Route::post('/admin-quotations-delete.php', [AdminQuotationController::class, 'handle']);
+    Route::post('/admin/quotations/handle', [AdminQuotationController::class, 'handle']);
+    Route::post('/admin-quotations-handle.php', [AdminQuotationController::class, 'handle']);
 
     // Agreement Management
     Route::get('/admin/agreements/{quotationId}', [AdminAgreementController::class, 'show']);

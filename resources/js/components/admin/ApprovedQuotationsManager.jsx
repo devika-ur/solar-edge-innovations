@@ -144,7 +144,7 @@ export const ApprovedQuotationsManager = ({ onNavigate, onUnauthorized }) => {
         if (!quotationToDelete) return;
         setIsDeleting(true);
         try {
-            const res = await fetch(`/api/admin-quotations-handle.php`, {
+            const res = await fetch(`/api/admin-quotations-delete.php`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
