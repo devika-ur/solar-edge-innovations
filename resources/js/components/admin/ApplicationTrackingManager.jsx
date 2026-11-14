@@ -81,6 +81,9 @@ export const ApplicationTrackingManager = ({ onNavigate, onUnauthorized, initial
             const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
             setStartDate(formatDate(startOfMonth));
             setEndDate(formatDate(today));
+        } else if (preset === 'custom') {
+            if (!startDate) setStartDate(formatDate(today));
+            if (!endDate) setEndDate(formatDate(today));
         }
     };
 
@@ -637,21 +640,29 @@ export const ApplicationTrackingManager = ({ onNavigate, onUnauthorized, initial
                                     {p.label}
                                 </button>
                             ))}
+
+                            {(datePreset !== 'all' || startDate || endDate || searchQuery || statusFilter !== 'all') && (
+                                <button
+                                    type="button"
+                                    onClick={handleResetFilters}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200/80 rounded-xl transition-all cursor-pointer ml-1"
+                                >
+                                    <X size={13} />
+                                    <span>Reset Filters</span>
+                                </button>
+                            )}
                         </div>
                     </div>
 
-                    {/* Custom Date Range Picker */}
-                    {(datePreset === 'custom' || startDate || endDate) && (
-                        <div className="pt-3 border-t border-neutral-100 flex flex-wrap items-center gap-3">
+                    {/* Custom Date Range Picker - ONLY when datePreset === 'custom' */}
+                    {datePreset === 'custom' && (
+                        <div className="pt-3 border-t border-neutral-100 flex flex-wrap items-center gap-3 animate-in fade-in duration-150">
                             <div className="flex items-center gap-2">
                                 <label className="text-xs font-bold text-neutral-600">From:</label>
                                 <input
                                     type="date"
                                     value={startDate}
-                                    onChange={(e) => {
-                                        setDatePreset('custom');
-                                        setStartDate(e.target.value);
-                                    }}
+                                    onChange={(e) => setStartDate(e.target.value)}
                                     className="px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs outline-none focus:border-[#1A4D2E]"
                                 />
                             </div>
@@ -660,24 +671,10 @@ export const ApplicationTrackingManager = ({ onNavigate, onUnauthorized, initial
                                 <input
                                     type="date"
                                     value={endDate}
-                                    onChange={(e) => {
-                                        setDatePreset('custom');
-                                        setEndDate(e.target.value);
-                                    }}
+                                    onChange={(e) => setEndDate(e.target.value)}
                                     className="px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs outline-none focus:border-[#1A4D2E]"
                                 />
                             </div>
-
-                            {(startDate || endDate || searchQuery || statusFilter !== 'all') && (
-                                <button
-                                    type="button"
-                                    onClick={handleResetFilters}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200/80 rounded-xl transition-all cursor-pointer ml-auto"
-                                >
-                                    <X size={13} />
-                                    <span>Reset Filters</span>
-                                </button>
-                            )}
                         </div>
                     )}
                 </div>

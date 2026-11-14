@@ -88,6 +88,9 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
             const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
             setStartDate(formatDate(startOfMonth));
             setEndDate(formatDate(today));
+        } else if (preset === 'custom') {
+            if (!startDate) setStartDate(formatDate(today));
+            if (!endDate) setEndDate(formatDate(today));
         }
     };
 
@@ -407,6 +410,30 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                             ))}
                         </div>
                     </div>
+
+                    {/* Custom Date Range Picker - ONLY when datePreset === 'custom' */}
+                    {datePreset === 'custom' && (
+                        <div className="pt-3 border-t border-neutral-100 flex flex-wrap items-center gap-3 animate-in fade-in duration-150">
+                            <div className="flex items-center gap-2">
+                                <label className="text-xs font-bold text-neutral-600">From:</label>
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs outline-none focus:border-[#1A4D2E]"
+                                />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <label className="text-xs font-bold text-neutral-600">To:</label>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="px-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs outline-none focus:border-[#1A4D2E]"
+                                />
+                            </div>
+                        </div>
+                    )}
 
                     {/* Status Filter Tabs & Custom Date Range */}
                     <div className="pt-3 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3">
