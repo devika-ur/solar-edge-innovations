@@ -49,6 +49,7 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
                 const parsed = JSON.parse(saved);
                 if (parsed.consumerName === 'SUNIL') parsed.consumerName = '';
                 if (parsed.firstPartySignName === 'SUNIL') parsed.firstPartySignName = '';
+                if (parsed.consumerAddress === 'KATTAKKAL HOUSE, AYIROOR PO, VARKALA, KERALA 695310') parsed.consumerAddress = '';
                 return parsed;
             }
         } catch {}
@@ -65,7 +66,7 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
             executionMonth: month,
             executionYear: year,
             consumerName: '',
-            consumerAddress: 'KATTAKKAL HOUSE, AYIROOR PO, VARKALA, KERALA 695310',
+            consumerAddress: '',
             secondPartyName: 'SOLAREDGE INNOVATIONS',
             secondPartyAddress: '476/5, AYIROOR VARKALA ROAD, ELAKAMON, VARKALA 695310',
             paymentTerms: DEFAULT_PAYMENT_TERMS,
@@ -114,7 +115,7 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
             executionMonth: month,
             executionYear: year,
             consumerName: '',
-            consumerAddress: 'KATTAKKAL HOUSE, AYIROOR PO, VARKALA, KERALA 695310',
+            consumerAddress: '',
             secondPartyName: 'SOLAREDGE INNOVATIONS',
             secondPartyAddress: '476/5, AYIROOR VARKALA ROAD, ELAKAMON, VARKALA 695310',
             paymentTerms: DEFAULT_PAYMENT_TERMS,

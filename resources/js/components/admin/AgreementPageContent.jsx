@@ -80,7 +80,7 @@ export const AgreementPageContent = ({
 
                             {/* Execution Clause (Left-aligned) */}
                             <div className="text-left font-normal text-neutral-900">
-                                This agreement is executed on {fields.executionDay ? <strong className="font-semibold text-neutral-950">{fields.executionDay}</strong> : '-------'}(Day)------{fields.executionMonth ? <strong className="font-semibold text-neutral-950">{fields.executionMonth}</strong> : '------'}(Month) ------ {fields.executionYear ? <strong className="font-semibold text-neutral-950">{fields.executionYear}</strong> : '------'} (Year) for design, supply, installation, commissioning and 5-year comprehensive maintenance of RTS project/system along with warranty under PM Surya Ghar: Muft Bijli Yojana
+                                This agreement is executed on {fields.executionDay ? <strong className="font-semibold text-neutral-950">{fields.executionDay}</strong> : '-------'} (Day) {fields.executionMonth ? <strong className="font-semibold text-neutral-950">{fields.executionMonth}</strong> : '------'} (Month) {fields.executionYear ? <strong className="font-semibold text-neutral-950">{fields.executionYear}</strong> : '------'} (Year) for design, supply, installation, commissioning and 5-year comprehensive maintenance of RTS project/system along with warranty under PM Surya Ghar: Muft Bijli Yojana
                             </div>
 
                             {/* Between (Centered) */}
@@ -90,10 +90,10 @@ export const AgreementPageContent = ({
 
                             {/* Consumer Details (Left-aligned) */}
                             <div className="text-left font-normal text-neutral-900">
-                                <span className="underline decoration-dotted underline-offset-4 font-semibold text-neutral-950">
+                                <span className={fields.consumerName ? "font-semibold text-neutral-950" : "underline decoration-dotted underline-offset-4 font-semibold text-neutral-950"}>
                                     {fields.consumerName || '.......................................................'}
                                 </span> (Name of Consumer) having address at{' '}
-                                <span className="underline decoration-dotted underline-offset-4 font-semibold text-neutral-950">
+                                <span className={fields.consumerAddress ? "font-semibold text-neutral-950" : "underline decoration-dotted underline-offset-4 font-semibold text-neutral-950"}>
                                     {fields.consumerAddress || '.................................................................................................................................................'}
                                 </span> (hereinafter referred to as first Party i.e. /consumer/consumer/purchaser /owner of system).
                             </div>
