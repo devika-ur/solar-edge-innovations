@@ -45,7 +45,12 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
     const [fields, setFields] = useState(() => {
         try {
             const saved = localStorage.getItem('solaredge_agreement_fields_v5');
-            if (saved) return JSON.parse(saved);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed.consumerName === 'SUNIL') parsed.consumerName = '';
+                if (parsed.firstPartySignName === 'SUNIL') parsed.firstPartySignName = '';
+                return parsed;
+            }
         } catch {}
 
         const now = new Date();
@@ -59,12 +64,12 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
             executionDay: day,
             executionMonth: month,
             executionYear: year,
-            consumerName: 'SUNIL',
+            consumerName: '',
             consumerAddress: 'KATTAKKAL HOUSE, AYIROOR PO, VARKALA, KERALA 695310',
             secondPartyName: 'SOLAREDGE INNOVATIONS',
             secondPartyAddress: '476/5, AYIROOR VARKALA ROAD, ELAKAMON, VARKALA 695310',
             paymentTerms: DEFAULT_PAYMENT_TERMS,
-            firstPartySignName: 'SUNIL',
+            firstPartySignName: '',
             firstPartySignDate: dateFormatted,
             secondPartySignName: 'SOLAREDGE INNOVATIONS',
             secondPartySignDate: dateFormatted,
@@ -108,12 +113,12 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
             executionDay: day,
             executionMonth: month,
             executionYear: year,
-            consumerName: 'SUNIL',
+            consumerName: '',
             consumerAddress: 'KATTAKKAL HOUSE, AYIROOR PO, VARKALA, KERALA 695310',
             secondPartyName: 'SOLAREDGE INNOVATIONS',
             secondPartyAddress: '476/5, AYIROOR VARKALA ROAD, ELAKAMON, VARKALA 695310',
             paymentTerms: DEFAULT_PAYMENT_TERMS,
-            firstPartySignName: 'SUNIL',
+            firstPartySignName: '',
             firstPartySignDate: dateFormatted,
             secondPartySignName: 'SOLAREDGE INNOVATIONS',
             secondPartySignDate: dateFormatted,

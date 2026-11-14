@@ -309,6 +309,7 @@ export const QuotationFormControls = ({
                                             type="text"
                                             value={data.clientInfo.name}
                                             onChange={(e) => updateField('clientInfo.name', e.target.value)}
+                                            placeholder="Enter Client Name"
                                             className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold focus:bg-white focus:border-emerald-600 outline-none transition-colors"
                                         />
                                     </div>
@@ -360,6 +361,7 @@ export const QuotationFormControls = ({
                                         type="text"
                                         value={data.clientInfo.name}
                                         onChange={(e) => updateField('clientInfo.name', e.target.value)}
+                                        placeholder="Enter Client Name"
                                         className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-bold focus:bg-white focus:border-emerald-600 outline-none transition-colors"
                                     />
                                 </div>

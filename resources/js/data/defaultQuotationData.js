@@ -15,7 +15,7 @@ export const defaultQuotationData = {
 
     // Client Information
     clientInfo: {
-        name: "SUNIL",
+        name: "",
         address: "ELAKAMON",
         contactNo: "7306251522",
         capacity: "3Kw",

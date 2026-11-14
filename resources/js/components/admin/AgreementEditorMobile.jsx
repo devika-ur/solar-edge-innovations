@@ -271,7 +271,7 @@ export const AgreementEditorMobile = ({
                                 type="text"
                                 value={fields.consumerName || ''}
                                 onChange={(e) => handleFieldChange('consumerName', e.target.value)}
-                                placeholder="SUNIL"
+                                placeholder="Enter Consumer Full Name"
                                 className="w-full px-3 py-2 text-xs font-medium border border-neutral-300 rounded-xl bg-white focus:border-[#1A4D2E] focus:ring-1 focus:ring-[#1A4D2E] outline-none"
                             />
                         </div>

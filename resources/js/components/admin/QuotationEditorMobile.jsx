@@ -462,7 +462,7 @@ export const QuotationEditorMobile = ({
                                         value={data.clientInfo?.name || ''}
                                         onChange={(e) => updateField('clientInfo.name', e.target.value)}
                                         className="w-full px-3 py-2.5 bg-white border border-neutral-300 rounded-xl text-xs font-bold text-neutral-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none shadow-2xs transition-all uppercase tracking-wide"
-                                        placeholder="SUNIL"
+                                        placeholder="Enter Client Name"
                                     />
                                 </div>
 

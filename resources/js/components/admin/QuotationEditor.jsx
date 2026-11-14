@@ -49,7 +49,11 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
         const saved = localStorage.getItem('solar_quotation_data');
         if (saved) {
             try {
-                return JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+                if (parsed.clientInfo?.name === 'SUNIL') {
+                    parsed.clientInfo.name = '';
+                }
+                return parsed;
             } catch (e) {
                 console.error("Failed to parse saved quotation data", e);
             }
