@@ -23,20 +23,43 @@ import {
 } from 'lucide-react';
 import { assets } from '../../assets/assets';
 
-export const ADMIN_NAV_ITEMS = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'inquiries', label: 'Enquiry', icon: Mail },
-    { id: 'projects', label: 'Projects & Gallery', icon: FolderGit2 },
-    { id: 'faqs', label: 'Website FAQs', icon: HelpCircle },
-    { id: 'letterhead', label: 'Letterhead', icon: ScrollText },
-    { id: 'quotation', label: 'Quotation Builder', icon: FileText },
-    { id: 'quotation-history', label: 'Quotation History', icon: History },
-    { id: 'approved-quotations', label: 'Approved Quotations', icon: CheckCircle2 },
-    { id: 'agreement', label: 'Agreement', icon: FileSignature },
-    { id: 'payments', label: 'Payments', icon: CreditCard },
-    { id: 'application-tracking', label: 'Application Tracking', icon: Activity },
-    { id: 'reports', label: 'Reports', icon: BarChart3 },
+export const ADMIN_NAV_SECTIONS = [
+    {
+        title: 'Main',
+        items: [
+            { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+        ],
+    },
+    {
+        title: 'APPLICATION MANAGEMENT',
+        items: [
+            { id: 'inquiries', label: 'Enquiry', icon: Mail },
+            { id: 'quotation', label: 'Quotation Builder', icon: FileText },
+            { id: 'quotation-history', label: 'Quotation History', icon: History },
+            { id: 'approved-quotations', label: 'Approved Quotations', icon: CheckCircle2 },
+            { id: 'agreement', label: 'Agreement', icon: FileSignature },
+            { id: 'payments', label: 'Payments', icon: CreditCard },
+            { id: 'application-tracking', label: 'Application Tracking', icon: Activity },
+        ],
+    },
+    {
+        title: 'PROJECT MANAGEMENT',
+        items: [
+            { id: 'projects', label: 'Projects & Gallery', icon: FolderGit2 },
+        ],
+    },
+    {
+        title: 'REPORTS & CONTENT MANAGEMENT',
+        items: [
+            { id: 'reports', label: 'Reports', icon: BarChart3 },
+            { id: 'faqs', label: 'Website FAQs', icon: HelpCircle },
+            { id: 'letterhead', label: 'Letterhead', icon: ScrollText },
+        ],
+    },
 ];
+
+// Flat list preserving the exact requested order
+export const ADMIN_NAV_ITEMS = ADMIN_NAV_SECTIONS.flatMap((section) => section.items);
 
 export const AdminSidebar = ({
     activeTab,
@@ -55,96 +78,110 @@ export const AdminSidebar = ({
         }
     };
 
-    const navItems = ADMIN_NAV_ITEMS.map((item) => ({
-        ...item,
-        badge: item.id === 'inquiries' && pendingInquiriesCount > 0 ? pendingInquiriesCount : null,
-    }));
-
-    // Reusable sidebar navigation list
+    // Reusable sidebar navigation list with Section Headers
     const renderNavList = (isRail) => (
         <nav
-            className={`flex-1 py-2.5 px-2 space-y-1 overflow-y-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
-                isRail ? 'flex flex-col items-center' : ''
+            className={`flex-1 py-2 px-2 overflow-y-auto scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden ${
+                isRail ? 'flex flex-col items-center space-y-1' : 'space-y-1'
             }`}
         >
-            {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-
-                if (isRail) {
-                    // Collapsed Rail Mode: Compact centered icon button with floating tooltip
-                    return (
-                        <div key={item.id} className="relative group/rail flex items-center justify-center w-full my-0.5">
-                            <button
-                                type="button"
-                                onClick={() => handleItemClick(item.id)}
-                                aria-label={item.label}
-                                className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer relative shrink-0 ${
-                                    isActive
-                                        ? 'bg-[#1A4D2E] text-white shadow-xs font-semibold'
-                                        : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 font-medium'
-                                }`}
-                            >
-                                <Icon size={18} className="shrink-0" />
-
-                                {/* Badge Indicator on Rail icon */}
-                                {item.badge != null && (
-                                    <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9.5px] font-bold bg-amber-500 text-white leading-none shadow-xs">
-                                        {item.badge}
-                                    </span>
-                                )}
-                            </button>
-
-                            {/* Floating Tooltip in Rail Mode */}
-                            <div className="absolute left-full ml-3 px-3 py-1.5 bg-neutral-900/95 backdrop-blur-xs text-white text-xs font-semibold rounded-xl whitespace-nowrap shadow-xl opacity-0 translate-x-1 group-hover/rail:opacity-100 group-hover/rail:translate-x-0 pointer-events-none transition-all duration-150 z-50 flex items-center gap-2 border border-neutral-700/50">
-                                <span>{item.label}</span>
-                                {item.badge != null && (
-                                    <span className="bg-amber-400 text-neutral-950 px-1.5 py-0.5 rounded-full text-[10px] font-bold">
-                                        {item.badge}
-                                    </span>
-                                )}
-                                <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-neutral-900/95" />
-                            </div>
+            {ADMIN_NAV_SECTIONS.map((section, sIdx) => (
+                <div key={section.title || sIdx} className="w-full">
+                    {/* Section Header */}
+                    {isRail ? (
+                        sIdx > 0 && <div className="w-8 h-[1px] bg-neutral-200 my-2 mx-auto" />
+                    ) : (
+                        <div className={`px-3 pb-1 text-[10px] font-bold text-neutral-400 uppercase tracking-wider ${
+                            sIdx === 0 ? 'pt-1' : 'pt-3.5'
+                        }`}>
+                            {section.title}
                         </div>
-                    );
-                }
+                    )}
 
-                // Expanded Mode: Full icon + text label + badge
-                return (
-                    <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => handleItemClick(item.id)}
-                        className={`w-full flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl text-xs sm:text-[13px] transition-all cursor-pointer group ${
-                            isActive
-                                ? 'bg-[#1A4D2E] text-white shadow-xs font-semibold'
-                                : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/90 font-medium'
-                        }`}
-                    >
-                        <div className="flex items-center gap-3 min-w-0">
-                            <Icon
-                                size={18}
-                                className={`shrink-0 transition-colors ${
-                                    isActive ? 'text-white' : 'text-neutral-500 group-hover:text-neutral-900'
-                                }`}
-                            />
-                            <span className="truncate">{item.label}</span>
-                        </div>
+                    {/* Section Items */}
+                    <div className={isRail ? 'space-y-1 w-full flex flex-col items-center' : 'space-y-0.5'}>
+                        {section.items.map((item) => {
+                            const Icon = item.icon;
+                            const isActive = activeTab === item.id;
+                            const badge = item.id === 'inquiries' && pendingInquiriesCount > 0 ? pendingInquiriesCount : null;
 
-                        {item.badge != null && (
-                            <span
-                                className={`px-2 py-0.5 rounded-full text-[11px] font-semibold leading-none shrink-0 ${
-                                    isActive
-                                        ? 'bg-amber-400 text-neutral-950 font-mono shadow-xs'
-                                        : 'bg-amber-500 text-white font-mono'
-                                }`}
-                            >
-                                {item.badge}
-                            </span>
-                        )}
-                    </button>
-                );
-            })}
+                            if (isRail) {
+                                // Collapsed Rail Mode: Compact centered icon button with floating tooltip
+                                return (
+                                    <div key={item.id} className="relative group/rail flex items-center justify-center w-full my-0.5">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleItemClick(item.id)}
+                                            aria-label={item.label}
+                                            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer relative shrink-0 ${
+                                                isActive
+                                                    ? 'bg-[#1A4D2E] text-white shadow-xs font-semibold'
+                                                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 font-medium'
+                                            }`}
+                                        >
+                                            <Icon size={18} className="shrink-0" />
+
+                                            {/* Badge Indicator on Rail icon */}
+                                            {badge != null && (
+                                                <span className="absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9.5px] font-bold bg-amber-500 text-white leading-none shadow-xs">
+                                                    {badge}
+                                                </span>
+                                            )}
+                                        </button>
+
+                                        {/* Floating Tooltip in Rail Mode */}
+                                        <div className="absolute left-full ml-3 px-3 py-1.5 bg-neutral-900/95 backdrop-blur-xs text-white text-xs font-semibold rounded-xl whitespace-nowrap shadow-xl opacity-0 translate-x-1 group-hover/rail:opacity-100 group-hover/rail:translate-x-0 pointer-events-none transition-all duration-150 z-50 flex items-center gap-2 border border-neutral-700/50">
+                                            <span>{item.label}</span>
+                                            {badge != null && (
+                                                <span className="bg-amber-400 text-neutral-950 px-1.5 py-0.5 rounded-full text-[10px] font-bold">
+                                                    {badge}
+                                                </span>
+                                            )}
+                                            <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-neutral-900/95" />
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            // Expanded Mode: Full icon + text label + badge
+                            return (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => handleItemClick(item.id)}
+                                    className={`w-full flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl text-xs sm:text-[13px] transition-all cursor-pointer group ${
+                                        isActive
+                                            ? 'bg-[#1A4D2E] text-white shadow-xs font-semibold'
+                                            : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/90 font-medium'
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <Icon
+                                            size={17}
+                                            className={`shrink-0 transition-colors ${
+                                                isActive ? 'text-white' : 'text-neutral-500 group-hover:text-neutral-900'
+                                            }`}
+                                        />
+                                        <span className="truncate">{item.label}</span>
+                                    </div>
+
+                                    {badge != null && (
+                                        <span
+                                            className={`px-2 py-0.5 rounded-full text-[11px] font-semibold leading-none shrink-0 ${
+                                                isActive
+                                                    ? 'bg-amber-400 text-neutral-950 font-mono shadow-xs'
+                                                    : 'bg-amber-500 text-white font-mono'
+                                            }`}
+                                        >
+                                            {badge}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
         </nav>
     );
 
