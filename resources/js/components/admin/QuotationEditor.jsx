@@ -5,7 +5,7 @@ import html2canvas from 'html2canvas-pro'; // npm i html2canvas-pro  (handles Ta
 
 // Resilient constructor resolution across ESM / Vite / CJS bundling
 const jsPDF = jspdfLib.jsPDF || jspdfLib.default?.jsPDF || jspdfLib.default;
-import { defaultQuotationData } from '../../data/defaultQuotationData';
+import { defaultQuotationData, getTodayFormatted } from '../../data/defaultQuotationData';
 import { QuotationFormControls } from './QuotationFormControls';
 import { QuotationPreview6Pages } from './QuotationPreview6Pages';
 import { QuotationEditorMobile } from './QuotationEditorMobile';
@@ -55,6 +55,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate, editId: propEdit
     }, []);
     // Load initial quotation data from localStorage or default
     const [quotationData, setQuotationData] = useState(() => {
+        const todayFormatted = getTodayFormatted();
         const saved = localStorage.getItem('solar_quotation_data');
         if (saved) {
             try {
@@ -72,12 +73,19 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate, editId: propEdit
                         }
                     ];
                 }
+                // Automatically default date to current date for new drafts
+                if (!parsed.id) {
+                    parsed.date = todayFormatted;
+                }
                 return parsed;
             } catch (e) {
                 console.error("Failed to parse saved quotation data", e);
             }
         }
-        return defaultQuotationData;
+        return {
+            ...defaultQuotationData,
+            date: todayFormatted,
+        };
     });
 
     // Active tab state & bidirectional scroll synchronization
@@ -561,9 +569,13 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate, editId: propEdit
     // Reset to initial default template
     const handleReset = () => {
         if (window.confirm("Are you sure you want to reset all fields to the default 6-page template?")) {
-            setQuotationData(defaultQuotationData);
+            const todayFormatted = getTodayFormatted();
+            setQuotationData({
+                ...defaultQuotationData,
+                date: todayFormatted,
+            });
             localStorage.removeItem('solar_quotation_data');
-            fetchNextRefNo(defaultQuotationData.date);
+            fetchNextRefNo(todayFormatted);
             toast.success("Reset to default template values.");
         }
     };

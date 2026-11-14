@@ -50,8 +50,25 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate, quotation: propQ
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Form fields state
+    // Form fields state with automatic current date defaults
+    const getCurrentAgreementDates = () => {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const month = monthNames[now.getMonth()];
+        const year = String(now.getFullYear());
+        const dateFormatted = `${day}/${String(now.getMonth() + 1).padStart(2, '0')}/${year}`;
+        return {
+            executionDay: day,
+            executionMonth: month,
+            executionYear: year,
+            firstPartySignDate: dateFormatted,
+            secondPartySignDate: dateFormatted,
+        };
+    };
+
     const [fields, setFields] = useState(() => {
+        const currentDates = getCurrentAgreementDates();
         try {
             const saved = localStorage.getItem('solaredge_agreement_fields_v5');
             if (saved) {
@@ -59,30 +76,27 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate, quotation: propQ
                 if (parsed.consumerName === 'SUNIL') parsed.consumerName = '';
                 if (parsed.firstPartySignName === 'SUNIL') parsed.firstPartySignName = '';
                 if (parsed.consumerAddress === 'KATTAKKAL HOUSE, AYIROOR PO, VARKALA, KERALA 695310') parsed.consumerAddress = '';
-                return parsed;
+                return {
+                    ...parsed,
+                    // Automatically show current date as default
+                    executionDay: currentDates.executionDay,
+                    executionMonth: currentDates.executionMonth,
+                    executionYear: currentDates.executionYear,
+                    firstPartySignDate: currentDates.firstPartySignDate,
+                    secondPartySignDate: currentDates.secondPartySignDate,
+                };
             }
         } catch {}
 
-        const now = new Date();
-        const day = String(now.getDate()).padStart(2, '0');
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const month = monthNames[now.getMonth()];
-        const year = String(now.getFullYear());
-        const dateFormatted = `${day}/${String(now.getMonth() + 1).padStart(2, '0')}/${year}`;
-
         return {
-            executionDay: day,
-            executionMonth: month,
-            executionYear: year,
+            ...currentDates,
             consumerName: '',
             consumerAddress: '',
             secondPartyName: 'SOLAREDGE INNOVATIONS',
             secondPartyAddress: '476/5, AYIROOR VARKALA ROAD, ELAKAMON, VARKALA 695310',
             paymentTerms: DEFAULT_PAYMENT_TERMS,
             firstPartySignName: '',
-            firstPartySignDate: dateFormatted,
             secondPartySignName: 'SOLAREDGE INNOVATIONS',
-            secondPartySignDate: dateFormatted,
         };
     });
 
@@ -102,10 +116,12 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate, quotation: propQ
 
     // Auto-populate agreement form from approved quotation
     useEffect(() => {
+        const currentDates = getCurrentAgreementDates();
         if (propQuotation) {
             setAssociatedQuotation(propQuotation);
             setFields(prev => ({
                 ...prev,
+                ...currentDates,
                 consumerName: propQuotation.client_name || prev.consumerName,
                 consumerAddress: (propQuotation.client_address && propQuotation.client_address !== '-') ? propQuotation.client_address : prev.consumerAddress,
                 firstPartySignName: propQuotation.client_name || prev.firstPartySignName,
@@ -127,6 +143,7 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate, quotation: propQ
                         setAssociatedQuotation(quote);
                         setFields(prev => ({
                             ...prev,
+                            ...currentDates,
                             consumerName: quote.client_name || prev.consumerName,
                             consumerAddress: (quote.client_address && quote.client_address !== '-') ? quote.client_address : prev.consumerAddress,
                             firstPartySignName: quote.client_name || prev.firstPartySignName,
@@ -274,26 +291,17 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate, quotation: propQ
 
     // Reset to default
     const handleReset = () => {
-        const now = new Date();
-        const day = String(now.getDate()).padStart(2, '0');
-        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        const month = monthNames[now.getMonth()];
-        const year = String(now.getFullYear());
-        const dateFormatted = `${day}/${String(now.getMonth() + 1).padStart(2, '0')}/${year}`;
+        const currentDates = getCurrentAgreementDates();
 
         const defaultFields = {
-            executionDay: day,
-            executionMonth: month,
-            executionYear: year,
+            ...currentDates,
             consumerName: '',
             consumerAddress: '',
             secondPartyName: 'SOLAREDGE INNOVATIONS',
             secondPartyAddress: '476/5, AYIROOR VARKALA ROAD, ELAKAMON, VARKALA 695310',
             paymentTerms: DEFAULT_PAYMENT_TERMS,
             firstPartySignName: '',
-            firstPartySignDate: dateFormatted,
             secondPartySignName: 'SOLAREDGE INNOVATIONS',
-            secondPartySignDate: dateFormatted,
         };
         setFields(defaultFields);
         toast.success('Reset to official MNRE Model Agreement template!');
