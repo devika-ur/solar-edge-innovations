@@ -279,10 +279,11 @@ class ReportController extends Controller
         $query = Quotation::active()->with(['payment']);
 
         // Date filter
-        if ($fromDate) {
+        if ($fromDate && $toDate) {
+            $query->whereBetween('created_at', [$fromDate, $toDate]);
+        } elseif ($fromDate) {
             $query->where('created_at', '>=', $fromDate);
-        }
-        if ($toDate) {
+        } elseif ($toDate) {
             $query->where('created_at', '<=', $toDate);
         }
 
@@ -291,6 +292,7 @@ class ReportController extends Controller
             $query->where(function ($q) use ($customer) {
                 $q->where('client_name', 'like', "%{$customer}%")
                     ->orWhere('client_phone', 'like', "%{$customer}%")
+                    ->orWhere('client_address', 'like', "%{$customer}%")
                     ->orWhere('id', $customer);
             });
         }
@@ -302,14 +304,26 @@ class ReportController extends Controller
 
         // Payment Status filter
         if ($paymentStatus) {
-            $query->whereHas('payment', function ($q) use ($paymentStatus) {
-                $q->where('status', $paymentStatus);
-            });
+            if ($paymentStatus === 'pending') {
+                $query->where(function ($q) {
+                    $q->whereDoesntHave('payment')
+                      ->orWhereHas('payment', function ($pq) {
+                          $pq->where('status', 'pending');
+                      });
+                });
+            } else {
+                $query->whereHas('payment', function ($q) use ($paymentStatus) {
+                    $q->where('status', $paymentStatus);
+                });
+            }
         }
 
-        // Quotation Status filter (if specified and not 'all')
+        // Quotation Workflow Status filter (if specified and not 'all')
         if (!empty($quotationStatus) && strtolower($quotationStatus) !== 'all') {
-            $query->where('status', $quotationStatus);
+            $query->where(function ($q) use ($quotationStatus) {
+                $q->where('workflow_status', $quotationStatus)
+                  ->orWhere('status', $quotationStatus);
+            });
         }
 
         $quotations = $query->orderBy('created_at', 'desc')->orderBy('id', 'desc')->get();
@@ -338,6 +352,15 @@ class ReportController extends Controller
                 default => 'Pending',
             };
 
+            $workflowStatus = $quote->workflow_status ?: 'approval_pending';
+            $workflowStatusLabel = match ($workflowStatus) {
+                'approved' => 'Approved by Client',
+                'rejected' => 'Rejected by Client',
+                'agreement_created' => 'Agreement Created',
+                'completed' => 'Completed',
+                default => 'Quotation Approval Pending',
+            };
+
             $quoteDate = $quote->quotation_date ?: ($quote->created_at ? $quote->created_at->format('d/m/Y') : '-');
 
             $records[] = [
@@ -356,7 +379,8 @@ class ReportController extends Controller
                 'amount_to_pay' => $balance,
                 'payment_status' => $statusLabel,
                 'payment_status_raw' => $curStatus,
-                'quotation_status' => $quote->status ? ucfirst($quote->status) : 'Active',
+                'quotation_status' => $workflowStatusLabel,
+                'workflow_status_raw' => $workflowStatus,
                 'created_at_formatted' => $quote->created_at ? $quote->created_at->format('d M Y, h:i A') : '-',
             ];
         }

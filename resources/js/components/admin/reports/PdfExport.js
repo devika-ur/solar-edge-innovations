@@ -80,7 +80,8 @@ export const exportToPdf = ({
             }
             if (filters.customer) filterParts.push(`Customer: ${filters.customer}`);
             if (filters.quotationNumber) filterParts.push(`Quotation No: ${filters.quotationNumber}`);
-            if (filters.status && filters.status !== 'all') filterParts.push(`Status: ${filters.status}`);
+            if (filters.status && filters.status !== 'all') filterParts.push(`Payment Status: ${filters.status}`);
+            if (filters.quotationStatus && filters.quotationStatus !== 'all') filterParts.push(`Quotation Status: ${filters.quotationStatus}`);
 
             if (filterParts.length > 0) {
                 doc.setFontSize(8);

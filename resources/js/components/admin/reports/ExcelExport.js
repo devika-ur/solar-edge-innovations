@@ -49,7 +49,8 @@ export const exportToExcel = ({
             }
             if (filters.customer) filterParts.push(`Customer: ${filters.customer}`);
             if (filters.quotationNumber) filterParts.push(`Quotation: ${filters.quotationNumber}`);
-            if (filters.status && filters.status !== 'all') filterParts.push(`Status: ${filters.status}`);
+            if (filters.status && filters.status !== 'all') filterParts.push(`Payment Status: ${filters.status}`);
+            if (filters.quotationStatus && filters.quotationStatus !== 'all') filterParts.push(`Quotation Status: ${filters.quotationStatus}`);
 
             if (filterParts.length > 0) {
                 aoa.push([`Filters: ${filterParts.join(' | ')}`]);

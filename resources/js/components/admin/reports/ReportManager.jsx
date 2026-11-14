@@ -136,12 +136,46 @@ export const ReportManager = ({ onUnauthorized }) => {
         }
     }, [reportType, filters, onUnauthorized]);
 
-    // Auto-generate on initial load or report type switch
+    // Helper to fetch filtered data for download/export ensuring 100% filter accuracy
+    const fetchFreshFilteredData = async (type, currentFilters) => {
+        const params = new URLSearchParams();
+        if (currentFilters.fromDate) params.append('fromDate', currentFilters.fromDate);
+        if (currentFilters.toDate) params.append('toDate', currentFilters.toDate);
+        if (currentFilters.customer) params.append('customer', currentFilters.customer);
+        if (currentFilters.quotationNumber) params.append('quotationNumber', currentFilters.quotationNumber);
+        if (currentFilters.status && currentFilters.status !== 'all') params.append('status', currentFilters.status);
+        if (currentFilters.quotationStatus && currentFilters.quotationStatus !== 'all') params.append('quotationStatus', currentFilters.quotationStatus);
+
+        let endpoint = '';
+        if (type === 'payment_history') {
+            endpoint = `/api/admin-reports-payment-history.php?${params.toString()}`;
+        } else if (type === 'quotation_history') {
+            endpoint = `/api/admin-reports-quotation-history.php?${params.toString()}`;
+        }
+
+        const res = await fetch(endpoint, { credentials: 'include' });
+        const json = await res.json();
+        if (res.ok && json.success) {
+            return { data: json.data || [], summary: json.summary || null };
+        }
+        return { data: reportData || [], summary };
+    };
+
+    // Auto-generate on filter change or report type switch (debounced for smooth real-time update)
     useEffect(() => {
-        setReportData(null);
-        setSummary(null);
-        generateReport(reportType);
-    }, [reportType]);
+        const timer = setTimeout(() => {
+            generateReport(reportType);
+        }, 250);
+        return () => clearTimeout(timer);
+    }, [
+        reportType,
+        filters.fromDate,
+        filters.toDate,
+        filters.customer,
+        filters.quotationNumber,
+        filters.status,
+        filters.quotationStatus,
+    ]);
 
     // Check if we have active data to export
     const hasDataToExport = useMemo(() => {
@@ -150,124 +184,147 @@ export const ReportManager = ({ onUnauthorized }) => {
     }, [reportData]);
 
     // 1. Export Excel Handler
-    const handleExportExcel = () => {
-        if (!hasDataToExport) {
-            toast.error('No report data to export.');
-            return;
-        }
+    const handleExportExcel = async () => {
+        setIsLoading(true);
+        try {
+            // Freshly query with currently active filters so exported file is 100% synchronized
+            const { data: exportData, summary: exportSummary } = await fetchFreshFilteredData(reportType, filters);
+            if (!exportData || exportData.length === 0) {
+                toast.error('No matching records found for the selected filters.');
+                return;
+            }
 
-        const dateTag = filters.fromDate && filters.toDate
-            ? `${filters.fromDate}_to_${filters.toDate}`
-            : new Date().toISOString().slice(0, 10);
+            const dateTag = filters.fromDate && filters.toDate
+                ? `${filters.fromDate}_to_${filters.toDate}`
+                : new Date().toISOString().slice(0, 10);
 
-        if (reportType === 'payment_history') {
-            const columns = [
-                { key: 'customer_name', label: 'Customer Name' },
-                { key: 'customer_contact', label: 'Customer Contact' },
-                { key: 'quotation_number', label: 'Quotation Number' },
-                { key: 'quotation_date', label: 'Quotation Date' },
-                { key: 'quotation_total_amount', label: 'Quotation Total', format: 'currency' },
-                { key: 'payment_date', label: 'Payment Date' },
-                { key: 'payment_amount', label: 'Payment Amount', format: 'currency' },
-                { key: 'total_paid_after', label: 'Total Paid', format: 'currency' },
-                { key: 'balance_after', label: 'Balance Due', format: 'currency' },
-                { key: 'payment_status', label: 'Payment Status' },
-                { key: 'payment_method', label: 'Payment Method' },
-                { key: 'transaction_reference', label: 'Transaction Reference' },
-                { key: 'notes', label: 'Notes' },
-            ];
+            if (reportType === 'payment_history') {
+                const columns = [
+                    { key: 'customer_name', label: 'Customer Name' },
+                    { key: 'customer_contact', label: 'Customer Contact' },
+                    { key: 'quotation_number', label: 'Quotation Number' },
+                    { key: 'quotation_date', label: 'Quotation Date' },
+                    { key: 'quotation_total_amount', label: 'Quotation Total', format: 'currency' },
+                    { key: 'payment_date', label: 'Payment Date' },
+                    { key: 'payment_amount', label: 'Payment Amount', format: 'currency' },
+                    { key: 'total_paid_after', label: 'Total Paid', format: 'currency' },
+                    { key: 'balance_after', label: 'Balance Due', format: 'currency' },
+                    { key: 'payment_status', label: 'Payment Status' },
+                    { key: 'payment_method', label: 'Payment Method' },
+                    { key: 'transaction_reference', label: 'Transaction Reference' },
+                    { key: 'notes', label: 'Notes' },
+                ];
 
-            exportToExcel({
-                title: 'Payment History Report',
-                filename: `payment_history_${dateTag}`,
-                data: reportData,
-                columns,
-                summary,
-                filters,
-            });
-        } else if (reportType === 'quotation_history') {
-            const columns = [
-                { key: 'quotation_date', label: 'Quotation Date' },
-                { key: 'quotation_number', label: 'Quotation Number' },
-                { key: 'customer_name', label: 'Customer Name' },
-                { key: 'customer_contact', label: 'Contact' },
-                { key: 'customer_address', label: 'Address' },
-                { key: 'system_capacity', label: 'Capacity' },
-                { key: 'system_type', label: 'System Type' },
-                { key: 'quotation_total_amount', label: 'Total Amount', format: 'currency' },
-                { key: 'amount_paid', label: 'Amount Paid', format: 'currency' },
-                { key: 'amount_to_pay', label: 'Amount to Pay', format: 'currency' },
-                { key: 'payment_status', label: 'Payment Status' },
-                { key: 'quotation_status', label: 'Quotation Status' },
-            ];
+                exportToExcel({
+                    title: 'Payment History Report',
+                    filename: `payment_history_${dateTag}`,
+                    data: exportData,
+                    columns,
+                    summary: exportSummary,
+                    filters,
+                });
+                toast.success('Payment History exported to Excel successfully!');
+            } else if (reportType === 'quotation_history') {
+                const columns = [
+                    { key: 'quotation_date', label: 'Quotation Date' },
+                    { key: 'quotation_number', label: 'Quotation Number' },
+                    { key: 'customer_name', label: 'Customer Name' },
+                    { key: 'customer_contact', label: 'Contact' },
+                    { key: 'customer_address', label: 'Address' },
+                    { key: 'system_capacity', label: 'Capacity' },
+                    { key: 'system_type', label: 'System Type' },
+                    { key: 'quotation_total_amount', label: 'Total Amount', format: 'currency' },
+                    { key: 'amount_paid', label: 'Amount Paid', format: 'currency' },
+                    { key: 'amount_to_pay', label: 'Amount to Pay', format: 'currency' },
+                    { key: 'payment_status', label: 'Payment Status' },
+                    { key: 'quotation_status', label: 'Quotation Status' },
+                ];
 
-            exportToExcel({
-                title: 'Quotation History Report',
-                filename: `quotation_history_${dateTag}`,
-                data: reportData,
-                columns,
-                summary,
-                filters,
-            });
+                exportToExcel({
+                    title: 'Quotation History Report',
+                    filename: `quotation_history_${dateTag}`,
+                    data: exportData,
+                    columns,
+                    summary: exportSummary,
+                    filters,
+                });
+                toast.success('Quotation History exported to Excel successfully!');
+            }
+        } catch {
+            toast.error('Failed to export Excel report.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     // 2. Export PDF Handler
-    const handleExportPdf = () => {
-        if (!hasDataToExport) {
-            toast.error('No report data to export.');
-            return;
-        }
+    const handleExportPdf = async () => {
+        setIsLoading(true);
+        try {
+            // Freshly query with currently active filters so exported file is 100% synchronized
+            const { data: exportData, summary: exportSummary } = await fetchFreshFilteredData(reportType, filters);
+            if (!exportData || exportData.length === 0) {
+                toast.error('No matching records found for the selected filters.');
+                return;
+            }
 
-        const dateTag = filters.fromDate && filters.toDate
-            ? `${filters.fromDate}_to_${filters.toDate}`
-            : new Date().toISOString().slice(0, 10);
+            const dateTag = filters.fromDate && filters.toDate
+                ? `${filters.fromDate}_to_${filters.toDate}`
+                : new Date().toISOString().slice(0, 10);
 
-        if (reportType === 'payment_history') {
-            const columns = [
-                { key: 'customer_name', label: 'Customer' },
-                { key: 'quotation_number', label: 'Quote No' },
-                { key: 'quotation_date', label: 'Quote Date' },
-                { key: 'quotation_total_amount', label: 'Total', format: 'currency' },
-                { key: 'payment_date', label: 'Pay Date' },
-                { key: 'payment_amount', label: 'Paid', format: 'currency' },
-                { key: 'total_paid_after', label: 'Total Paid', format: 'currency' },
-                { key: 'balance_after', label: 'Balance', format: 'currency' },
-                { key: 'payment_status', label: 'Status' },
-                { key: 'transaction_reference', label: 'Ref No' },
-            ];
+            if (reportType === 'payment_history') {
+                const columns = [
+                    { key: 'customer_name', label: 'Customer' },
+                    { key: 'quotation_number', label: 'Quote No' },
+                    { key: 'quotation_date', label: 'Quote Date' },
+                    { key: 'quotation_total_amount', label: 'Total', format: 'currency' },
+                    { key: 'payment_date', label: 'Pay Date' },
+                    { key: 'payment_amount', label: 'Paid', format: 'currency' },
+                    { key: 'total_paid_after', label: 'Total Paid', format: 'currency' },
+                    { key: 'balance_after', label: 'Balance', format: 'currency' },
+                    { key: 'payment_status', label: 'Status' },
+                    { key: 'transaction_reference', label: 'Ref No' },
+                ];
 
-            exportToPdf({
-                title: 'Payment History Report',
-                filename: `payment_history_${dateTag}`,
-                data: reportData,
-                columns,
-                summary,
-                filters,
-                orientation: 'landscape',
-            });
-        } else if (reportType === 'quotation_history') {
-            const columns = [
-                { key: 'quotation_date', label: 'Date' },
-                { key: 'quotation_number', label: 'Quotation No' },
-                { key: 'customer_name', label: 'Customer Name' },
-                { key: 'customer_contact', label: 'Contact' },
-                { key: 'system_capacity', label: 'Capacity' },
-                { key: 'quotation_total_amount', label: 'Total Amount', format: 'currency' },
-                { key: 'amount_paid', label: 'Amount Paid', format: 'currency' },
-                { key: 'amount_to_pay', label: 'Amount to Pay', format: 'currency' },
-                { key: 'payment_status', label: 'Status' },
-            ];
+                exportToPdf({
+                    title: 'Payment History Report',
+                    filename: `payment_history_${dateTag}`,
+                    data: exportData,
+                    columns,
+                    summary: exportSummary,
+                    filters,
+                    orientation: 'landscape',
+                });
+                toast.success('Payment History exported to PDF successfully!');
+            } else if (reportType === 'quotation_history') {
+                const columns = [
+                    { key: 'quotation_date', label: 'Date' },
+                    { key: 'quotation_number', label: 'Quotation No' },
+                    { key: 'customer_name', label: 'Customer Name' },
+                    { key: 'customer_contact', label: 'Contact' },
+                    { key: 'system_capacity', label: 'Capacity' },
+                    { key: 'quotation_total_amount', label: 'Total Amount', format: 'currency' },
+                    { key: 'amount_paid', label: 'Amount Paid', format: 'currency' },
+                    { key: 'amount_to_pay', label: 'Amount to Pay', format: 'currency' },
+                    { key: 'payment_status', label: 'Payment Status' },
+                    { key: 'quotation_status', label: 'Quotation Status' },
+                ];
 
-            exportToPdf({
-                title: 'Quotation History Report',
-                filename: `quotation_history_${dateTag}`,
-                data: reportData,
-                columns,
-                summary,
-                filters,
-                orientation: 'landscape',
-            });
+                exportToPdf({
+                    title: 'Quotation History Report',
+                    filename: `quotation_history_${dateTag}`,
+                    data: exportData,
+                    columns,
+                    summary: exportSummary,
+                    filters,
+                    orientation: 'landscape',
+                });
+                toast.success('Quotation History exported to PDF successfully!');
+            }
+        } catch {
+            toast.error('Failed to export PDF report.');
+        } finally {
+            setIsLoading(false);
         }
     };
 

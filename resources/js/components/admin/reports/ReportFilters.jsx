@@ -156,7 +156,11 @@ export const ReportFilters = ({
                             className="w-full px-2.5 py-1.5 bg-neutral-50 hover:bg-white focus:bg-white border border-neutral-300 rounded-lg text-xs font-medium text-neutral-800 outline-none cursor-pointer focus:border-[#1A4D2E]"
                         >
                             <option value="all">All Quotations</option>
-                            <option value="active">Active</option>
+                            <option value="approval_pending">Quotation Approval Pending</option>
+                            <option value="approved">Approved by Client</option>
+                            <option value="rejected">Rejected by Client</option>
+                            <option value="agreement_created">Agreement Created</option>
+                            <option value="completed">Completed</option>
                         </select>
                     </div>
                 )}
