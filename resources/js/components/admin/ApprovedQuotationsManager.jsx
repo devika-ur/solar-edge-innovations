@@ -17,6 +17,7 @@ import {
     X,
     ExternalLink,
     Filter,
+    FilterX,
     ArrowRight,
     AlertCircle,
     Check,
@@ -195,49 +196,50 @@ export const ApprovedQuotationsManager = ({ onNavigate, onUnauthorized }) => {
     };
 
     return (
-        <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto font-poppins">
-            {/* Top Header Card */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-neutral-200/80 shadow-2xs">
-                <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#1A4D2E] border border-emerald-100 flex items-center justify-center shadow-2xs">
-                        <CheckCircle2 size={24} />
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2.5">
-                            <h2 className="text-lg sm:text-xl font-bold text-neutral-900 leading-tight">
-                                Approved Quotations
-                            </h2>
-                            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-[#1A4D2E] border border-emerald-200">
-                                {quotations.length} Approved
-                            </span>
-                        </div>
-                        <p className="text-xs text-neutral-500 mt-1">
-                            Quotations approved by clients eligible for generating MNRE Model RTS Agreements
-                        </p>
-                    </div>
+        <div className="w-full px-4 sm:px-8 py-8 space-y-6 font-poppins max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
+                        Approved Quotations
+                    </h1>
+                    <p className="text-xs sm:text-sm text-neutral-500 mt-1">
+                        Quotations approved by clients eligible for generating MNRE Model RTS Agreements.
+                    </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2.5">
+                <div className="flex items-center gap-2.5 self-start sm:self-center">
                     <button
-                        onClick={() => setShowFilter(!showFilter)}
-                        className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                        type="button"
+                        onClick={() => setShowFilter((prev) => !prev)}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
                             showFilter
-                                ? 'bg-neutral-900 text-white border-neutral-900 shadow-2xs'
-                                : 'bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50'
+                                ? 'bg-neutral-100 border-neutral-300 text-neutral-800'
+                                : 'bg-white hover:bg-neutral-50 border-neutral-200/90 text-neutral-700'
                         }`}
                     >
-                        <Filter size={14} />
-                        <span>Filter & Search</span>
+                        {showFilter ? (
+                            <>
+                                <FilterX size={14} className="text-neutral-500" />
+                                <span>Hide Filter</span>
+                            </>
+                        ) : (
+                            <>
+                                <Filter size={14} className="text-neutral-500" />
+                                <span>Filter & Search</span>
+                            </>
+                        )}
                     </button>
 
                     <button
+                        type="button"
                         onClick={() => loadApprovedQuotations(true)}
                         disabled={isLoading}
-                        className="inline-flex items-center gap-2 px-3.5 py-2 bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 rounded-xl text-xs font-semibold transition-all cursor-pointer"
-                        title="Refresh approved list"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-neutral-50 border border-neutral-200/90 text-neutral-700 text-xs font-semibold shadow-2xs transition-all cursor-pointer disabled:opacity-60"
+                        title="Refresh approved quotations list"
                     >
-                        <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-                        <span className="hidden sm:inline">Refresh</span>
+                        <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
+                        <span>Refresh</span>
                     </button>
                 </div>
             </div>
