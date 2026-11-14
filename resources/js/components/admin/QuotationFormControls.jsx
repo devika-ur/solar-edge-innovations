@@ -13,7 +13,8 @@ import {
     Battery,
     LogOut,
     Loader2,
-    Download
+    Download,
+    Sparkles
 } from 'lucide-react';
 
 export const QuotationFormControls = ({
@@ -21,6 +22,7 @@ export const QuotationFormControls = ({
     onChange,
     onSave,
     onReset,
+    onRefreshRefNo,
     onGeneratePdf,
     isGeneratingPdf = false,
     pdfProgress = "",
@@ -232,11 +234,24 @@ export const QuotationFormControls = ({
 
                         <div className={isFullWidth ? "grid grid-cols-1 md:grid-cols-4 gap-3" : "grid grid-cols-2 gap-3"}>
                             <div>
-                                <label className="block font-bold text-neutral-700 mb-1">Quote Reference No</label>
+                                <div className="flex items-center justify-between mb-1">
+                                    <label className="block font-bold text-neutral-700">Quote Reference No</label>
+                                    {onRefreshRefNo && (
+                                        <button
+                                            type="button"
+                                            onClick={() => onRefreshRefNo(data.date)}
+                                            className="text-[10px] text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1 cursor-pointer bg-emerald-100/70 hover:bg-emerald-100 px-2 py-0.5 rounded transition-colors"
+                                            title="Auto-generate next quotation number based on date"
+                                        >
+                                            <Sparkles size={11} className="text-emerald-600" /> Auto
+                                        </button>
+                                    )}
+                                </div>
                                 <input
                                     type="text"
-                                    value={data.refNo}
+                                    value={data.refNo || ''}
                                     onChange={(e) => updateField('refNo', e.target.value)}
+                                    placeholder="e.g. DCR:11-26-01"
                                     className="w-full px-3 py-2 bg-neutral-50 border border-neutral-300 rounded-lg font-mono focus:bg-white focus:border-emerald-600 outline-none transition-colors"
                                 />
                             </div>

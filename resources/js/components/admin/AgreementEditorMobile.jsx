@@ -25,7 +25,6 @@ export const AgreementEditorMobile = ({
     handleFieldChange,
     baseFontSize = 14,
     setFontSizeOffset,
-    fontSizeOffset = 0,
     onReset,
     onCopy,
     onDownloadPdf,

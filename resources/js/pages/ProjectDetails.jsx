@@ -14,9 +14,34 @@ const ProjectDetails = () => {
     // Get project data from navigation state or fetch based on id
     const project = location.state?.project;
 
-    // If no project data, redirect back (in real app, fetch from API/database)
+    // If no project data, redirect back in an effect (not during render)
+    React.useEffect(() => {
+        if (!project) {
+            navigate('/projects', { replace: true });
+        }
+    }, [project, navigate]);
+
+    // Keyboard navigation
+    React.useEffect(() => {
+        if (!project || selectedImageIndex === null) return;
+
+        const handleKeyDown = (e) => {
+            if (e.key === 'ArrowRight') {
+                setSelectedImageIndex((prev) => (prev !== null ? (prev + 1) % project.images.length : null));
+            }
+            if (e.key === 'ArrowLeft') {
+                setSelectedImageIndex((prev) => (prev !== null ? (prev - 1 + project.images.length) % project.images.length : null));
+            }
+            if (e.key === 'Escape') {
+                setSelectedImageIndex(null);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [project, selectedImageIndex]);
+
     if (!project) {
-        navigate('/projects');
         return null;
     }
 
@@ -30,7 +55,7 @@ const ProjectDetails = () => {
     };
 
     const navigateImage = (direction) => {
-        if (selectedImageIndex === null) return;
+        if (selectedImageIndex === null || !project?.images?.length) return;
         
         if (direction === 'next') {
             setSelectedImageIndex((selectedImageIndex + 1) % project.images.length);
@@ -38,20 +63,6 @@ const ProjectDetails = () => {
             setSelectedImageIndex((selectedImageIndex - 1 + project.images.length) % project.images.length);
         }
     };
-
-    // Keyboard navigation
-    React.useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (selectedImageIndex === null) return;
-            
-            if (e.key === 'ArrowRight') navigateImage('next');
-            if (e.key === 'ArrowLeft') navigateImage('prev');
-            if (e.key === 'Escape') closeLightbox();
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [selectedImageIndex]);
 
     return (
         <>

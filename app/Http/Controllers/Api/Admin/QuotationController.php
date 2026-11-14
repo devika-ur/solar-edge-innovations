@@ -104,6 +104,35 @@ class QuotationController extends Controller
     }
 
     /**
+     * Generate the next sequential quotation reference number.
+     * Format: DCR:MM-YY-XX (e.g. DCR:11-26-01, DCR:12-26-01, DCR:01-27-04)
+     */
+    public function nextRef(Request $request): JsonResponse
+    {
+        try {
+            $date = $request->query('date') ?: $request->input('date');
+            $prefix = $request->query('prefix', 'DCR:');
+
+            $nextRef = Quotation::generateNextRefNo($date, $prefix);
+            $parsedDate = Quotation::parseDateHelper($date);
+
+            return response()->json([
+                'success' => true,
+                'ref_no' => $nextRef,
+                'month' => $parsedDate->format('m'),
+                'year' => $parsedDate->format('y'),
+                'date_formatted' => $parsedDate->format('d/m/Y'),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to generate next quotation reference number.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
      * Store a newly created quotation with its main data and generated PDF.
      */
     public function store(Request $request): JsonResponse
@@ -114,7 +143,12 @@ class QuotationController extends Controller
                 $clientName = 'Client ' . date('d-m-Y');
             }
 
+            $quotationDate = trim((string)$request->input('quotation_date', date('d/m/Y')));
             $refNo = trim((string)$request->input('ref_no', ''));
+            if (empty($refNo) || $refNo === 'N/A' || $refNo === 'DCR:09-26-13') {
+                $refNo = Quotation::generateNextRefNo($quotationDate);
+            }
+
             $clientPhone = trim((string)$request->input('client_phone', ''));
             $clientAddress = trim((string)$request->input('client_address', ''));
             $capacity = trim((string)$request->input('capacity', ''));

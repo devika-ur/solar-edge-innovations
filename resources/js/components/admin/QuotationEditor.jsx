@@ -78,6 +78,38 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
         };
     }, [quotationData.clientInfo?.name, quotationData.date]);
 
+    // Fetch next auto-generated quotation reference number from backend (Format: DCR:MM-YY-XX)
+    const fetchNextRefNo = async (overrideDate = null) => {
+        try {
+            const dateToUse = overrideDate || quotationData.date || '';
+            const query = dateToUse ? `?date=${encodeURIComponent(dateToUse)}` : '';
+            const res = await fetch(`/api/admin-quotations-next-ref.php${query}`, {
+                credentials: 'include'
+            });
+            if (res.ok) {
+                const json = await res.json();
+                if (json.success && json.ref_no) {
+                    setQuotationData((prev) => ({
+                        ...prev,
+                        refNo: json.ref_no
+                    }));
+                    return json.ref_no;
+                }
+            }
+        } catch (err) {
+            console.error('Failed to auto-generate quotation ref_no from backend', err);
+        }
+        return null;
+    };
+
+    // Auto-populate next ref number on mount if empty or holding legacy placeholder
+    useEffect(() => {
+        if (!quotationData.refNo || quotationData.refNo === 'DCR:09-26-13') {
+            fetchNextRefNo();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     // Handle clicking a tab on the left: switch tab and smoothly scroll right preview to that section
     const handleTabChange = (tabId) => {
         setActiveTab(tabId);
@@ -394,6 +426,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
 
                 setQuotationData(clearedData);
                 localStorage.removeItem('solar_quotation_data');
+                fetchNextRefNo(formattedDate);
                 setActiveTab('client');
                 activeTabRef.current = 'client';
                 if (rightPanelRef.current) {
@@ -460,6 +493,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
 
             setQuotationData(clearedData);
             localStorage.removeItem('solar_quotation_data');
+            fetchNextRefNo(formattedDate);
             setActiveTab('client');
             activeTabRef.current = 'client';
             if (rightPanelRef.current) {
@@ -474,6 +508,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
         if (window.confirm("Are you sure you want to reset all fields to the default 6-page template?")) {
             setQuotationData(defaultQuotationData);
             localStorage.removeItem('solar_quotation_data');
+            fetchNextRefNo(defaultQuotationData.date);
             toast.success("Reset to default template values.");
         }
     };
@@ -629,6 +664,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                     onSave={handleSave}
                     onReset={handleReset}
                     onClear={handleClearForm}
+                    onRefreshRefNo={fetchNextRefNo}
                     onGeneratePdf={handleGeneratePdf}
                     isGeneratingPdf={isGeneratingPdf}
                     pdfProgress={pdfProgress}
@@ -883,6 +919,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                         onChange={setQuotationData}
                         onSave={handleSave}
                         onReset={handleReset}
+                        onRefreshRefNo={fetchNextRefNo}
                         onGeneratePdf={handleGeneratePdf}
                         isGeneratingPdf={isGeneratingPdf}
                         pdfProgress={pdfProgress}

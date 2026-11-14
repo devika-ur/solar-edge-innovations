@@ -36,6 +36,7 @@ export const QuotationEditorMobile = ({
     onSave,
     onReset,
     onClear,
+    onRefreshRefNo,
     onGeneratePdf,
     isGeneratingPdf = false,
     pdfProgress = "",
@@ -365,15 +366,27 @@ export const QuotationEditorMobile = ({
                                 {/* Reference No & Date Inputs */}
                                 <div className="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-                                            Quote Reference No
-                                        </label>
+                                        <div className="flex items-center justify-between mb-1">
+                                            <label className="block text-[11px] font-bold text-neutral-700">
+                                                Quote Ref No
+                                            </label>
+                                            {onRefreshRefNo && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onRefreshRefNo(data.date)}
+                                                    className="text-[10px] text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-0.5 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200"
+                                                    title="Auto-generate"
+                                                >
+                                                    <Sparkles size={10} /> Auto
+                                                </button>
+                                            )}
+                                        </div>
                                         <input
                                             type="text"
                                             value={data.refNo || ''}
                                             onChange={(e) => updateField('refNo', e.target.value)}
-                                            className="w-full px-3 py-2.5 bg-white border border-neutral-300 rounded-xl text-xs font-semibold text-neutral-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none shadow-2xs transition-all"
-                                            placeholder="DCR:09-26-13"
+                                            className="w-full px-3 py-2.5 bg-white border border-neutral-300 rounded-xl text-xs font-semibold text-neutral-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none shadow-2xs transition-all font-mono"
+                                            placeholder="e.g. DCR:11-26-01"
                                         />
                                     </div>
                                     <div>
@@ -1106,7 +1119,7 @@ export const QuotationEditorMobile = ({
                             {isGeneratingPdf ? (
                                 <>
                                     <Loader2 size={15} className="animate-spin" />
-                                    <span>Exporting...</span>
+                                    <span>{pdfProgress || 'Exporting...'}</span>
                                 </>
                             ) : (
                                 <>

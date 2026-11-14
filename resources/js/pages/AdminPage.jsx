@@ -21,7 +21,6 @@ import {
     X,
     Menu
 } from 'lucide-react';
-import { assets } from '../assets/assets';
 
 const VALID_TABS = ['dashboard', 'inquiries', 'projects', 'faqs', 'letterhead', 'quotation', 'agreement', 'quotation-history', 'payments', 'reports'];
 
@@ -62,7 +61,9 @@ const AdminPage = () => {
             const next = typeof val === 'boolean' ? val : !prev;
             try {
                 localStorage.setItem('solar_admin_sidebar_collapsed', String(next));
-            } catch {}
+            } catch {
+                // Ignore storage availability errors
+            }
             return next;
         });
     };
@@ -124,7 +125,7 @@ const AdminPage = () => {
                     sessionStorage.removeItem('solar_admin_auth');
                     setIsAuthenticated(false);
                 }
-            } catch (err) {
+            } catch {
                 // Network unreachable — preserve existing UI state
             }
         };
@@ -151,7 +152,9 @@ const AdminPage = () => {
                 method: 'POST',
                 credentials: 'include'
             });
-        } catch (e) {}
+        } catch {
+            // Ignore logout network errors
+        }
 
         sessionStorage.removeItem('solar_admin_auth');
         setIsAuthenticated(false);
@@ -165,7 +168,9 @@ const AdminPage = () => {
                 method: 'POST',
                 credentials: 'include'
             });
-        } catch (e) {}
+        } catch {
+            // Ignore logout network errors
+        }
 
         sessionStorage.removeItem('solar_admin_auth');
         setIsAuthenticated(false);

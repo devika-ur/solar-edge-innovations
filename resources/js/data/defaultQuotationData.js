@@ -1,7 +1,15 @@
+const getTodayFormatted = () => {
+    const today = new Date();
+    const day = String(today.getDate()).padStart(2, '0');
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const year = today.getFullYear();
+    return `${day}/${month}/${year}`;
+};
+
 export const defaultQuotationData = {
     // Reference & Header Info
-    refNo: "DCR:09-26-13",
-    date: "06/09/2026",
+    refNo: "",
+    date: getTodayFormatted(),
     systemTitle: "SOLAR POWERPLANT",
     systemSubtitle: "Grid Tie System",
 

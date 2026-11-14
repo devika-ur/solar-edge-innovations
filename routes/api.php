@@ -83,6 +83,8 @@ Route::middleware('admin.session')->group(function () {
     Route::post('/admin-inquiries.php', [AdminInquiryController::class, 'handle']);
 
     // Quotation Management & History
+    Route::get('/admin/quotations/next-ref', [AdminQuotationController::class, 'nextRef']);
+    Route::get('/admin-quotations-next-ref.php', [AdminQuotationController::class, 'nextRef']);
     Route::get('/admin/quotations', [AdminQuotationController::class, 'index']);
     Route::get('/admin-quotations.php', [AdminQuotationController::class, 'index']);
     Route::post('/admin/quotations', [AdminQuotationController::class, 'store']);
