@@ -41,6 +41,7 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate, editId: propEdit
     const [editingQuotationMeta, setEditingQuotationMeta] = useState(null);
     const [isEditLocked, setIsEditLocked] = useState(false);
     const [isLoadingEdit, setIsLoadingEdit] = useState(false);
+    const [isApprovingFromEditor, setIsApprovingFromEditor] = useState(false);
     // Screen responsiveness detection
     const [isMobile, setIsMobile] = useState(() => {
         return typeof window !== 'undefined' && window.innerWidth < 768;
@@ -518,6 +519,33 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate, editId: propEdit
         }
     };
 
+    // Client Approval directly from editor
+    const handleApproveFromEditor = async () => {
+        if (!editingQuotationMeta?.id) return;
+        setIsApprovingFromEditor(true);
+        try {
+            const res = await fetch(`/api/admin-quotations-approve.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ id: editingQuotationMeta.id })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                toast.success(`Quotation #${editingQuotationMeta.ref_no} marked as Approved by Client! Redirecting to Approved Quotations...`);
+                if (onNavigate) {
+                    onNavigate('approved-quotations');
+                }
+            } else {
+                toast.error(data.message || 'Failed to approve quotation.');
+            }
+        } catch {
+            toast.error('Network error approving quotation.');
+        } finally {
+            setIsApprovingFromEditor(false);
+        }
+    };
+
     // Clear form fields for entering a fresh quotation
     const handleClearForm = () => {
         if (window.confirm("Are you sure you want to clear all client and pricing fields for a new quotation?")) {
@@ -862,16 +890,30 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate, editId: propEdit
                         </span>
                     </div>
 
-                    {onNavigate && (
-                        <button
-                            type="button"
-                            onClick={() => onNavigate('quotation-history')}
-                            className="inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-neutral-50 rounded-lg text-xs font-semibold border border-neutral-200 transition-colors cursor-pointer"
-                        >
-                            <ArrowLeft size={12} />
-                            <span>Return to History</span>
-                        </button>
-                    )}
+                    <div className="flex items-center gap-2">
+                        {!isEditLocked && editingQuotationMeta?.workflow_status === 'approval_pending' && (
+                            <button
+                                type="button"
+                                disabled={isApprovingFromEditor}
+                                onClick={handleApproveFromEditor}
+                                className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-lg text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-60"
+                                title="Approve quotation by client and move to Approved Quotations"
+                            >
+                                {isApprovingFromEditor ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+                                <span>Approve by Client</span>
+                            </button>
+                        )}
+                        {onNavigate && (
+                            <button
+                                type="button"
+                                onClick={() => onNavigate('quotation-history')}
+                                className="inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-neutral-50 rounded-lg text-xs font-semibold border border-neutral-200 transition-colors cursor-pointer"
+                            >
+                                <ArrowLeft size={12} />
+                                <span>Return to History</span>
+                            </button>
+                        )}
+                    </div>
                 </div>
             )}
 

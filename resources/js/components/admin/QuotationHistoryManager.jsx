@@ -164,8 +164,12 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
             });
             const data = await res.json();
             if (res.ok && data.success) {
-                toast.success(`Quotation #${quote.ref_no} marked as Approved by Client!`);
-                loadQuotations();
+                toast.success(`Quotation #${quote.ref_no} marked as Approved by Client! Redirecting to Approved Quotations...`);
+                if (onNavigate) {
+                    onNavigate('approved-quotations');
+                } else {
+                    loadQuotations();
+                }
             } else {
                 toast.error(data.message || 'Failed to approve quotation.');
             }

@@ -27,7 +27,8 @@ import {
     Filter,
     ShieldAlert,
     Layers,
-    Sparkles
+    Sparkles,
+    Loader2
 } from 'lucide-react';
 import { Pagination } from './Pagination';
 
@@ -140,6 +141,36 @@ export const ApplicationTrackingManager = ({ onNavigate, onUnauthorized, initial
         e.preventDefault();
         setCurrentPage(1);
         loadTrackingData();
+    };
+
+    const [isApproving, setIsApproving] = useState(false);
+
+    const handleApproveApplicant = async (app) => {
+        if (!app) return;
+        setIsApproving(true);
+        try {
+            const res = await fetch(`/api/admin-quotations-approve.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ id: app.id })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                toast.success(`Quotation #${app.ref_no} marked as Approved by Client! Redirecting to Approved Quotations...`);
+                if (onNavigate) {
+                    onNavigate('approved-quotations');
+                } else {
+                    loadTrackingData();
+                }
+            } else {
+                toast.error(data.message || 'Failed to approve quotation.');
+            }
+        } catch {
+            toast.error('Network error approving quotation.');
+        } finally {
+            setIsApproving(false);
+        }
     };
 
     const handleResetFilters = () => {
@@ -383,14 +414,28 @@ export const ApplicationTrackingManager = ({ onNavigate, onUnauthorized, initial
 
                                             {stage.key === 'client_approval' && (
                                                 <>
-                                                    {selectedApplicant.workflow_status === 'approval_pending' && onNavigate && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => onNavigate('quotation-history')}
-                                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#1A4D2E] text-white hover:bg-[#143c24] text-xs font-bold transition-all cursor-pointer shadow-xs"
-                                                        >
-                                                            <span>Review Client Approval in History</span>
-                                                        </button>
+                                                    {selectedApplicant.workflow_status === 'approval_pending' && (
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <button
+                                                                type="button"
+                                                                disabled={isApproving}
+                                                                onClick={() => handleApproveApplicant(selectedApplicant)}
+                                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer shadow-xs disabled:opacity-60"
+                                                                title="Approve quotation by client and move to Approved Quotations"
+                                                            >
+                                                                {isApproving ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                                                                <span>Approve by Client</span>
+                                                            </button>
+                                                            {onNavigate && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => onNavigate('quotation-history')}
+                                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 text-xs font-semibold transition-all cursor-pointer"
+                                                                >
+                                                                    <span>Review in History</span>
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     )}
                                                 </>
                                             )}
