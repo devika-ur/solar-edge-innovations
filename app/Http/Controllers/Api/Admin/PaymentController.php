@@ -19,12 +19,17 @@ class PaymentController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            // Auto-sync any active quotations that do not yet have a payment master record
-            $activeQuotations = Quotation::active()->get();
+            // Auto-sync quotations that have an agreement created and do not yet have a payment master record
+            $eligibleQuotations = Quotation::active()
+                ->where(function ($q) {
+                    $q->whereIn('workflow_status', ['agreement_created', 'completed'])
+                      ->orWhereHas('agreement');
+                })
+                ->get();
             $existingMasterQuotationIds = QuotationPayment::pluck('quotation_id')->all();
             $existingMasterLookup = array_flip($existingMasterQuotationIds);
 
-            foreach ($activeQuotations as $quote) {
+            foreach ($eligibleQuotations as $quote) {
                 if (!isset($existingMasterLookup[$quote->id])) {
                     QuotationPayment::syncForQuotation($quote);
                 }
@@ -36,8 +41,11 @@ class PaymentController extends Controller
             $endDate = $request->query('end_date');
 
             $query = QuotationPayment::whereHas('quotation', function ($q) {
-                $q->active();
-            })->with(['quotation']);
+                $q->active()->where(function ($sq) {
+                    $sq->whereIn('workflow_status', ['agreement_created', 'completed'])
+                       ->orWhereHas('agreement');
+                });
+            })->with(['quotation.agreement']);
 
             // Filter by Status: pending, partially_paid, paid
             if (!empty($status) && in_array(strtolower($status), ['pending', 'partially_paid', 'paid'])) {
@@ -250,6 +258,19 @@ class PaymentController extends Controller
                 $master->status = $newStatus;
                 $master->last_payment_date = $paymentDate;
                 $master->save();
+
+                // 3. Update application workflow status: once fully paid, mark Completed
+                if ($newStatus === 'paid') {
+                    $quotation->workflow_status = 'completed';
+                    if (!$quotation->completed_at) {
+                        $quotation->completed_at = Carbon::now();
+                    }
+                    $quotation->save();
+                } elseif ($quotation->workflow_status === 'completed' && $newStatus !== 'paid') {
+                    $quotation->workflow_status = 'agreement_created';
+                    $quotation->completed_at = null;
+                    $quotation->save();
+                }
 
                 return [
                     'master' => $master,
@@ -507,6 +528,15 @@ class PaymentController extends Controller
             $master->save();
 
             $quotation->total_amount = number_format($newTotal, 0, '.', ',');
+            if ($newStatus === 'paid') {
+                $quotation->workflow_status = 'completed';
+                if (!$quotation->completed_at) {
+                    $quotation->completed_at = Carbon::now();
+                }
+            } elseif ($quotation->workflow_status === 'completed' && $newStatus !== 'paid') {
+                $quotation->workflow_status = 'agreement_created';
+                $quotation->completed_at = null;
+            }
             $quotation->save();
 
             return response()->json([

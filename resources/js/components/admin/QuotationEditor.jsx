@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import * as jspdfLib from 'jspdf';
 import html2canvas from 'html2canvas-pro'; // npm i html2canvas-pro  (handles Tailwind v4 oklch colors)
 
@@ -27,11 +28,19 @@ import {
     Eye,
     EyeOff,
     ZoomIn,
-    ZoomOut
+    ZoomOut,
+    Lock,
+    AlertCircle,
+    ArrowLeft
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
+export const QuotationEditor = ({ onLogout, onBack, onNavigate, editId: propEditId }) => {
+    const [searchParams] = useSearchParams();
+    const activeEditId = propEditId || searchParams.get('edit') || null;
+    const [editingQuotationMeta, setEditingQuotationMeta] = useState(null);
+    const [isEditLocked, setIsEditLocked] = useState(false);
+    const [isLoadingEdit, setIsLoadingEdit] = useState(false);
     // Screen responsiveness detection
     const [isMobile, setIsMobile] = useState(() => {
         return typeof window !== 'undefined' && window.innerWidth < 768;
@@ -91,6 +100,63 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
             document.title = originalTitle;
         };
     }, [quotationData.clientInfo?.name, quotationData.date]);
+
+    // Load quotation details when activeEditId is set
+    useEffect(() => {
+        if (!activeEditId) {
+            setEditingQuotationMeta(null);
+            setIsEditLocked(false);
+            return;
+        }
+
+        const fetchQuotationForEdit = async () => {
+            setIsLoadingEdit(true);
+            try {
+                const res = await fetch(`/api/admin/quotations/${activeEditId}`, {
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (res.ok && data.success && data.data) {
+                    const quote = data.data;
+                    setEditingQuotationMeta(quote);
+                    const isEditable = quote.workflow_status === 'approval_pending' || !quote.workflow_status;
+                    setIsEditLocked(!isEditable);
+
+                    if (quote.quotation_data && typeof quote.quotation_data === 'object' && Object.keys(quote.quotation_data).length > 0) {
+                        setQuotationData(quote.quotation_data);
+                    } else {
+                        setQuotationData(prev => ({
+                            ...prev,
+                            refNo: quote.ref_no || prev.refNo,
+                            date: quote.quotation_date || prev.date,
+                            clientInfo: {
+                                ...prev.clientInfo,
+                                name: quote.client_name || '',
+                                contactNo: quote.client_phone || '',
+                                address: quote.client_address !== '-' ? quote.client_address : '',
+                                capacity: quote.capacity || '',
+                                type: quote.system_type || 'ON GRID'
+                            },
+                            pricing: {
+                                ...prev.pricing,
+                                totalPayable: quote.total_amount || ''
+                            }
+                        }));
+                    }
+                    toast.success(`Loaded Quotation #${quote.ref_no} for editing`);
+                } else {
+                    toast.error(data.message || 'Failed to load quotation details');
+                }
+            } catch (err) {
+                console.error('Error fetching quote for edit:', err);
+                toast.error('Network error loading quotation');
+            } finally {
+                setIsLoadingEdit(false);
+            }
+        };
+
+        fetchQuotationForEdit();
+    }, [activeEditId]);
 
     // Fetch next auto-generated quotation reference number from backend (Format: DCR:MM-YY-XX)
     const fetchNextRefNo = async (overrideDate = null) => {
@@ -271,6 +337,10 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
 
     // Open save confirmation modal popup
     const handleSave = () => {
+        if (isEditLocked) {
+            toast.error(`Editing is disabled because this quotation is ${editingQuotationMeta?.workflow_status_label || 'processed'}.`);
+            return;
+        }
         setIsSaveModalOpen(true);
     };
 
@@ -403,6 +473,10 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
             formData.append('total_amount', quotationData.pricing?.totalPayable || '');
             formData.append('ref_no', quotationData.refNo || '');
             formData.append('quotation_date', quotationData.date || '');
+            if (activeEditId) {
+                formData.append('id', String(activeEditId));
+            }
+            formData.append('quotation_data', JSON.stringify(quotationData));
 
             const res = await fetch('/api/admin-quotations.php', {
                 method: 'POST',
@@ -412,58 +486,18 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
 
             const data = await res.json();
             if (res.ok && data.success) {
-                // Clear the form fields for the next quotation
-                const today = new Date();
-                const day = String(today.getDate()).padStart(2, '0');
-                const month = String(today.getMonth() + 1).padStart(2, '0');
-                const year = today.getFullYear();
-                const formattedDate = `${day}/${month}/${year}`;
-
-                const clearedData = {
-                    ...defaultQuotationData,
-                    refNo: '',
-                    date: formattedDate,
-                    clientInfo: {
-                        name: '',
-                        address: '',
-                        contactNo: '',
-                        capacity: '',
-                        type: 'ON GRID'
-                    },
-                    pricing: {
-                        ...defaultQuotationData.pricing,
-                        headerTitle: '',
-                        totalPayable: '',
-                        amountInWords: ''
-                    }
-                };
-
-                setQuotationData(clearedData);
                 localStorage.removeItem('solar_quotation_data');
-                fetchNextRefNo(formattedDate);
-                setActiveTab('client');
-                activeTabRef.current = 'client';
-                if (rightPanelRef.current) {
-                    rightPanelRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-                }
                 setIsSaveModalOpen(false);
 
-                toast.success((t) => (
-                    <div className="flex items-center justify-between gap-3">
-                        <span className="text-xs">Quotation saved & form cleared!</span>
-                        {onNavigate && (
-                            <button
-                                onClick={() => {
-                                    toast.dismiss(t.id);
-                                    onNavigate('quotation-history');
-                                }}
-                                className="px-3 py-1 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
-                            >
-                                View History
-                            </button>
-                        )}
-                    </div>
-                ), { duration: 5000 });
+                toast.success(
+                    activeEditId
+                        ? `Quotation #${quotationData.refNo} updated successfully!`
+                        : "Quotation saved successfully! Navigating to Quotation History..."
+                );
+
+                if (onNavigate) {
+                    onNavigate('quotation-history');
+                }
             } else {
                 toast.error(data.message || "Failed to save quotation to history.");
             }
@@ -793,6 +827,41 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate }) => {
                     }
                 }
             `}</style>
+
+            {/* Edit Mode Notice Banner */}
+            {activeEditId && (
+                <div className={`no-print px-4 sm:px-8 py-2.5 flex items-center justify-between text-xs border-b ${
+                    isEditLocked
+                        ? 'bg-amber-50 border-amber-200 text-amber-900'
+                        : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                }`}>
+                    <div className="flex items-center gap-2">
+                        {isEditLocked ? <Lock size={15} className="text-amber-600 shrink-0" /> : <FileText size={15} className="text-emerald-700 shrink-0" />}
+                        <span>
+                            {isEditLocked ? (
+                                <>
+                                    <strong>Editing Locked:</strong> Quotation #{editingQuotationMeta?.ref_no || quotationData.refNo} ({editingQuotationMeta?.client_name || quotationData.clientInfo?.name}) is currently marked as <strong>{editingQuotationMeta?.workflow_status_label}</strong>. Modifications are disabled unless reopened.
+                                </>
+                            ) : (
+                                <>
+                                    <strong>Editing Quotation:</strong> #{editingQuotationMeta?.ref_no || quotationData.refNo} ({editingQuotationMeta?.client_name || quotationData.clientInfo?.name}). You can modify fields and click Save to update history.
+                                </>
+                            )}
+                        </span>
+                    </div>
+
+                    {onNavigate && (
+                        <button
+                            type="button"
+                            onClick={() => onNavigate('quotation-history')}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-neutral-50 rounded-lg text-xs font-semibold border border-neutral-200 transition-colors cursor-pointer"
+                        >
+                            <ArrowLeft size={12} />
+                            <span>Return to History</span>
+                        </button>
+                    )}
+                </div>
+            )}
 
             {/* Top Toolbar (Matching Official Letterhead Creator Layout) */}
             <div className="no-print bg-white border-b border-neutral-200/90 px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4 shadow-2xs">

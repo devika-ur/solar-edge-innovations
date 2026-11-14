@@ -9,6 +9,8 @@ import { QuotationEditor } from '../components/admin/QuotationEditor';
 import { InquiryManager } from '../components/admin/InquiryManager';
 import { LetterheadEditor } from '../components/admin/LetterheadEditor';
 import { QuotationHistoryManager } from '../components/admin/QuotationHistoryManager';
+import { ApprovedQuotationsManager } from '../components/admin/ApprovedQuotationsManager';
+import { ApplicationTrackingManager } from '../components/admin/ApplicationTrackingManager';
 import { PaymentManager } from '../components/admin/PaymentManager';
 import { ReportManager } from '../components/admin/reports/ReportManager';
 import { AgreementEditor } from '../components/admin/AgreementEditor';
@@ -22,7 +24,20 @@ import {
     Menu
 } from 'lucide-react';
 
-const VALID_TABS = ['dashboard', 'inquiries', 'projects', 'faqs', 'letterhead', 'quotation', 'agreement', 'quotation-history', 'payments', 'reports'];
+const VALID_TABS = [
+    'dashboard',
+    'inquiries',
+    'projects',
+    'faqs',
+    'letterhead',
+    'quotation',
+    'quotation-history',
+    'approved-quotations',
+    'agreement',
+    'payments',
+    'application-tracking',
+    'reports'
+];
 
 const AdminPage = () => {
     const { tab } = useParams();
@@ -38,8 +53,13 @@ const AdminPage = () => {
         ? tab.toLowerCase()
         : (queryTab && VALID_TABS.includes(queryTab.toLowerCase()) ? queryTab.toLowerCase() : 'dashboard');
 
-    const handleTabChange = (tabId) => {
+    const [workflowContext, setWorkflowContext] = useState({});
+
+    const handleTabChange = (tabId, extra = null) => {
         if (VALID_TABS.includes(tabId)) {
+            if (extra) {
+                setWorkflowContext((prev) => ({ ...prev, [tabId]: extra }));
+            }
             navigate(`/admin/${tabId}`);
         }
     };
@@ -333,13 +353,7 @@ const AdminPage = () => {
                 {activeTab === 'faqs' && <FaqManager onUnauthorized={handleUnauthorized} />}
                 {activeTab === 'quotation' && (
                     <QuotationEditor
-                        onLogout={() => setIsLogoutModalOpen(true)}
-                        onBack={() => handleTabChange('dashboard')}
-                        onNavigate={handleTabChange}
-                    />
-                )}
-                {activeTab === 'agreement' && (
-                    <AgreementEditor
+                        editId={workflowContext['quotation']?.editId}
                         onLogout={() => setIsLogoutModalOpen(true)}
                         onBack={() => handleTabChange('dashboard')}
                         onNavigate={handleTabChange}
@@ -351,8 +365,30 @@ const AdminPage = () => {
                         onUnauthorized={handleUnauthorized}
                     />
                 )}
+                {activeTab === 'approved-quotations' && (
+                    <ApprovedQuotationsManager
+                        onNavigate={handleTabChange}
+                        onUnauthorized={handleUnauthorized}
+                    />
+                )}
+                {activeTab === 'agreement' && (
+                    <AgreementEditor
+                        quotation={workflowContext['agreement']?.quotation}
+                        quotationId={workflowContext['agreement']?.quotationId}
+                        onLogout={() => setIsLogoutModalOpen(true)}
+                        onBack={() => handleTabChange('dashboard')}
+                        onNavigate={handleTabChange}
+                    />
+                )}
                 {activeTab === 'payments' && (
                     <PaymentManager
+                        onNavigate={handleTabChange}
+                        onUnauthorized={handleUnauthorized}
+                    />
+                )}
+                {activeTab === 'application-tracking' && (
+                    <ApplicationTrackingManager
+                        initialApplicantId={workflowContext['application-tracking']?.applicantId}
                         onNavigate={handleTabChange}
                         onUnauthorized={handleUnauthorized}
                     />

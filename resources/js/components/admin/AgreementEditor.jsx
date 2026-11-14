@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import * as jspdfLib from 'jspdf';
 import html2canvas from 'html2canvas-pro';
 import toast from 'react-hot-toast';
@@ -16,7 +17,11 @@ import {
     User,
     Building2,
     Calendar,
-    CreditCard
+    CreditCard,
+    Save,
+    CheckCircle2,
+    ArrowRight,
+    Loader2
 } from 'lucide-react';
 import headerImg from '../../assets/header.jpeg';
 import footerImg from '../../assets/footer.jpeg';
@@ -26,7 +31,11 @@ import { AgreementPageContent, DEFAULT_PAYMENT_TERMS } from './AgreementPageCont
 
 const jsPDF = jspdfLib.jsPDF || jspdfLib.default?.jsPDF || jspdfLib.default;
 
-export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
+export const AgreementEditor = ({ onLogout, onBack, onNavigate, quotation: propQuotation, quotationId: propQuotationId }) => {
+    const [searchParams] = useSearchParams();
+    const targetQuoteId = propQuotation?.id || propQuotationId || searchParams.get('quotation_id');
+    const [associatedQuotation, setAssociatedQuotation] = useState(propQuotation || null);
+    const [isSavingAgreement, setIsSavingAgreement] = useState(false);
     // Screen responsiveness
     const [isMobile, setIsMobile] = useState(() => {
         return typeof window !== 'undefined' && window.innerWidth < 1024;
@@ -90,6 +99,168 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
             localStorage.setItem('solaredge_agreement_fields_v5', JSON.stringify(fields));
         } catch {}
     }, [fields]);
+
+    // Auto-populate agreement form from approved quotation
+    useEffect(() => {
+        if (propQuotation) {
+            setAssociatedQuotation(propQuotation);
+            setFields(prev => ({
+                ...prev,
+                consumerName: propQuotation.client_name || prev.consumerName,
+                consumerAddress: (propQuotation.client_address && propQuotation.client_address !== '-') ? propQuotation.client_address : prev.consumerAddress,
+                firstPartySignName: propQuotation.client_name || prev.firstPartySignName,
+                quotationId: propQuotation.id,
+                quotationRef: propQuotation.ref_no,
+            }));
+            return;
+        }
+
+        if (targetQuoteId) {
+            const fetchQuote = async () => {
+                try {
+                    const res = await fetch(`/api/admin/quotations/${targetQuoteId}`, {
+                        credentials: 'include'
+                    });
+                    const json = await res.json();
+                    if (res.ok && json.success && json.data) {
+                        const quote = json.data;
+                        setAssociatedQuotation(quote);
+                        setFields(prev => ({
+                            ...prev,
+                            consumerName: quote.client_name || prev.consumerName,
+                            consumerAddress: (quote.client_address && quote.client_address !== '-') ? quote.client_address : prev.consumerAddress,
+                            firstPartySignName: quote.client_name || prev.firstPartySignName,
+                            quotationId: quote.id,
+                            quotationRef: quote.ref_no,
+                        }));
+                    }
+                } catch (e) {
+                    console.error('Failed to load quotation for agreement:', e);
+                }
+            };
+            fetchQuote();
+        }
+    }, [targetQuoteId, propQuotation]);
+
+    // Save agreement to backend and update application workflow status to 'agreement_created'
+    const handleSaveAgreement = async () => {
+        const quoteId = associatedQuotation?.id || targetQuoteId || fields.quotationId;
+        if (!quoteId) {
+            toast.error('An associated approved quotation is required to save an agreement. Please generate agreement from the Approved Quotations page.');
+            return;
+        }
+        if (!fields.consumerName || !fields.consumerName.trim()) {
+            toast.error('Please enter the Consumer Full Name before saving the agreement.');
+            return;
+        }
+
+        setIsSavingAgreement(true);
+        const toastId = toast.loading('Generating & saving official agreement...');
+
+        const savedScale = previewScale;
+        setPreviewScale(1);
+        await new Promise((resolve) => setTimeout(resolve, 140));
+
+        try {
+            const pageElements = document.querySelectorAll('.agreement-printable-sheet');
+            if (pageElements.length === 0) {
+                toast.error('No agreement pages found to generate PDF.', { id: toastId });
+                setPreviewScale(savedScale);
+                setIsSavingAgreement(false);
+                return;
+            }
+
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4',
+                compress: true,
+            });
+
+            for (let i = 0; i < pageElements.length; i++) {
+                const sheet = pageElements[i];
+                const canvas = await html2canvas(sheet, {
+                    scale: 2.0,
+                    useCORS: true,
+                    logging: false,
+                    backgroundColor: '#ffffff',
+                    windowWidth: 794,
+                    windowHeight: 1123,
+                    onclone: (clonedDoc, clonedEl) => {
+                        clonedEl.style.transform = 'none';
+                        clonedEl.style.position = 'static';
+                        clonedEl.style.opacity = '1';
+                        clonedEl.style.left = '0';
+                        clonedEl.style.top = '0';
+                    }
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                if (i > 0) {
+                    pdf.addPage('a4', 'portrait');
+                }
+                pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+            }
+
+            const pdfBlob = pdf.output('blob');
+            const formData = new FormData();
+            formData.append('quotation_id', String(quoteId));
+            formData.append('consumer_name', fields.consumerName.trim());
+            formData.append('consumer_address', fields.consumerAddress || '');
+            formData.append('agreement_date', `${fields.executionDay}/${fields.executionMonth}/${fields.executionYear}`);
+            formData.append('agreement_data', JSON.stringify(fields));
+            formData.append('pdf_file', pdfBlob, `agreement_${quoteId}_${Date.now()}.pdf`);
+
+            const res = await fetch('/api/admin-agreements.php', {
+                method: 'POST',
+                credentials: 'include',
+                body: formData
+            });
+
+            const resData = await res.json();
+            if (res.ok && resData.success) {
+                toast.success((t) => (
+                    <div className="flex flex-col gap-2">
+                        <span className="font-bold text-xs">{resData.message}</span>
+                        <div className="flex items-center gap-2 mt-1">
+                            {onNavigate && (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            toast.dismiss(t.id);
+                                            onNavigate('payments');
+                                        }}
+                                        className="px-2.5 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                                    >
+                                        Go to Payments
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            toast.dismiss(t.id);
+                                            onNavigate('application-tracking');
+                                        }}
+                                        className="px-2.5 py-1 bg-neutral-800 hover:bg-neutral-900 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
+                                    >
+                                        Track Application
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                ), { id: toastId, duration: 6000 });
+            } else {
+                toast.error(resData.message || 'Failed to save agreement.', { id: toastId });
+            }
+        } catch (err) {
+            console.error('Save agreement error:', err);
+            toast.error('Failed to save agreement to server.', { id: toastId });
+        } finally {
+            setPreviewScale(savedScale);
+            setIsSavingAgreement(false);
+        }
+    };
 
     const handleFieldChange = (key, value) => {
         setFields(prev => {
@@ -226,8 +397,12 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
                 onCopy={handleCopyText}
                 onDownloadPdf={handleDownloadPdf}
                 isGeneratingPdf={isGeneratingPdf}
+                onSaveAgreement={handleSaveAgreement}
+                isSavingAgreement={isSavingAgreement}
+                associatedQuotation={associatedQuotation}
                 onLogout={onLogout}
                 onBack={onBack}
+                onNavigate={onNavigate}
             />
         );
     }
@@ -237,6 +412,28 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
             className="w-full flex flex-col font-sans bg-[#F4F6F9] min-h-[calc(100vh-60px)] h-[calc(100vh-60px)] overflow-hidden relative"
             data-lenis-prevent
         >
+            {/* Associated Approved Quotation Banner */}
+            {associatedQuotation && (
+                <div className="no-print bg-emerald-50 border-b border-emerald-200/80 px-4 sm:px-8 py-2.5 flex items-center justify-between text-xs text-emerald-900">
+                    <div className="flex items-center gap-2">
+                        <CheckCircle2 size={15} className="text-emerald-700 shrink-0" />
+                        <span>
+                            Auto-populated from Approved Quotation <strong>#{associatedQuotation.ref_no}</strong> for <strong>{associatedQuotation.client_name}</strong> ({associatedQuotation.capacity}, ₹{associatedQuotation.total_amount}).
+                        </span>
+                    </div>
+                    {onNavigate && (
+                        <button
+                            type="button"
+                            onClick={() => onNavigate('approved-quotations')}
+                            className="inline-flex items-center gap-1 text-emerald-800 hover:text-emerald-950 font-bold hover:underline cursor-pointer"
+                        >
+                            <span>Back to Approved Quotations</span>
+                            <ArrowRight size={12} />
+                        </button>
+                    )}
+                </div>
+            )}
+
             {/* Top Action & Status Bar - Sticky at top */}
             <div className="no-print shrink-0 bg-white border-b border-neutral-200/90 px-4 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-3 shadow-2xs z-30">
                 <div className="flex items-center gap-3">
@@ -298,6 +495,22 @@ export const AgreementEditor = ({ onLogout, onBack, onNavigate }) => {
                                 <span>Show Preview</span>
                             </>
                         )}
+                    </button>
+
+                    {/* Save Agreement Button */}
+                    <button
+                        type="button"
+                        onClick={handleSaveAgreement}
+                        disabled={isSavingAgreement || isGeneratingPdf}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 active:scale-98 rounded-xl shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                        title="Save agreement to database and mark application as Agreement Created"
+                    >
+                        {isSavingAgreement ? (
+                            <Loader2 size={15} className="animate-spin" />
+                        ) : (
+                            <Save size={15} />
+                        )}
+                        <span>{isSavingAgreement ? 'Saving...' : 'Save Agreement'}</span>
                     </button>
 
                     <button

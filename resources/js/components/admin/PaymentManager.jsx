@@ -237,8 +237,24 @@ export const PaymentManager = ({ onNavigate, onUnauthorized }) => {
                         <span>Loading payments...</span>
                     </div>
                 ) : paginatedPayments.length === 0 ? (
-                    <div className="py-16 text-center text-xs text-neutral-500">
-                        No quotations found.
+                    <div className="py-16 text-center text-xs text-neutral-500 space-y-2">
+                        <CreditCard size={28} className="text-neutral-400 mx-auto" />
+                        <div className="font-semibold text-neutral-800 text-sm">No Payment Records Found</div>
+                        <p className="max-w-md mx-auto text-neutral-500">
+                            {searchQuery || statusFilter !== 'all'
+                                ? "No payments match your active filters."
+                                : "Applications appear here automatically once their agreements have been created and saved."}
+                        </p>
+                        {onNavigate && (
+                            <div className="pt-2">
+                                <button
+                                    onClick={() => onNavigate('approved-quotations')}
+                                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#1A4D2E] text-white rounded-xl text-xs font-bold shadow-xs hover:bg-[#143c24] cursor-pointer"
+                                >
+                                    <span>View Approved Quotations</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <>

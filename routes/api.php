@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\AgreementController as AdminAgreementController;
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Api\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Api\Admin\InquiryController as AdminInquiryController;
@@ -82,16 +83,30 @@ Route::middleware('admin.session')->group(function () {
     Route::post('/admin/inquiries', [AdminInquiryController::class, 'handle']);
     Route::post('/admin-inquiries.php', [AdminInquiryController::class, 'handle']);
 
-    // Quotation Management & History
+    // Quotation Management & History & Tracking
     Route::get('/admin/quotations/next-ref', [AdminQuotationController::class, 'nextRef']);
     Route::get('/admin-quotations-next-ref.php', [AdminQuotationController::class, 'nextRef']);
+    Route::get('/admin/quotations/tracking', [AdminQuotationController::class, 'tracking']);
+    Route::get('/admin-quotations-tracking.php', [AdminQuotationController::class, 'tracking']);
     Route::get('/admin/quotations', [AdminQuotationController::class, 'index']);
     Route::get('/admin-quotations.php', [AdminQuotationController::class, 'index']);
     Route::post('/admin/quotations', [AdminQuotationController::class, 'store']);
     Route::post('/admin-quotations.php', [AdminQuotationController::class, 'store']);
     Route::get('/admin/quotations/{id}', [AdminQuotationController::class, 'show']);
+    Route::post('/admin/quotations/{id}/approve', [AdminQuotationController::class, 'approve']);
+    Route::post('/admin-quotations-approve.php', [AdminQuotationController::class, 'approve']);
+    Route::post('/admin/quotations/{id}/reject', [AdminQuotationController::class, 'reject']);
+    Route::post('/admin-quotations-reject.php', [AdminQuotationController::class, 'reject']);
+    Route::post('/admin/quotations/{id}/reopen', [AdminQuotationController::class, 'reopen']);
+    Route::post('/admin-quotations-reopen.php', [AdminQuotationController::class, 'reopen']);
     Route::post('/admin/quotations/delete', [AdminQuotationController::class, 'handle']);
     Route::post('/admin-quotations-delete.php', [AdminQuotationController::class, 'handle']);
+
+    // Agreement Management
+    Route::get('/admin/agreements/{quotationId}', [AdminAgreementController::class, 'show']);
+    Route::get('/admin-agreements.php', [AdminAgreementController::class, 'show']);
+    Route::post('/admin/agreements', [AdminAgreementController::class, 'store']);
+    Route::post('/admin-agreements.php', [AdminAgreementController::class, 'store']);
 
     // Payment Tracking & History
     Route::get('/admin/payments', [AdminPaymentController::class, 'index']);

@@ -10,6 +10,8 @@ import {
     ScrollText,
     Mail,
     BarChart3,
+    CheckCircle2,
+    Activity,
     PanelLeftClose,
     PanelLeftOpen,
     Sparkles,
@@ -28,9 +30,11 @@ export const ADMIN_NAV_ITEMS = [
     { id: 'faqs', label: 'Website FAQs', icon: HelpCircle },
     { id: 'letterhead', label: 'Letterhead', icon: ScrollText },
     { id: 'quotation', label: 'Quotation Builder', icon: FileText },
-    { id: 'agreement', label: 'Agreement', icon: FileSignature },
     { id: 'quotation-history', label: 'Quotation History', icon: History },
+    { id: 'approved-quotations', label: 'Approved Quotations', icon: CheckCircle2 },
+    { id: 'agreement', label: 'Agreement', icon: FileSignature },
     { id: 'payments', label: 'Payments', icon: CreditCard },
+    { id: 'application-tracking', label: 'Application Tracking', icon: Activity },
     { id: 'reports', label: 'Reports', icon: BarChart3 },
 ];
 

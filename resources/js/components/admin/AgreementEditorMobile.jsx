@@ -14,7 +14,9 @@ import {
     Calendar,
     FileSignature,
     CreditCard,
-    Building2
+    Building2,
+    Save,
+    CheckCircle2
 } from 'lucide-react';
 import { assets } from '../../assets/assets';
 import { AgreementPageContent } from './AgreementPageContent';
@@ -29,8 +31,12 @@ export const AgreementEditorMobile = ({
     onCopy,
     onDownloadPdf,
     isGeneratingPdf = false,
+    onSaveAgreement,
+    isSavingAgreement = false,
+    associatedQuotation = null,
     onLogout,
     onBack,
+    onNavigate,
 }) => {
     const [mobileTab, setMobileTab] = useState('edit'); // 'edit' or 'preview'
     const [copied, setCopied] = useState(false);
@@ -535,30 +541,52 @@ export const AgreementEditorMobile = ({
 
                 {/* Bottom Preview Quick Action Bar */}
                 {mobileTab === 'preview' && (
-                    <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-neutral-200 px-4 py-3 z-30 shadow-lg flex items-center justify-between gap-3 max-w-md mx-auto mobile-action-bar no-print">
+                    <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-neutral-200 px-3 py-2.5 z-30 shadow-lg flex items-center justify-between gap-2 max-w-md mx-auto mobile-action-bar no-print">
                         <button
                             type="button"
                             onClick={() => setMobileTab('edit')}
-                            className="flex-1 py-3 px-4 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="p-2.5 rounded-xl border border-neutral-200 bg-white text-xs font-semibold text-neutral-700 flex items-center justify-center shrink-0 cursor-pointer"
+                            title="Edit Details"
                         >
                             <Edit3 size={15} />
-                            <span>Edit Details</span>
                         </button>
+
+                        {onSaveAgreement && (
+                            <button
+                                type="button"
+                                onClick={onSaveAgreement}
+                                disabled={isSavingAgreement || isGeneratingPdf}
+                                className="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50"
+                            >
+                                {isSavingAgreement ? (
+                                    <>
+                                        <Loader2 size={14} className="animate-spin" />
+                                        <span>Saving...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save size={14} />
+                                        <span>Save</span>
+                                    </>
+                                )}
+                            </button>
+                        )}
+
                         <button
                             type="button"
                             onClick={onDownloadPdf}
                             disabled={isGeneratingPdf}
-                            className="flex-1 py-3 px-4 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs bg-[#1A4D2E] hover:bg-[#143c24] disabled:opacity-50"
+                            className="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs bg-[#1A4D2E] hover:bg-[#143c24] disabled:opacity-50"
                         >
                             {isGeneratingPdf ? (
                                 <>
-                                    <Loader2 size={15} className="animate-spin" />
-                                    <span>Generating...</span>
+                                    <Loader2 size={14} className="animate-spin" />
+                                    <span>PDF...</span>
                                 </>
                             ) : (
                                 <>
-                                    <Download size={15} />
-                                    <span>Download PDF (5p)</span>
+                                    <Download size={14} />
+                                    <span>Download PDF</span>
                                 </>
                             )}
                         </button>

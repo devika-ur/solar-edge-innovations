@@ -21,15 +21,27 @@ class Quotation extends Model
         'capacity',
         'system_type',
         'total_amount',
+        'quotation_data',
         'quotation_date',
         'pdf_path',
         'pdf_url',
         'status',
+        'workflow_status',
+        'approved_at',
+        'rejected_at',
+        'rejection_reason',
+        'agreement_created_at',
+        'completed_at',
         'created_by',
         'admin_notes',
     ];
 
     protected $casts = [
+        'quotation_data' => 'array',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
+        'agreement_created_at' => 'datetime',
+        'completed_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -43,6 +55,14 @@ class Quotation extends Model
         return $query->where(function ($q) {
             $q->whereNull('status')->orWhere('status', '!=', 'deleted');
         });
+    }
+
+    /**
+     * Agreement record linked to this quotation.
+     */
+    public function agreement()
+    {
+        return $this->hasOne(Agreement::class, 'quotation_id');
     }
 
     /**
