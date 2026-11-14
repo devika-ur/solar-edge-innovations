@@ -21,6 +21,7 @@ import {
 export const ReportFilters = ({
     reportType,
     onReportTypeChange,
+    isFixedType = false,
     filters,
     onFilterChange,
     onGenerate,
@@ -80,26 +81,28 @@ export const ReportFilters = ({
 
     return (
         <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs p-4 sm:p-5 space-y-4">
-            {/* Top Row: Report Type Selector */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-3">
-                <div className="flex items-center gap-2">
-                    <Filter size={16} className="text-[#1A4D2E]" />
-                    <span className="text-xs sm:text-sm font-bold text-neutral-900">Report Type:</span>
-                    <select
-                        value={reportType}
-                        onChange={(e) => onReportTypeChange(e.target.value)}
-                        className="bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-semibold text-neutral-800 outline-none cursor-pointer focus:border-[#1A4D2E] focus:bg-white"
-                    >
-                        <option value="payment_history">Payment History Report</option>
-                        <option value="quotation_history">Quotation History Report</option>
-                        <option value="approved_quotations">Approved Quotations Report</option>
-                    </select>
-                </div>
+            {/* Top Row: Report Type Selector (shown when viewing generic report manager) */}
+            {!isFixedType && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-100 pb-3">
+                    <div className="flex items-center gap-2">
+                        <Filter size={16} className="text-[#1A4D2E]" />
+                        <span className="text-xs sm:text-sm font-bold text-neutral-900">Report Type:</span>
+                        <select
+                            value={reportType}
+                            onChange={(e) => onReportTypeChange(e.target.value)}
+                            className="bg-neutral-50 border border-neutral-300 rounded-xl px-3 py-1.5 text-xs sm:text-sm font-semibold text-neutral-800 outline-none cursor-pointer focus:border-[#1A4D2E] focus:bg-white"
+                        >
+                            <option value="payment_history">Payment History Report</option>
+                            <option value="quotation_history">Quotation History Report</option>
+                            <option value="approved_quotations">Approved Quotations Report</option>
+                        </select>
+                    </div>
 
-                <div className="text-[11px] text-neutral-400">
-                    Server-side filtered • Non-paginated report dataset
+                    <div className="text-[11px] text-neutral-400">
+                        Server-side filtered • Non-paginated report dataset
+                    </div>
                 </div>
-            </div>
+            )}
 
             {/* Date Presets Row */}
             <div className="flex flex-wrap items-center gap-1.5">

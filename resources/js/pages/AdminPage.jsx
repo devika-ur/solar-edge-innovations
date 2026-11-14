@@ -36,7 +36,10 @@ const VALID_TABS = [
     'agreement',
     'payments',
     'application-tracking',
-    'reports'
+    'reports',
+    'payment-report',
+    'quotation-report',
+    'approved-quotations-report'
 ];
 
 const AdminPage = () => {
@@ -398,8 +401,23 @@ const AdminPage = () => {
                         onUnauthorized={handleUnauthorized}
                     />
                 )}
-                {activeTab === 'reports' && (
+                {(activeTab === 'reports' || activeTab === 'payment-report') && (
                     <ReportManager
+                        fixedReportType="payment_history"
+                        onNavigate={handleTabChange}
+                        onUnauthorized={handleUnauthorized}
+                    />
+                )}
+                {activeTab === 'quotation-report' && (
+                    <ReportManager
+                        fixedReportType="quotation_history"
+                        onNavigate={handleTabChange}
+                        onUnauthorized={handleUnauthorized}
+                    />
+                )}
+                {activeTab === 'approved-quotations-report' && (
+                    <ReportManager
+                        fixedReportType="approved_quotations"
                         onNavigate={handleTabChange}
                         onUnauthorized={handleUnauthorized}
                     />

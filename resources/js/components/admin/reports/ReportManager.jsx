@@ -15,9 +15,15 @@ import { exportToPdf } from './PdfExport';
  * Connects dedicated report APIs (Payment History, Quotation History, Approved Quotations)
  * to table rendering and direct Excel/PDF exports with fast date presets.
  */
-export const ReportManager = ({ onUnauthorized }) => {
+export const ReportManager = ({ fixedReportType = null, onUnauthorized }) => {
     // 1. Report Type: 'payment_history' | 'quotation_history' | 'approved_quotations'
-    const [reportType, setReportType] = useState('payment_history');
+    const [reportType, setReportType] = useState(fixedReportType || 'payment_history');
+
+    useEffect(() => {
+        if (fixedReportType) {
+            setReportType(fixedReportType);
+        }
+    }, [fixedReportType]);
 
     // 2. Filter State
     const [filters, setFilters] = useState({
@@ -397,16 +403,32 @@ export const ReportManager = ({ onUnauthorized }) => {
         }
     };
 
+    const pageTitle = fixedReportType === 'quotation_history'
+        ? 'Quotation History Report'
+        : fixedReportType === 'approved_quotations'
+        ? 'Approved Quotations Report'
+        : fixedReportType === 'payment_history'
+        ? 'Payment History Report'
+        : 'Reports & Export Center';
+
+    const pageSubtitle = fixedReportType === 'quotation_history'
+        ? 'Comprehensive report of all quotations, total invoice amounts, and client approval statuses with Excel/PDF export.'
+        : fixedReportType === 'approved_quotations'
+        ? 'Summary of all client-approved quotations, agreement preparation status, and project financials.'
+        : fixedReportType === 'payment_history'
+        ? 'Track customer payments, installment receipts, and balance dues with instant Excel & PDF export.'
+        : 'Generate comprehensive, non-paginated reports with server-side filters and instant Excel/PDF exports.';
+
     return (
-        <div className="w-full px-4 sm:px-8 py-8 space-y-8 font-poppins">
+        <div className="w-full px-4 sm:px-8 py-8 space-y-8 font-poppins max-w-7xl mx-auto">
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
-                        Reports & Export Center
+                        {pageTitle}
                     </h1>
                     <p className="text-xs sm:text-sm text-neutral-500 mt-1">
-                        Generate comprehensive, non-paginated reports with server-side filters and instant Excel/PDF exports.
+                        {pageSubtitle}
                     </p>
                 </div>
 
@@ -440,6 +462,7 @@ export const ReportManager = ({ onUnauthorized }) => {
                 <ReportFilters
                     reportType={reportType}
                     onReportTypeChange={setReportType}
+                    isFixedType={Boolean(fixedReportType)}
                     filters={filters}
                     onFilterChange={handleFilterChange}
                     onGenerate={() => generateReport()}

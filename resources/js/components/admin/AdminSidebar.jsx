@@ -12,6 +12,8 @@ import {
     BarChart3,
     CheckCircle2,
     Activity,
+    Receipt,
+    FileSpreadsheet,
     PanelLeftClose,
     PanelLeftOpen,
     Sparkles,
@@ -58,7 +60,9 @@ export const ADMIN_NAV_SECTIONS = [
     {
         title: 'REPORTS',
         items: [
-            { id: 'reports', label: 'Reports', icon: BarChart3 },
+            { id: 'payment-report', label: 'Payment Report', icon: Receipt },
+            { id: 'quotation-report', label: 'Quotation Report', icon: FileSpreadsheet },
+            { id: 'approved-quotations-report', label: 'Approved Quotations Report', icon: CheckCircle2 },
         ],
     },
 ];
