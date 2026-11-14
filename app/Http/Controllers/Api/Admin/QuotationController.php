@@ -471,6 +471,7 @@ class QuotationController extends Controller
             $startDate = $request->query('start_date');
             $endDate = $request->query('end_date');
             $statusFilter = trim((string)$request->query('status', ''));
+            $limit = (int)$request->query('limit', 0);
 
             $query = Quotation::active()->with(['agreement', 'payment.paymentHistories']);
 
@@ -498,6 +499,12 @@ class QuotationController extends Controller
 
             if (!empty($statusFilter)) {
                 $query->where('workflow_status', $statusFilter);
+            }
+
+            $totalCount = (clone $query)->count();
+
+            if ($limit > 0) {
+                $query->limit($limit);
             }
 
             $applications = $query->orderBy('id', 'desc')->get()->map(function ($q) {
@@ -622,7 +629,7 @@ class QuotationController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $applications,
-                'total' => $applications->count(),
+                'total' => $totalCount,
             ]);
         } catch (\Throwable $e) {
             return response()->json([

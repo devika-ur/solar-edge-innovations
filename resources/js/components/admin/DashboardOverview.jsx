@@ -26,7 +26,11 @@ import {
     PieChart,
     BarChart3,
     ExternalLink,
-    HelpCircle
+    HelpCircle,
+    Activity,
+    Check,
+    X,
+    User
 } from 'lucide-react';
 
 export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
@@ -34,6 +38,9 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
     const [recentProjects, setRecentProjects] = useState([]);
     const [recentInquiries, setRecentInquiries] = useState([]);
     const [recentQuotations, setRecentQuotations] = useState([]);
+    const [recentApplications, setRecentApplications] = useState([]);
+    const [totalApplicationsCount, setTotalApplicationsCount] = useState(0);
+    const [isLoadingApplications, setIsLoadingApplications] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
 
     // Interactive chart states
@@ -42,12 +49,35 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
     const [hoveredQuotationMonthIdx, setHoveredQuotationMonthIdx] = useState(null);
     const [hoveredDonutIdx, setHoveredDonutIdx] = useState(null);
     
-    // Overview table active tab: 'inquiries' | 'quotations'
-    const [tableTab, setTableTab] = useState('inquiries');
+    // Overview table active tab: 'applications' (default) | 'inquiries' | 'quotations'
+    const [tableTab, setTableTab] = useState('applications');
+
+    const loadApplications = async () => {
+        setIsLoadingApplications(true);
+        try {
+            const res = await fetch('/api/admin-quotations-tracking.php?limit=5', {
+                credentials: 'include'
+            });
+            if (res.status === 401 && onUnauthorized) {
+                onUnauthorized();
+                return;
+            }
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setRecentApplications(data.data || []);
+                setTotalApplicationsCount(data.total || (data.data ? data.data.length : 0));
+            }
+        } catch {
+            // silent failover
+        } finally {
+            setIsLoadingApplications(false);
+        }
+    };
 
     const loadStats = async (isManual = false) => {
         setIsLoading(true);
         try {
+            loadApplications();
             const res = await fetch('/api/admin-stats.php', {
                 credentials: 'include'
             });
@@ -81,6 +111,7 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
 
     useEffect(() => {
         loadStats();
+        loadApplications();
     }, []);
 
     // 1. Monthly inquiries data from server (Real data only)
@@ -555,17 +586,29 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
 
             </div>
 
-            {/* 3. OVERVIEW TABLE SECTION (Matches "Employee Overview" table from screenshot) */}
+            {/* 3. OVERVIEW TABLE SECTION */}
             <div className="bg-white rounded-2xl border border-neutral-200/80 shadow-xs overflow-hidden">
                 {/* Table Header with Tabs and View All */}
-                <div className="p-6 border-b border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-base sm:text-lg font-semibold text-neutral-900 tracking-tight">
-                            Recent Overview
+                <div className="p-5 sm:p-6 border-b border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                        <h2 className="text-base sm:text-lg font-semibold text-neutral-900 tracking-tight flex items-center gap-2">
+                            <Activity size={18} className="text-[#1A4D2E]" />
+                            <span>Recent Overview</span>
                         </h2>
 
                         {/* Filter Tabs */}
-                        <div className="inline-flex p-1 bg-neutral-100 rounded-xl text-xs font-medium">
+                        <div className="inline-flex p-1 bg-neutral-100 rounded-xl text-xs font-medium flex-wrap gap-1">
+                            <button
+                                onClick={() => setTableTab('applications')}
+                                className={`px-3 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                                    tableTab === 'applications'
+                                        ? 'bg-white text-neutral-900 shadow-2xs font-semibold'
+                                        : 'text-neutral-500 hover:text-neutral-800'
+                                }`}
+                            >
+                                <Activity size={12} className={tableTab === 'applications' ? 'text-[#1A4D2E]' : 'text-neutral-400'} />
+                                <span>Application Tracking ({totalApplicationsCount || recentApplications.length})</span>
+                            </button>
                             <button
                                 onClick={() => setTableTab('inquiries')}
                                 className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
@@ -590,17 +633,189 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
                     </div>
 
                     <button
-                        onClick={() => onNavigate(tableTab === 'inquiries' ? 'inquiries' : 'quotation-history')}
-                        className="text-xs font-medium text-[#1A4D2E] hover:underline flex items-center gap-1 cursor-pointer self-start sm:self-auto"
+                        onClick={() => {
+                            if (tableTab === 'applications') onNavigate('application-tracking');
+                            else if (tableTab === 'inquiries') onNavigate('inquiries');
+                            else onNavigate('quotation-history');
+                        }}
+                        className="text-xs font-semibold text-[#1A4D2E] hover:underline flex items-center gap-1 cursor-pointer self-start sm:self-auto bg-emerald-50/70 hover:bg-emerald-100/70 px-3 py-1.5 rounded-xl border border-emerald-200/60 transition-all"
                     >
-                        <span>View All</span>
+                        <span>
+                            {tableTab === 'applications' ? 'View All Applications' : tableTab === 'inquiries' ? 'View All Inquiries' : 'View All Quotations'}
+                        </span>
                         <ArrowUpRight size={14} />
                     </button>
                 </div>
 
                 {/* Table Content */}
                 <div className="overflow-x-auto">
-                    {tableTab === 'inquiries' ? (
+                    {tableTab === 'applications' ? (
+                        /* Application Tracking Table (Showing top 5) */
+                        <div>
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-neutral-100 text-[11px] font-bold text-neutral-400 uppercase tracking-wider bg-neutral-50/50">
+                                        <th className="py-3.5 px-4 text-center w-12 font-mono">#</th>
+                                        <th className="py-3.5 px-6">Applicant Name</th>
+                                        <th className="py-3.5 px-4">Ref & Date</th>
+                                        <th className="py-3.5 px-4">System Specs</th>
+                                        <th className="py-3.5 px-4">Current Workflow Status</th>
+                                        <th className="py-3.5 px-4">Financial Progress</th>
+                                        <th className="py-3.5 px-6 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-neutral-100 text-xs text-neutral-700">
+                                    {isLoadingApplications ? (
+                                        <tr>
+                                            <td colSpan="7" className="py-12 text-center text-neutral-400 font-normal">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <RefreshCw size={15} className="animate-spin text-[#1A4D2E]" />
+                                                    <span>Loading applications...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : recentApplications.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="7" className="py-12 text-center text-neutral-400 font-normal">
+                                                No applications tracked yet. Create a quotation to begin tracking applicant journeys.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        recentApplications.slice(0, 5).map((app, idx) => (
+                                            <tr
+                                                key={app.id}
+                                                onClick={() => onNavigate('application-tracking', { applicantId: app.id })}
+                                                className="hover:bg-emerald-50/25 transition-colors cursor-pointer group"
+                                            >
+                                                {/* Serial */}
+                                                <td className="py-4 px-4 text-center font-mono text-neutral-400 text-xs font-semibold">
+                                                    {idx + 1}
+                                                </td>
+
+                                                {/* Applicant Name */}
+                                                <td className="py-4 px-6 font-semibold text-neutral-900 group-hover:text-[#1A4D2E]">
+                                                    <div className="flex items-center gap-2.5">
+                                                        <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#1A4D2E] font-semibold flex items-center justify-center text-xs shrink-0 border border-emerald-200/50">
+                                                            {app.client_name ? app.client_name.charAt(0).toUpperCase() : 'A'}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-bold text-neutral-900 group-hover:text-[#1A4D2E] flex items-center gap-1">
+                                                                <span>{app.client_name}</span>
+                                                            </div>
+                                                            <div className="text-[11px] text-neutral-400 font-normal flex items-center gap-1">
+                                                                <Phone size={11} className="text-neutral-400 shrink-0" />
+                                                                <span>{app.client_phone}</span>
+                                                                {app.client_address && app.client_address !== '-' && (
+                                                                    <span className="truncate max-w-[150px]">· {app.client_address}</span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                {/* Ref & Date */}
+                                                <td className="py-4 px-4">
+                                                    <div className="font-mono text-xs font-bold text-neutral-900">
+                                                        {app.ref_no}
+                                                    </div>
+                                                    <div className="text-[11px] text-neutral-400 font-normal flex items-center gap-1">
+                                                        <Clock size={11} />
+                                                        <span>{app.created_at_formatted}</span>
+                                                    </div>
+                                                </td>
+
+                                                {/* System Specs */}
+                                                <td className="py-4 px-4 text-neutral-600 font-normal">
+                                                    <span className="px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
+                                                        {app.capacity || 'Solar RTS'}
+                                                    </span>
+                                                    {app.system_type && (
+                                                        <div className="text-[10px] text-neutral-400 mt-0.5 font-medium">
+                                                            {app.system_type}
+                                                        </div>
+                                                    )}
+                                                </td>
+
+                                                {/* Status Badge */}
+                                                <td className="py-4 px-4">
+                                                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border ${
+                                                        app.workflow_status === 'completed'
+                                                            ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                                            : app.workflow_status === 'agreement_created'
+                                                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                                            : app.workflow_status === 'approved'
+                                                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                                            : app.workflow_status === 'rejected'
+                                                            ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                                            : 'bg-amber-50 text-amber-700 border-amber-200'
+                                                    }`}>
+                                                        {app.workflow_status === 'completed' && <CheckCircle2 size={11} />}
+                                                        {app.workflow_status === 'agreement_created' && <FileText size={11} />}
+                                                        {app.workflow_status === 'approved' && <Check size={11} />}
+                                                        {app.workflow_status === 'rejected' && <X size={11} />}
+                                                        {app.workflow_status === 'approval_pending' && <Clock size={11} />}
+                                                        <span>{app.workflow_status_label}</span>
+                                                    </span>
+                                                </td>
+
+                                                {/* Financial Progress */}
+                                                <td className="py-4 px-4">
+                                                    <div className="font-semibold text-neutral-900 text-xs">
+                                                        ₹{String(app.total_amount).replace(/[^0-9.]/g, '') ? Number(String(app.total_amount).replace(/[^0-9.]/g, '')).toLocaleString('en-IN') : app.total_amount}
+                                                    </div>
+                                                    <div className="text-[10px] text-neutral-500 flex items-center gap-1.5 mt-0.5">
+                                                        <span className={`px-1.5 py-0.2 rounded font-bold text-[9px] ${
+                                                            app.payment_status === 'paid'
+                                                                ? 'bg-emerald-100 text-emerald-800'
+                                                                : app.payment_status === 'partial'
+                                                                ? 'bg-blue-100 text-blue-800'
+                                                                : 'bg-neutral-100 text-neutral-600'
+                                                        }`}>
+                                                            {app.payment_status === 'paid' ? 'Paid' : app.payment_status === 'partial' ? 'Partial' : 'Pending'}
+                                                        </span>
+                                                        <span>Paid: ₹{Number(app.amount_paid || 0).toLocaleString('en-IN')}</span>
+                                                    </div>
+                                                </td>
+
+                                                {/* Action */}
+                                                <td className="py-4 px-6 text-right">
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onNavigate('application-tracking', { applicantId: app.id });
+                                                        }}
+                                                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-semibold shadow-2xs transition-all cursor-pointer"
+                                                        title="Track applicant timeline journey"
+                                                    >
+                                                        <span>Track</span>
+                                                        <ChevronRight size={12} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+
+                            {/* Footer navigation button to Application Tracking */}
+                            <div className="p-4 bg-neutral-50/80 border-t border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="text-xs text-neutral-500">
+                                    Showing top <span className="font-bold text-neutral-800">{Math.min(recentApplications.length, 5)}</span> of{' '}
+                                    <span className="font-bold text-neutral-800">{totalApplicationsCount || recentApplications.length}</span> applications
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => onNavigate('application-tracking')}
+                                    className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+                                >
+                                    <Activity size={14} />
+                                    <span>View All in Application Tracking Page</span>
+                                    <ArrowUpRight size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    ) : tableTab === 'inquiries' ? (
                         /* Inquiries Table */
                         <table className="w-full text-left border-collapse">
                             <thead>
@@ -818,7 +1033,27 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
             </div>
 
             {/* Quick Navigation Footer Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+                <button
+                    onClick={() => onNavigate('application-tracking')}
+                    className="p-4 rounded-2xl bg-white border border-neutral-200/80 hover:border-[#1A4D2E] hover:bg-emerald-50/20 text-left transition-all flex items-center justify-between cursor-pointer group shadow-2xs"
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-50 text-[#1A4D2E] flex items-center justify-center">
+                            <Activity size={17} />
+                        </div>
+                        <div>
+                            <div className="text-xs font-semibold text-neutral-900 group-hover:text-[#1A4D2E]">
+                                Application Tracking
+                            </div>
+                            <div className="text-[10px] text-neutral-400 font-normal">
+                                {totalApplicationsCount ? `${totalApplicationsCount} applications tracked` : 'Track client journeys'}
+                            </div>
+                        </div>
+                    </div>
+                    <ChevronRight size={16} className="text-neutral-400 group-hover:text-[#1A4D2E]" />
+                </button>
+
                 <button
                     onClick={() => onNavigate('inquiries')}
                     className="p-4 rounded-2xl bg-white border border-neutral-200/80 hover:border-amber-400 hover:bg-amber-50/20 text-left transition-all flex items-center justify-between cursor-pointer group shadow-2xs"
@@ -852,7 +1087,7 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
                                 Quotation Builder
                             </div>
                             <div className="text-[10px] text-neutral-400 font-normal">
-                                Generate customized PDF proposal
+                                Generate customized proposal
                             </div>
                         </div>
                     </div>
