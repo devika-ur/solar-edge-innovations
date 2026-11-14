@@ -50,13 +50,14 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
     const [quotationToDelete, setQuotationToDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
+    // Approve Modal state
+    const [quotationToApprove, setQuotationToApprove] = useState(null);
+    const [isApproving, setIsApproving] = useState(false);
+
     // Reject Modal state
     const [quotationToReject, setQuotationToReject] = useState(null);
     const [rejectionReason, setRejectionReason] = useState('');
     const [isRejecting, setIsRejecting] = useState(false);
-
-    // Approving indicator
-    const [isApprovingId, setIsApprovingId] = useState(null);
 
     // PDF Preview Modal
     const [previewPdfUrl, setPreviewPdfUrl] = useState(null);
@@ -152,19 +153,21 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
         setCurrentPage(1);
     };
 
-    // Client Approval Handler
-    const handleApproveQuotation = async (quote) => {
-        setIsApprovingId(quote.id);
+    // Client Approval Handler (triggered from Approve Confirmation Modal)
+    const handleConfirmApprove = async () => {
+        if (!quotationToApprove) return;
+        setIsApproving(true);
         try {
             const res = await fetch(`/api/admin-quotations-approve.php`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ id: quote.id })
+                body: JSON.stringify({ id: quotationToApprove.id })
             });
             const data = await res.json();
             if (res.ok && data.success) {
-                toast.success(`Quotation #${quote.ref_no} marked as Approved by Client! Redirecting to Approved Quotations...`);
+                toast.success(`Quotation #${quotationToApprove.ref_no} marked as Approved by Client! Redirecting to Approved Quotations...`);
+                setQuotationToApprove(null);
                 if (onNavigate) {
                     onNavigate('approved-quotations');
                 } else {
@@ -176,7 +179,7 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
         } catch {
             toast.error('Network error approving quotation.');
         } finally {
-            setIsApprovingId(null);
+            setIsApproving(false);
         }
     };
 
@@ -638,12 +641,11 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                                                                 <div className="flex items-center gap-1.5">
                                                                     <button
                                                                         type="button"
-                                                                        disabled={isApprovingId === quote.id}
-                                                                        onClick={() => handleApproveQuotation(quote)}
+                                                                        onClick={() => setQuotationToApprove(quote)}
                                                                         className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold transition-all cursor-pointer border border-emerald-200/80 shadow-2xs"
                                                                         title="Mark approved by client"
                                                                     >
-                                                                        <CheckCircle2 size={12} className={isApprovingId === quote.id ? 'animate-spin' : ''} />
+                                                                        <CheckCircle2 size={12} />
                                                                         <span>Approve</span>
                                                                     </button>
 
@@ -744,11 +746,10 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                                                     <div className="flex items-center gap-2">
                                                         <button
                                                             type="button"
-                                                            disabled={isApprovingId === quote.id}
-                                                            onClick={() => handleApproveQuotation(quote)}
-                                                            className="flex-1 py-1.5 px-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center justify-center gap-1 shadow-2xs"
+                                                            onClick={() => setQuotationToApprove(quote)}
+                                                            className="flex-1 py-1.5 px-2.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold text-xs flex items-center justify-center gap-1 shadow-2xs cursor-pointer hover:bg-emerald-100"
                                                         >
-                                                            <CheckCircle2 size={12} className={isApprovingId === quote.id ? 'animate-spin' : ''} />
+                                                            <CheckCircle2 size={12} />
                                                             <span>Approve</span>
                                                         </button>
                                                         <button
@@ -801,6 +802,74 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                             </>
                         );
                     })()}
+                </div>
+            )}
+
+            {/* Approve Quotation Confirmation Modal */}
+            {quotationToApprove && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/60 backdrop-blur-xs animate-in fade-in duration-150">
+                    <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-neutral-100 space-y-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#1A4D2E] flex items-center justify-center">
+                                    <CheckCircle2 size={22} />
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-bold text-neutral-900">
+                                        Mark as Approved by Client
+                                    </h3>
+                                    <p className="text-xs text-neutral-500">
+                                        Quotation #{quotationToApprove.ref_no} ({quotationToApprove.client_name})
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setQuotationToApprove(null)}
+                                className="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+
+                        <div className="p-3.5 bg-emerald-50/50 rounded-2xl border border-emerald-100/80 space-y-2 text-xs">
+                            <div className="flex items-center justify-between">
+                                <span className="text-neutral-600">Client Name:</span>
+                                <span className="font-bold text-neutral-900">{quotationToApprove.client_name}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-neutral-600">Plant Capacity:</span>
+                                <span className="font-semibold text-neutral-800">{quotationToApprove.capacity} ({quotationToApprove.system_type || 'On-Grid'})</span>
+                            </div>
+                            <div className="flex items-center justify-between border-t border-emerald-100/60 pt-2">
+                                <span className="text-neutral-600">Total Project Value:</span>
+                                <span className="font-bold text-[#1A4D2E] text-sm">₹{quotationToApprove.total_amount}</span>
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-neutral-500 leading-relaxed">
+                            Are you sure you want to approve this quotation? Once approved, it will automatically move to the <strong>Approved Quotations</strong> page and become eligible for generating an MNRE Model RTS agreement.
+                        </p>
+
+                        <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-neutral-100">
+                            <button
+                                type="button"
+                                onClick={() => setQuotationToApprove(null)}
+                                className="px-4 py-2 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                disabled={isApproving}
+                                onClick={handleConfirmApprove}
+                                className="px-4 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
+                            >
+                                {isApproving ? <RefreshCw size={13} className="animate-spin" /> : <Check size={13} />}
+                                <span>Confirm Approval</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 

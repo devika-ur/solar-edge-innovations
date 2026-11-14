@@ -144,6 +144,7 @@ export const ApplicationTrackingManager = ({ onNavigate, onUnauthorized, initial
     };
 
     const [isApproving, setIsApproving] = useState(false);
+    const [showApproveConfirmModal, setShowApproveConfirmModal] = useState(false);
 
     const handleApproveApplicant = async (app) => {
         if (!app) return;
@@ -419,7 +420,7 @@ export const ApplicationTrackingManager = ({ onNavigate, onUnauthorized, initial
                                                             <button
                                                                 type="button"
                                                                 disabled={isApproving}
-                                                                onClick={() => handleApproveApplicant(selectedApplicant)}
+                                                                onClick={() => setShowApproveConfirmModal(true)}
                                                                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all cursor-pointer shadow-xs disabled:opacity-60"
                                                                 title="Approve quotation by client and move to Approved Quotations"
                                                             >
@@ -489,6 +490,83 @@ export const ApplicationTrackingManager = ({ onNavigate, onUnauthorized, initial
                         })}
                     </div>
                 </div>
+
+                {/* Approve Confirmation Modal */}
+                {showApproveConfirmModal && selectedApplicant && (
+                    <div 
+                        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/60 backdrop-blur-xs animate-in fade-in duration-150"
+                        onClick={() => setShowApproveConfirmModal(false)}
+                    >
+                        <div 
+                            className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-neutral-100 space-y-4 animate-in zoom-in-95 duration-150"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-10 h-10 rounded-xl bg-emerald-50 text-[#1A4D2E] flex items-center justify-center">
+                                        <CheckCircle2 size={22} />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-neutral-900">
+                                            Mark as Approved by Client
+                                        </h3>
+                                        <p className="text-xs text-neutral-500">
+                                            Quotation #{selectedApplicant.ref_no} ({selectedApplicant.client_name})
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowApproveConfirmModal(false)}
+                                    className="p-1 rounded-lg text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            <div className="p-3.5 bg-emerald-50/50 rounded-2xl border border-emerald-100/80 space-y-2 text-xs">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-neutral-600">Client Name:</span>
+                                    <span className="font-bold text-neutral-900">{selectedApplicant.client_name}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-neutral-600">Plant Capacity:</span>
+                                    <span className="font-semibold text-neutral-800">{selectedApplicant.capacity} ({selectedApplicant.system_type || 'On-Grid'})</span>
+                                </div>
+                                <div className="flex items-center justify-between border-t border-emerald-100/60 pt-2">
+                                    <span className="text-neutral-600">Total Project Value:</span>
+                                    <span className="font-bold text-[#1A4D2E] text-sm">₹{selectedApplicant.total_amount}</span>
+                                </div>
+                            </div>
+
+                            <p className="text-xs text-neutral-500 leading-relaxed">
+                                Are you sure you want to approve this quotation? Once approved, it will advance this applicant to Stage 2 (Client Approved) and redirect to the <strong>Approved Quotations</strong> page to generate an agreement.
+                            </p>
+
+                            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-neutral-100">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowApproveConfirmModal(false)}
+                                    className="px-4 py-2 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-700 hover:bg-neutral-50 cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    disabled={isApproving}
+                                    onClick={() => {
+                                        setShowApproveConfirmModal(false);
+                                        handleApproveApplicant(selectedApplicant);
+                                    }}
+                                    className="px-4 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs font-bold shadow-xs cursor-pointer flex items-center gap-1.5 disabled:opacity-60"
+                                >
+                                    {isApproving ? <Loader2 size={13} className="animate-spin" /> : <Check size={13} />}
+                                    <span>Confirm Approval</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Embedded PDF Modal */}
                 {previewPdfUrl && (
