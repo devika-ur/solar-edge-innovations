@@ -14,11 +14,13 @@ import {
     Activity,
     Receipt,
     FileSpreadsheet,
+    ShieldCheck,
     PanelLeftClose,
     PanelLeftOpen,
     Sparkles,
     X,
     LogOut,
+    KeyRound,
     User,
     Globe,
     ChevronRight
@@ -65,6 +67,12 @@ export const ADMIN_NAV_SECTIONS = [
             { id: 'approved-quotations-report', label: 'Approved Quotations Report', icon: CheckCircle2 },
         ],
     },
+    {
+        title: 'SECURITY',
+        items: [
+            { id: 'activity-log', label: 'Activity Log', icon: ShieldCheck },
+        ],
+    },
 ];
 
 // Flat list preserving the exact requested order
@@ -78,8 +86,18 @@ export const AdminSidebar = ({
     setIsCollapsed,
     isMobileOpen,
     setIsMobileOpen,
-    onLogout
+    onLogout,
+    onChangePassword,
+    userRole
 }) => {
+    // Only Super Admin can see the SECURITY (Activity Log) section
+    const visibleSections = ADMIN_NAV_SECTIONS.filter((section) => {
+        if (section.title === 'SECURITY') {
+            return userRole === 'super_admin';
+        }
+        return true;
+    });
+
     const handleItemClick = (id) => {
         onTabChange(id);
         if (isMobileOpen) {
@@ -94,7 +112,7 @@ export const AdminSidebar = ({
                 isRail ? 'flex flex-col items-center space-y-1' : 'space-y-1'
             }`}
         >
-            {ADMIN_NAV_SECTIONS.map((section, sIdx) => (
+            {visibleSections.map((section, sIdx) => (
                 <div key={section.title || sIdx} className="w-full">
                     {/* Section Header */}
                     {isRail ? (
@@ -353,6 +371,20 @@ export const AdminSidebar = ({
                                 <Globe size={15} />
                                 <span>View Website</span>
                             </a>
+
+                            {onChangePassword && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsMobileOpen(false);
+                                        onChangePassword();
+                                    }}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-neutral-700 hover:text-[#1A4D2E] hover:bg-emerald-50 bg-white border border-neutral-200 rounded-xl cursor-pointer"
+                                >
+                                    <KeyRound size={15} className="text-[#1A4D2E]" />
+                                    <span>Change Password</span>
+                                </button>
+                            )}
 
                             <button
                                 type="button"

@@ -253,7 +253,7 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
     };
 
     // Delete quotation
-    const handleConfirmDelete = async () => {
+    const handleConfirmDelete = async (password = '') => {
         if (!quotationToDelete) return;
         setIsDeleting(true);
         try {
@@ -263,7 +263,8 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                 credentials: 'include',
                 body: JSON.stringify({
                     action: 'delete',
-                    id: quotationToDelete.id
+                    id: quotationToDelete.id,
+                    password: password
                 })
             });
 

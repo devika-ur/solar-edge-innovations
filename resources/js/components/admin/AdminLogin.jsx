@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { assets } from '../../assets/assets';
-import { Lock, User, ArrowRight, AlertCircle, Sparkles } from 'lucide-react';
+import { Lock, User, ArrowRight, AlertCircle, Sparkles, Mail, CheckCircle2, KeyRound, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const AdminLogin = ({ onLoginSuccess }) => {
@@ -8,6 +8,52 @@ export const AdminLogin = ({ onLoginSuccess }) => {
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+
+    // Forgot / Change Password Mode
+    const [isForgotMode, setIsForgotMode] = useState(false);
+    const [forgotInput, setForgotInput] = useState('');
+    const [isSendingForgot, setIsSendingForgot] = useState(false);
+    const [forgotSuccess, setForgotSuccess] = useState('');
+
+    const handleForgotPassword = async (e) => {
+        e.preventDefault();
+        setErrorMessage('');
+        setForgotSuccess('');
+
+        if (!forgotInput.trim()) {
+            setErrorMessage('Please enter your username or email address.');
+            return;
+        }
+
+        setIsSendingForgot(true);
+        const sendToast = toast.loading('Sending password reset email...');
+
+        try {
+            const res = await fetch('/api/admin/password/email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: forgotInput.trim()
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                toast.success('Reset link sent!', { id: sendToast });
+                setForgotSuccess(data.message || 'A password reset link has been sent to your email.');
+            } else {
+                const msg = data.message || 'Failed to send password reset email.';
+                setErrorMessage(msg);
+                toast.error(msg, { id: sendToast });
+            }
+        } catch {
+            const msg = 'Network error. Please check your connection and try again.';
+            setErrorMessage(msg);
+            toast.error(msg, { id: sendToast });
+        } finally {
+            setIsSendingForgot(false);
+        }
+    };
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -48,7 +94,7 @@ export const AdminLogin = ({ onLoginSuccess }) => {
             // Network failure only — API server unreachable (local dev offline mode)
             if (username.trim() === 'admin' && (password === 'SolarEdge@2026!' || password === 'batterymaman@varkala$#!')) {
                 sessionStorage.setItem('solar_admin_auth', 'true');
-                sessionStorage.setItem('solar_admin_user', JSON.stringify({ id: 1, username: 'admin', email: 'admin@solaredgeinnovation.in' }));
+                sessionStorage.setItem('solar_admin_user', JSON.stringify({ id: 1, username: 'admin', email: 'solaredgeinnovations25@gmail.com', role: 'staff' }));
                 toast.success('Logged in (offline dev mode).', { id: loginToast });
                 onLoginSuccess();
             } else {
@@ -95,61 +141,148 @@ export const AdminLogin = ({ onLoginSuccess }) => {
                     </div>
                 )}
 
-                {/* Login Form */}
-                <form onSubmit={handleLogin} className="space-y-5">
-                    <div>
-                        <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">
-                            Username
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
-                                <User className="w-4 h-4" />
-                            </div>
-                            <input
-                                type="text"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                placeholder="Enter username"
-                                required
-                                className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-2xl text-sm font-medium text-neutral-900 focus:bg-white focus:border-green-800 focus:ring-2 focus:ring-green-800/20 outline-none transition-all"
-                            />
+                {/* Success Banner (for Reset Link) */}
+                {forgotSuccess && (
+                    <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-start gap-3 text-emerald-800 text-xs font-medium">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                        <div className="space-y-1">
+                            <span className="font-bold block">Reset Link Sent!</span>
+                            <span>{forgotSuccess}</span>
+                            <span className="block text-[11px] text-emerald-700 mt-1">
+                                Check your email inbox (and spam folder) and click the link to reset your password.
+                            </span>
                         </div>
                     </div>
+                )}
 
-                    <div>
-                        <label className="block text-xs font-medium text-neutral-700 uppercase tracking-wider mb-2">
-                            Password
-                        </label>
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
-                                <Lock className="w-4 h-4" />
+                {!isForgotMode ? (
+                    /* Standard Login Form */
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">
+                                Username
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
+                                    <User className="w-4 h-4" />
+                                </div>
+                                <input
+                                    type="text"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    placeholder="Enter username"
+                                    required
+                                    className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-2xl text-sm font-medium text-neutral-900 focus:bg-white focus:border-green-800 focus:ring-2 focus:ring-green-800/20 outline-none transition-all"
+                                />
                             </div>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Enter password"
-                                required
-                                className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-2xl text-sm font-normal text-neutral-900 focus:bg-white focus:border-green-800 focus:ring-2 focus:ring-green-800/20 outline-none transition-all"
-                            />
                         </div>
-                    </div>
 
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full py-3.5 px-6 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl font-medium text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
-                    >
-                        {isLoading ? (
-                            <span>Logging in...</span>
-                        ) : (
-                            <>
-                                <span>Login to Editor</span>
-                                <ArrowRight className="w-4 h-4" />
-                            </>
-                        )}
-                    </button>
-                </form>
+                        <div>
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="block text-xs font-medium text-neutral-700 uppercase tracking-wider">
+                                    Password
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setIsForgotMode(true);
+                                        setForgotInput(username);
+                                        setErrorMessage('');
+                                        setForgotSuccess('');
+                                    }}
+                                    className="text-xs text-neutral-500 hover:text-[#1A4D2E] font-semibold transition cursor-pointer"
+                                >
+                                    Forgot password?
+                                </button>
+                            </div>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
+                                    <Lock className="w-4 h-4" />
+                                </div>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Enter password"
+                                    required
+                                    className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-2xl text-sm font-normal text-neutral-900 focus:bg-white focus:border-green-800 focus:ring-2 focus:ring-green-800/20 outline-none transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full py-3.5 px-6 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl font-medium text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70 mt-2"
+                        >
+                            {isLoading ? (
+                                <span>Logging in...</span>
+                            ) : (
+                                <>
+                                    <span>Login to Editor</span>
+                                    <ArrowRight className="w-4 h-4" />
+                                </>
+                            )}
+                        </button>
+                    </form>
+                ) : (
+                    /* Forgot Password Mode: Send Reset Link */
+                    <form onSubmit={handleForgotPassword} className="space-y-4">
+                        <div className="p-3 bg-neutral-50 rounded-2xl border border-neutral-200 text-xs text-neutral-600 leading-relaxed">
+                            Enter your admin username or email address and we will send a password reset link to your registered inbox.
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-neutral-700 uppercase tracking-wider mb-2">
+                                Username or Email
+                            </label>
+                            <div className="relative">
+                                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-neutral-400">
+                                    <User className="w-4 h-4" />
+                                </div>
+                                <input
+                                    type="text"
+                                    value={forgotInput}
+                                    onChange={(e) => setForgotInput(e.target.value)}
+                                    placeholder="e.g. admin or jose-the-super-admin"
+                                    required
+                                    className="w-full pl-10 pr-4 py-3 bg-neutral-50 border border-neutral-200 rounded-2xl text-sm font-medium text-neutral-900 focus:bg-white focus:border-green-800 focus:ring-2 focus:ring-green-800/20 outline-none transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            disabled={isSendingForgot}
+                            className="w-full py-3.5 px-6 bg-[#1A4D2E] hover:bg-[#143c24] text-white rounded-xl font-medium text-sm transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
+                        >
+                            {isSendingForgot ? (
+                                <>
+                                    <RefreshCw className="w-4 h-4 animate-spin" />
+                                    <span>Sending Reset Link...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Mail className="w-4 h-4" />
+                                    <span>Send Reset Link</span>
+                                </>
+                            )}
+                        </button>
+
+                        <div className="text-center pt-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsForgotMode(false);
+                                    setErrorMessage('');
+                                }}
+                                className="text-xs text-neutral-500 hover:text-neutral-800 font-semibold transition cursor-pointer"
+                            >
+                                Back to Login
+                            </button>
+                        </div>
+                    </form>
+                )}
             </div>
         </div>
     );

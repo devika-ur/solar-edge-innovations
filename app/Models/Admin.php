@@ -23,8 +23,26 @@ class Admin extends Authenticatable
         'username',
         'email',
         'password',
+        'role',
         'status',
+        'activity_log_password',
     ];
+
+    /**
+     * Check if admin is a Super Admin.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === 'super_admin';
+    }
+
+    /**
+     * Check if admin is a Staff Admin.
+     */
+    public function isStaff(): bool
+    {
+        return $this->role !== 'super_admin';
+    }
 
     /**
      * The attributes that should be hidden for serialization.

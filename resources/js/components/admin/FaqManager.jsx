@@ -180,7 +180,7 @@ export const FaqManager = ({ onUnauthorized }) => {
         }
     };
 
-    const handleDelete = async () => {
+    const handleDelete = async (password = '') => {
         if (!faqToDelete) return;
         setIsDeleting(true);
         const delToast = toast.loading('Deleting FAQ...');
@@ -194,7 +194,8 @@ export const FaqManager = ({ onUnauthorized }) => {
                 },
                 body: JSON.stringify({
                     action: 'delete',
-                    id: faqToDelete.id
+                    id: faqToDelete.id,
+                    password: password
                 })
             });
 

@@ -213,7 +213,7 @@ export const InquiryManager = ({ onUnauthorized }) => {
     };
 
     // Delete Inquiry
-    const confirmDeleteInquiry = async () => {
+    const confirmDeleteInquiry = async (password = '') => {
         if (!inquiryToDelete) return;
         setIsDeleting(true);
         const toastId = toast.loading('Deleting inquiry record...');
@@ -227,7 +227,8 @@ export const InquiryManager = ({ onUnauthorized }) => {
                 },
                 body: JSON.stringify({
                     action: 'delete',
-                    id: inquiryToDelete.id
+                    id: inquiryToDelete.id,
+                    password: password
                 })
             });
 

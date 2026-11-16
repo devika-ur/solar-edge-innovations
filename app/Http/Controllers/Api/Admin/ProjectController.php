@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProjectRequest;
 use App\Models\Project;
 use App\Models\ProjectImage;
+use App\Services\ActivityLogger;
 use App\Services\ImageUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -116,14 +117,31 @@ class ProjectController extends Controller
 
             // 3. Delete Entire Project
             if ($action === 'delete_project') {
+                $password = (string)$request->input('password', '');
+                if (!ActivityLogController::verifyAdminPassword($password)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Admin password verification failed. Please enter the correct admin password to delete.',
+                    ], 403);
+                }
+
                 $projectId = (int)$request->input('project_id');
                 $project = Project::find($projectId);
 
                 if ($project) {
+                    $snapshot = [
+                        'id' => $project->id,
+                        'title' => $project->title,
+                        'category' => $project->category,
+                        'location' => $project->location,
+                        'capacity' => $project->capacity,
+                    ];
                     $project->update(['status' => 'deleted']);
                     $project->images()->update(['status' => 'deleted']);
                     $project->images()->delete();
                     $project->delete();
+
+                    ActivityLogger::deleted('Project', "Project: {$project->title}", (string)$project->id, "Deleted project and associated gallery photos.", $snapshot);
 
                     return response()->json([
                         'success' => true,

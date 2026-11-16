@@ -48,6 +48,7 @@ class EnsureAdminAuthenticated
                         $request->session()->put('admin_id', (int)$admin->id);
                         $request->session()->put('admin_username', $admin->username);
                         $request->session()->put('admin_email', $admin->email);
+                        $request->session()->put('admin_role', $admin->role ?? 'staff');
                         $request->merge(['current_admin' => $admin]);
 
                         return $next($request);
@@ -65,6 +66,7 @@ class EnsureAdminAuthenticated
                 })->first();
 
             if ($admin) {
+                $request->session()->put('admin_role', $admin->role ?? 'staff');
                 $request->merge(['current_admin' => $admin]);
                 return $next($request);
             }
@@ -83,6 +85,7 @@ class EnsureAdminAuthenticated
                 $request->session()->put('admin_id', (int)$tokenRecord->admin->id);
                 $request->session()->put('admin_username', $tokenRecord->admin->username);
                 $request->session()->put('admin_email', $tokenRecord->admin->email);
+                $request->session()->put('admin_role', $tokenRecord->admin->role ?? 'staff');
                 $request->merge(['current_admin' => $tokenRecord->admin]);
                 return $next($request);
             }

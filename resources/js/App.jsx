@@ -13,6 +13,7 @@ import Lenis from 'lenis';
 import PrivacyPolicy from './pages/LegalPrivacy';
 import TermsOfService from './pages/TermsOfService';
 import AdminPage from './pages/AdminPage';
+import { AdminResetPasswordPage } from './pages/AdminResetPasswordPage';
 import Contact from './pages/Contact';
 
 const ScrollToTop = () => {
@@ -115,6 +116,7 @@ const AppContent = () => {
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/terms" element={<TermsOfService />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/admin/:tab" element={<AdminPage />} />
             </Routes>

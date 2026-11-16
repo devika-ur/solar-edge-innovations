@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PaymentHistory;
 use App\Models\Quotation;
 use App\Models\QuotationPayment;
+use App\Services\ActivityLogger;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -280,6 +281,13 @@ class PaymentController extends Controller
                     $quotation->completed_at = null;
                     $quotation->save();
                 }
+
+                ActivityLogger::added(
+                    'Payment',
+                    "Payment of ₹" . number_format($paymentAmount, 2) . " for #{$master->ref_no}",
+                    (string)$history->id,
+                    "Recorded payment of ₹" . number_format($paymentAmount, 2) . " for #{$master->ref_no} ({$master->client_name}) via {$paymentMethod}."
+                );
 
                 return [
                     'master' => $master,

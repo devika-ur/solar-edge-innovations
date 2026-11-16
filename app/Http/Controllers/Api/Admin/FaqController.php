@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\FaqRequest;
 use App\Models\Faq;
+use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -110,10 +111,26 @@ class FaqController extends Controller
             }
 
             if ($action === 'delete') {
+                $password = (string)$request->input('password', '');
+                if (!ActivityLogController::verifyAdminPassword($password)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Admin password verification failed. Please enter the correct admin password to delete.',
+                    ], 403);
+                }
+
                 $id = (int)$request->input('id');
                 $faq = Faq::findOrFail($id);
+                $snapshot = [
+                    'id' => $faq->id,
+                    'question' => $faq->question,
+                    'answer' => $faq->answer,
+                    'category' => $faq->category,
+                ];
                 $faq->update(['status' => 'deleted']);
                 $faq->delete();
+
+                ActivityLogger::deleted('FAQ', "FAQ: {$faq->question}", (string)$faq->id, "Deleted FAQ item.", $snapshot);
 
                 return response()->json([
                     'success' => true,

@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\ActivityLogController as AdminActivityLogController;
 use App\Http\Controllers\Api\Admin\AgreementController as AdminAgreementController;
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Api\Admin\PasswordResetController as AdminPasswordResetController;
 use App\Http\Controllers\Api\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Api\Admin\InquiryController as AdminInquiryController;
 use App\Http\Controllers\Api\Admin\PaymentController as AdminPaymentController;
@@ -53,6 +55,14 @@ Route::get('/admin-verify.php', [AdminAuthController::class, 'verify']);
 
 Route::match(['get', 'post'], '/admin/logout', [AdminAuthController::class, 'logout']);
 Route::match(['get', 'post'], '/admin-logout.php', [AdminAuthController::class, 'logout']);
+
+// Password Reset via Email
+Route::post('/admin/password/email', [AdminPasswordResetController::class, 'sendResetLink']);
+Route::post('/admin-password-forgot.php', [AdminPasswordResetController::class, 'sendResetLink']);
+Route::post('/admin/password/verify-token', [AdminPasswordResetController::class, 'verifyToken']);
+Route::post('/admin-password-verify-token.php', [AdminPasswordResetController::class, 'verifyToken']);
+Route::post('/admin/password/reset', [AdminPasswordResetController::class, 'resetPassword']);
+Route::post('/admin-password-reset.php', [AdminPasswordResetController::class, 'resetPassword']);
 
 /*
 |--------------------------------------------------------------------------
@@ -147,6 +157,18 @@ Route::middleware('admin.session')->group(function () {
     Route::get('/admin-tokens.php', [AdminTokenController::class, 'index']);
     Route::post('/admin/tokens', [AdminTokenController::class, 'handle']);
     Route::post('/admin-tokens.php', [AdminTokenController::class, 'handle']);
+
+    // Activity Log & Audit (Strict Super Admin Only)
+    Route::middleware(['super_admin'])->group(function () {
+        Route::post('/admin/activity-log/verify-password', [AdminActivityLogController::class, 'verifyPassword']);
+        Route::post('/admin-activity-log-verify-password.php', [AdminActivityLogController::class, 'verifyPassword']);
+        Route::post('/admin/activity-log/clear', [AdminActivityLogController::class, 'clear']);
+        Route::post('/admin-activity-log-clear.php', [AdminActivityLogController::class, 'clear']);
+        Route::post('/admin/activity-log/change-password', [AdminActivityLogController::class, 'changePassword']);
+        Route::post('/admin-activity-log-change-password.php', [AdminActivityLogController::class, 'changePassword']);
+        Route::get('/admin/activity-log', [AdminActivityLogController::class, 'index']);
+        Route::get('/admin-activity-log.php', [AdminActivityLogController::class, 'index']);
+    });
 
     // Admin Setup
     Route::get('/admin/setup', [SetupController::class, 'check']);

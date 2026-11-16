@@ -140,7 +140,7 @@ export const ApprovedQuotationsManager = ({ onNavigate, onUnauthorized }) => {
         setCurrentPage(1);
     };
 
-    const handleConfirmDelete = async () => {
+    const handleConfirmDelete = async (password = '') => {
         if (!quotationToDelete) return;
         setIsDeleting(true);
         try {
@@ -150,7 +150,8 @@ export const ApprovedQuotationsManager = ({ onNavigate, onUnauthorized }) => {
                 credentials: 'include',
                 body: JSON.stringify({
                     id: quotationToDelete.id,
-                    action: 'delete'
+                    action: 'delete',
+                    password: password
                 })
             });
             const data = await res.json();

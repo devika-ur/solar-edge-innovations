@@ -37,6 +37,7 @@ class JwtAuthService
         $adminId = $admin instanceof Admin ? (int)$admin->id : (int)$admin;
         $username = $admin instanceof Admin ? $admin->username : 'admin';
         $email = $admin instanceof Admin ? $admin->email : 'admin@solaredgeinnovation.in';
+        $role = $admin instanceof Admin ? ($admin->role ?? 'staff') : 'staff';
 
         $header = [
             'typ' => 'JWT',
@@ -51,7 +52,7 @@ class JwtAuthService
             'sub' => $adminId,
             'username' => $username,
             'email' => $email,
-            'role' => 'admin',
+            'role' => $role,
             'iat' => $now,
             'exp' => $exp,
             'jti' => bin2hex(random_bytes(16)),

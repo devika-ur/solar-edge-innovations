@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Agreement;
 use App\Models\Quotation;
 use App\Models\QuotationPayment;
+use App\Services\ActivityLogger;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -101,6 +102,13 @@ class AgreementController extends Controller
                 $quotation->agreement_created_at = Carbon::now();
             }
             $quotation->save();
+
+            ActivityLogger::added(
+                'Agreement',
+                "Agreement for #{$quotation->ref_no} ({$consumerName})",
+                (string)$agreement->id,
+                "Saved executed agreement for quotation #{$quotation->ref_no} ({$consumerName}) and moved status to 'Agreement Created'."
+            );
 
             // Sync master payment tracking record so it appears on the Payments page
             try {

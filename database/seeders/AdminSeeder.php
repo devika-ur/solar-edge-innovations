@@ -14,7 +14,7 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         $username = env('ADMIN_DEFAULT_USER', 'admin');
-        $email    = env('ADMIN_DEFAULT_EMAIL', 'admin@solaredgeinnovation.in');
+        $email    = env('ADMIN_DEFAULT_EMAIL', 'solaredgeinnovations25@gmail.com');
         $password = env('ADMIN_DEFAULT_PASSWORD', 'SolarEdge@2026!');
 
         Admin::updateOrCreate(
@@ -22,6 +22,7 @@ class AdminSeeder extends Seeder
             [
                 'email'    => $email,
                 'password' => Hash::make($password),
+                'role'     => 'staff',
                 'status'   => 'active',
             ]
         );

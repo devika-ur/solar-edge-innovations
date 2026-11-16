@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { AlertTriangle, Trash2, X, RefreshCw } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { AlertTriangle, Trash2, X, RefreshCw, Lock, Eye, EyeOff } from 'lucide-react';
 
 export const ConfirmDeleteModal = ({
     isOpen,
@@ -8,11 +8,24 @@ export const ConfirmDeleteModal = ({
     title = "Delete Item Confirmation",
     itemName = "",
     itemType = "item",
-    message = "Are you sure you want to permanently delete this item? This action will remove it from your website and cannot be undone.",
+    message = "Are you sure you want to permanently delete this item? This action will remove it and cannot be undone.",
     isDeleting = false,
     confirmText = "Yes, Permanently Delete",
     cancelText = "Cancel, Keep It"
 }) => {
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+
+    // Reset fields on open/close
+    useEffect(() => {
+        if (isOpen) {
+            setPassword('');
+            setShowPassword(false);
+            setError('');
+        }
+    }, [isOpen]);
+
     // Close on Escape key
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -24,6 +37,16 @@ export const ConfirmDeleteModal = ({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, isDeleting, onClose]);
 
+    const handleConfirmSubmit = (e) => {
+        if (e) e.preventDefault();
+        if (!password.trim()) {
+            setError('Please enter your admin password to confirm deletion.');
+            return;
+        }
+        setError('');
+        onConfirm(password);
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -34,7 +57,7 @@ export const ConfirmDeleteModal = ({
             }}
         >
             <div 
-                className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-neutral-100 space-y-5 animate-in zoom-in-95 duration-200 font-poppins"
+                className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-neutral-100 space-y-4 animate-in zoom-in-95 duration-200 font-poppins"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header Icon & Close Button */}
@@ -62,7 +85,7 @@ export const ConfirmDeleteModal = ({
                     </p>
 
                     {itemName && (
-                        <div className="mt-3.5 p-3.5 bg-neutral-50 rounded-2xl border border-neutral-200/80 flex items-start gap-2.5">
+                        <div className="mt-3 p-3 bg-neutral-50 rounded-2xl border border-neutral-200/80 flex items-start gap-2.5">
                             <AlertTriangle size={15} className="text-amber-600 shrink-0 mt-0.5" />
                             <div className="min-w-0 flex-1">
                                 <span className="text-[10px] uppercase tracking-wider font-semibold text-neutral-500 block mb-0.5 font-poppins">
@@ -73,6 +96,63 @@ export const ConfirmDeleteModal = ({
                                 </p>
                             </div>
                         </div>
+                    )}
+                </div>
+
+                {/* Password Verification Field */}
+                <div className="space-y-1.5 pt-1">
+                    <label className="text-[11px] font-bold text-neutral-700 flex items-center justify-between">
+                        <span className="flex items-center gap-1">
+                            <Lock size={12} className="text-rose-600" />
+                            Admin Password Required
+                        </span>
+                        <span className="text-[10px] text-neutral-400">Security Check</span>
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="text"
+                            name="confirm_delete_pin"
+                            id="confirm_delete_pin"
+                            autoComplete="off"
+                            autoCorrect="off"
+                            autoCapitalize="off"
+                            spellCheck="false"
+                            data-lpignore="true"
+                            data-1p-ignore="true"
+                            data-bwignore="true"
+                            data-form-type="other"
+                            style={{
+                                WebkitTextSecurity: showPassword ? "none" : "disc"
+                            }}
+                            value={password}
+                            onChange={(e) => {
+                                setPassword(e.target.value);
+                                if (error) setError('');
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleConfirmSubmit();
+                                }
+                            }}
+                            placeholder="Enter admin password to delete..."
+                            disabled={isDeleting}
+                            className={`w-full px-3 py-2 bg-neutral-50 hover:bg-white focus:bg-white border rounded-xl text-xs font-medium text-neutral-800 outline-none transition-all pr-8 ${
+                                error ? 'border-rose-500 focus:border-rose-600' : 'border-neutral-300 focus:border-[#1A4D2E]'
+                            }`}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                        >
+                            {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+                    </div>
+                    {error && (
+                        <p className="text-[11px] font-medium text-rose-600 mt-1">
+                            {error}
+                        </p>
                     )}
                 </div>
 
@@ -88,9 +168,9 @@ export const ConfirmDeleteModal = ({
                     </button>
                     <button
                         type="button"
-                        onClick={onConfirm}
+                        onClick={handleConfirmSubmit}
                         disabled={isDeleting}
-                        className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-[#1A4D2E] hover:bg-[#143c24] text-white text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                        className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs sm:text-sm font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
                     >
                         {isDeleting ? (
                             <>
@@ -109,3 +189,5 @@ export const ConfirmDeleteModal = ({
         </div>
     );
 };
+
+export default ConfirmDeleteModal;

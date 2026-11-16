@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AdminLoginRequest;
 use App\Models\Admin;
+use App\Services\ActivityLogger;
 use App\Services\JwtAuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -27,6 +30,16 @@ class AuthController extends Controller
             ], 400);
         }
 
+        // Rate limit by username/email and client IP (5 attempts per 5 minutes)
+        $throttleKey = 'login:' . Str::lower(trim($input)) . '|' . $request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return response()->json([
+                'success' => false,
+                'message' => "Too many login attempts. Please try again in {$seconds} seconds.",
+            ], 429);
+        }
+
         $admin = Admin::where(function ($q) use ($input) {
             $q->where('username', $input)->orWhere('email', $input);
         })->where(function ($q) {
@@ -39,6 +52,7 @@ class AuthController extends Controller
                 'username' => 'admin',
                 'email' => 'admin@solaredgeinnovation.in',
                 'password' => Hash::make($password),
+                'role' => 'staff',
                 'status' => 'active',
             ]);
             $isValid = true;
@@ -47,26 +61,41 @@ class AuthController extends Controller
         $isValid = $isValid ?? false;
 
         if ($admin && !$isValid) {
-            if (Hash::check($password, $admin->password)) {
-                $isValid = true;
-            } elseif ($password === 'SolarEdge@2026!' || $password === 'batterymaman@varkala$#!') {
-                $isValid = true;
-                $admin->update(['password' => Hash::make($password)]);
+            if ($admin->role === 'super_admin') {
+                // Super Admin MUST strictly match its own password — never allow Staff Admin password
+                $isValid = Hash::check($password, $admin->password);
+            } else {
+                // Staff Admin
+                if (Hash::check($password, $admin->password)) {
+                    $isValid = true;
+                } elseif (($admin->username === 'admin' || $admin->email === 'admin@solaredgeinnovation.in') && ($password === 'SolarEdge@2026!' || $password === 'batterymaman@varkala$#!')) {
+                    $isValid = true;
+                    $admin->update(['password' => Hash::make($password)]);
+                }
             }
         }
 
         if ($admin && $isValid) {
+            RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
 
             $request->session()->put('admin_id', (int)$admin->id);
             $request->session()->put('admin_username', $admin->username);
             $request->session()->put('admin_email', $admin->email);
+            $request->session()->put('admin_role', $admin->role ?? 'staff');
             $request->session()->put('login_time', time());
 
             // Generate JWT and store in secure HttpOnly cookie
             $jwtService = app(JwtAuthService::class);
             $jwtToken = $jwtService->generateToken($admin, 14);
             $cookie = $jwtService->makeCookie($jwtToken, 14);
+
+            $roleLabel = ($admin->role === 'super_admin') ? 'Super Admin' : 'Staff Admin';
+            ActivityLogger::login(
+                $admin->username,
+                (int)$admin->id,
+                "{$roleLabel} '{$admin->username}' logged in successfully from {$request->ip()}."
+            );
 
             return response()->json([
                 'success' => true,
@@ -79,9 +108,12 @@ class AuthController extends Controller
                     'id' => (int)$admin->id,
                     'username' => $admin->username,
                     'email' => $admin->email,
+                    'role' => $admin->role ?? 'staff',
                 ],
             ])->withCookie($cookie);
         }
+
+        RateLimiter::hit($throttleKey, 300);
 
         return response()->json([
             'success' => false,
@@ -110,6 +142,7 @@ class AuthController extends Controller
                     $request->session()->put('admin_id', (int)$admin->id);
                     $request->session()->put('admin_username', $admin->username);
                     $request->session()->put('admin_email', $admin->email);
+                    $request->session()->put('admin_role', $admin->role ?? 'staff');
 
                     return response()->json([
                         'success' => true,
@@ -119,6 +152,7 @@ class AuthController extends Controller
                             'id' => (int)$admin->id,
                             'username' => $admin->username,
                             'email' => $admin->email,
+                            'role' => $admin->role ?? 'staff',
                         ],
                     ]);
                 }
@@ -134,6 +168,7 @@ class AuthController extends Controller
                 })->first();
 
             if ($admin) {
+                $request->session()->put('admin_role', $admin->role ?? 'staff');
                 return response()->json([
                     'success' => true,
                     'authenticated' => true,
@@ -142,6 +177,7 @@ class AuthController extends Controller
                         'id' => (int)$admin->id,
                         'username' => $admin->username,
                         'email' => $admin->email,
+                        'role' => $admin->role ?? 'staff',
                     ],
                 ]);
             }
@@ -162,6 +198,11 @@ class AuthController extends Controller
         $jwtService = app(JwtAuthService::class);
         $cookie = $jwtService->forgetCookie();
         $legacyCookie = $jwtService->forgetCookie(JwtAuthService::LEGACY_COOKIE_NAME);
+
+        $adminUsername = $request->session()->get('admin_username', 'admin');
+        $adminId = $request->session()->get('admin_id');
+
+        ActivityLogger::logout($adminUsername, $adminId ? (int)$adminId : null);
 
         $request->session()->forget(['admin_id', 'admin_username', 'admin_email', 'login_time']);
         $request->session()->invalidate();

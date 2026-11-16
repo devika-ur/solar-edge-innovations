@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContactInquiry;
+use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -172,9 +173,27 @@ class InquiryController extends Controller
 
             // 4. Delete inquiry
             if ($action === 'delete') {
+                $password = (string)$request->input('password', '');
+                if (!ActivityLogController::verifyAdminPassword($password)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Admin password verification failed. Please enter the correct admin password to delete.',
+                    ], 403);
+                }
+
+                $snapshot = [
+                    'id' => $inquiry->id,
+                    'name' => $inquiry->name,
+                    'email' => $inquiry->email,
+                    'phone' => $inquiry->phone,
+                    'message' => $inquiry->message,
+                ];
+
                 $inquiry->status = 'deleted';
                 $inquiry->save();
                 $inquiry->delete(); // Soft delete
+
+                ActivityLogger::deleted('Inquiry', "Inquiry from {$inquiry->name}", (string)$inquiry->id, "Deleted contact inquiry from {$inquiry->name} ({$inquiry->phone}).", $snapshot);
 
                 return response()->json([
                     'success' => true,

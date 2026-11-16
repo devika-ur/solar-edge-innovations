@@ -206,7 +206,7 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
     };
 
     // Delete Entire Project Confirmation Handler
-    const handleConfirmDeleteProject = async () => {
+    const handleConfirmDeleteProject = async (password = '') => {
         if (!projectToDelete) return;
 
         setIsDeletingProject(true);
@@ -215,6 +215,7 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
             const formData = new FormData();
             formData.append('action', 'delete_project');
             formData.append('project_id', projectToDelete.id);
+            if (password) formData.append('password', password);
 
             const res = await fetch('/api/admin-projects.php', {
                 method: 'POST',
@@ -222,12 +223,14 @@ export const ProjectGalleryManager = ({ onUnauthorized }) => {
                 body: formData
             });
 
-            if (res.ok) {
+            const data = await res.json().catch(() => ({}));
+
+            if (res.ok && data.success) {
                 setProjects(prev => prev.filter(p => p.id !== projectToDelete.id));
                 toast.success(`Project "${projectToDelete.title}" was permanently removed.`, { id: deleteToast });
                 setProjectToDelete(null);
             } else {
-                toast.error('Failed to delete project. Please try again.', { id: deleteToast });
+                toast.error(data.message || 'Failed to delete project. Please check password.', { id: deleteToast });
             }
         } catch (err) {
             console.error('Delete project error:', err);

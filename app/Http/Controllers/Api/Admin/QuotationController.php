@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Agreement;
 use App\Models\Quotation;
 use App\Models\QuotationPayment;
+use App\Services\ActivityLogger;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -278,6 +279,15 @@ class QuotationController extends Controller
                 $existing->save();
                 $quotation = $existing;
                 $actionMessage = "Quotation #{$quotation->ref_no} for '{$clientName}' updated successfully.";
+
+                ActivityLogger::edited(
+                    'Quotation',
+                    "Quotation #{$quotation->ref_no} ({$clientName})",
+                    (string)$quotation->id,
+                    "Updated quotation #{$quotation->ref_no} for {$clientName} ({$capacity}, Total: ₹{$totalAmount})",
+                    null,
+                    ['ref_no' => $quotation->ref_no, 'client_name' => $clientName, 'capacity' => $capacity, 'total_amount' => $totalAmount]
+                );
             } else {
                 $quotation = Quotation::create([
                     'ref_no' => $refNo ?: 'N/A',
@@ -296,6 +306,14 @@ class QuotationController extends Controller
                     'created_by' => $adminUser,
                 ]);
                 $actionMessage = "Quotation for '{$clientName}' saved successfully to history.";
+
+                ActivityLogger::added(
+                    'Quotation',
+                    "Quotation #{$quotation->ref_no} ({$clientName})",
+                    (string)$quotation->id,
+                    "Created new quotation #{$quotation->ref_no} for {$clientName} ({$capacity}, Total: ₹{$totalAmount})",
+                    ['ref_no' => $quotation->ref_no, 'client_name' => $clientName, 'capacity' => $capacity, 'total_amount' => $totalAmount]
+                );
             }
 
             return response()->json([
@@ -379,6 +397,15 @@ class QuotationController extends Controller
             $quotation->rejection_reason = null;
             $quotation->save();
 
+            ActivityLogger::approved(
+                'Quotation',
+                "Quotation #{$quotation->ref_no} ({$quotation->client_name})",
+                (string)$quotation->id,
+                "Quotation #{$quotation->ref_no} for {$quotation->client_name} marked as Approved by Client (Total: ₹{$quotation->total_amount}).",
+                ['workflow_status' => 'approval_pending'],
+                ['workflow_status' => 'approved', 'approved_at' => $quotation->approved_at->format('d/m/Y, h:i:s A')]
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => "Quotation #{$quotation->ref_no} for '{$quotation->client_name}' marked as 'Approved by Client'! It is now ready for Agreement generation.",
@@ -412,6 +439,14 @@ class QuotationController extends Controller
             $quotation->rejection_reason = $reason;
             $quotation->save();
 
+            ActivityLogger::rejected(
+                'Quotation',
+                "Quotation #{$quotation->ref_no} ({$quotation->client_name})",
+                (string)$quotation->id,
+                "Quotation #{$quotation->ref_no} marked as Rejected by Client. Reason: '{$reason}'",
+                ['reason' => $reason]
+            );
+
             return response()->json([
                 'success' => true,
                 'message' => "Quotation #{$quotation->ref_no} for '{$quotation->client_name}' marked as 'Rejected by Client'.",
@@ -439,9 +474,19 @@ class QuotationController extends Controller
         try {
             $quoteId = $id ?: (int)$request->input('id');
             $quotation = Quotation::findOrFail($quoteId);
+            $oldStatus = $quotation->workflow_status;
             $quotation->workflow_status = 'approval_pending';
             $quotation->rejection_reason = null;
             $quotation->save();
+
+            ActivityLogger::edited(
+                'Quotation',
+                "Quotation #{$quotation->ref_no} ({$quotation->client_name})",
+                (string)$quotation->id,
+                "Authorized reopening of quotation #{$quotation->ref_no} for editing.",
+                ['workflow_status' => $oldStatus],
+                ['workflow_status' => 'approval_pending']
+            );
 
             return response()->json([
                 'success' => true,
@@ -659,6 +704,27 @@ class QuotationController extends Controller
             $quotation = Quotation::findOrFail($id);
 
             if ($action === 'delete') {
+                $password = (string)$request->input('password', '');
+                if (!ActivityLogController::verifyAdminPassword($password)) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Admin password verification failed. Please enter the correct admin password to delete.',
+                    ], 403);
+                }
+
+                $deletedSnapshot = [
+                    'id' => $quotation->id,
+                    'ref_no' => $quotation->ref_no,
+                    'client_name' => $quotation->client_name,
+                    'client_phone' => $quotation->client_phone,
+                    'client_address' => $quotation->client_address,
+                    'capacity' => $quotation->capacity,
+                    'system_type' => $quotation->system_type,
+                    'total_amount' => $quotation->total_amount,
+                    'quotation_date' => $quotation->quotation_date,
+                    'workflow_status' => $quotation->workflow_status,
+                ];
+
                 if ($quotation->pdf_path && File::exists(public_path($quotation->pdf_path))) {
                     @File::delete(public_path($quotation->pdf_path));
                 }
@@ -681,6 +747,14 @@ class QuotationController extends Controller
                 $quotation->status = 'deleted';
                 $quotation->save();
                 $quotation->delete(); // Soft delete
+
+                ActivityLogger::deleted(
+                    'Quotation',
+                    "Quotation #{$quotation->ref_no} ({$quotation->client_name})",
+                    (string)$quotation->id,
+                    "Permanently deleted quotation #{$quotation->ref_no} for '{$quotation->client_name}' and its associated records.",
+                    $deletedSnapshot
+                );
 
                 return response()->json([
                     'success' => true,
