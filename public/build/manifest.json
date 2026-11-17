@@ -1,35 +1,23 @@
 {
-  "_vendor-lucide-4C9EtVwN.js": {
-    "file": "assets/vendor-lucide-4C9EtVwN.js",
-    "name": "vendor-lucide",
-    "imports": [
-      "_vendor-motion-MOU-OT13.js"
+  "_vendor-export-DW9Lu604.js": {
+    "file": "assets/vendor-export-DW9Lu604.js",
+    "name": "vendor-export",
+    "dynamicImports": [
+      "node_modules/dompurify/dist/purify.es.mjs"
     ]
   },
-  "_vendor-motion-MOU-OT13.js": {
-    "file": "assets/vendor-motion-MOU-OT13.js",
+  "_vendor-motion-BuUo_DR2.js": {
+    "file": "assets/vendor-motion-BuUo_DR2.js",
     "name": "vendor-motion",
     "imports": [
-      "_vendor-react-Dazix4UH.js"
+      "_vendor-react-BTWxf2Te.js"
     ]
   },
-  "_vendor-react-Dazix4UH.js": {
-    "file": "assets/vendor-react-Dazix4UH.js",
-    "name": "vendor-react"
-  },
-  "node_modules/canvg/lib/index.es.js": {
-    "file": "assets/index.es-W1gUvICV.js",
-    "name": "index.es",
-    "src": "node_modules/canvg/lib/index.es.js",
-    "isDynamicEntry": true,
+  "_vendor-react-BTWxf2Te.js": {
+    "file": "assets/vendor-react-BTWxf2Te.js",
+    "name": "vendor-react",
     "imports": [
-      "_vendor-react-Dazix4UH.js",
-      "resources/js/main.jsx",
-      "_vendor-motion-MOU-OT13.js",
-      "_vendor-lucide-4C9EtVwN.js"
-    ],
-    "css": [
-      "assets/app-CquBLqo2.css"
+      "_vendor-export-DW9Lu604.js"
     ]
   },
   "node_modules/dompurify/dist/purify.es.mjs": {
@@ -38,91 +26,53 @@
     "src": "node_modules/dompurify/dist/purify.es.mjs",
     "isDynamicEntry": true
   },
-  "node_modules/html2canvas/dist/html2canvas.esm.js": {
-    "file": "assets/html2canvas.esm-D6qsocQf.js",
-    "name": "html2canvas.esm",
-    "src": "node_modules/html2canvas/dist/html2canvas.esm.js",
-    "isDynamicEntry": true
-  },
   "resources/css/app.css": {
-    "file": "assets/app-CquBLqo2.css",
+    "file": "assets/app-tPAX09C9.css",
     "src": "resources/css/app.css",
     "isEntry": true,
     "names": [
       "app.css"
     ]
   },
-  "resources/js/assets/BG.png": {
-    "file": "assets/BG-DMLbjXWN.png",
-    "src": "resources/js/assets/BG.png"
-  },
-  "resources/js/assets/Home-page-images/1.jpg": {
-    "file": "assets/1-Btkkv2Q-.jpg",
-    "src": "resources/js/assets/Home-page-images/1.jpg"
-  },
-  "resources/js/assets/Home-page-images/3.jpg": {
-    "file": "assets/3-ByKEQjvt.jpg",
-    "src": "resources/js/assets/Home-page-images/3.jpg"
-  },
-  "resources/js/assets/Home-page-images/4.jpg": {
-    "file": "assets/4-7cI6BPrc.jpg",
-    "src": "resources/js/assets/Home-page-images/4.jpg"
-  },
-  "resources/js/assets/Home-page-images/5.jpg": {
-    "file": "assets/5-Ckgc1U98.jpg",
-    "src": "resources/js/assets/Home-page-images/5.jpg"
-  },
-  "resources/js/assets/Home-page-images/6.jpg": {
-    "file": "assets/6-BdX7ZwRl.jpg",
-    "src": "resources/js/assets/Home-page-images/6.jpg"
-  },
-  "resources/js/assets/Home-page-images/7.jpg": {
-    "file": "assets/7-7Jr2_D4q.jpg",
-    "src": "resources/js/assets/Home-page-images/7.jpg"
-  },
   "resources/js/assets/Home-page-images/cctv-camera.png": {
-    "file": "assets/cctv-camera-DdG0nJyV.png",
+    "file": "assets/cctv-camera-Bih0KVr1.png",
     "src": "resources/js/assets/Home-page-images/cctv-camera.png"
   },
   "resources/js/assets/Home-page-images/commercial-img.jpg": {
-    "file": "assets/commercial-img-PbtI9uKi.jpg",
+    "file": "assets/commercial-img-CSh8PAO5.jpg",
     "src": "resources/js/assets/Home-page-images/commercial-img.jpg"
   },
   "resources/js/assets/Home-page-images/header.jpg": {
-    "file": "assets/header-LWRvDzEO.jpg",
+    "file": "assets/header-B8GOPEW1.jpg",
     "src": "resources/js/assets/Home-page-images/header.jpg"
   },
   "resources/js/assets/Home-page-images/industrial-img.jpg": {
-    "file": "assets/industrial-img-Cf5t4tXQ.jpg",
+    "file": "assets/industrial-img-MYO3_GZ_.jpg",
     "src": "resources/js/assets/Home-page-images/industrial-img.jpg"
   },
   "resources/js/assets/Home-page-images/inverter.png": {
-    "file": "assets/inverter-CrLAiEkT.png",
+    "file": "assets/inverter-VcUT4IeY.png",
     "src": "resources/js/assets/Home-page-images/inverter.png"
   },
   "resources/js/assets/Home-page-images/solar-inverter.svg": {
     "file": "assets/solar-inverter-COtlQYDm.svg",
     "src": "resources/js/assets/Home-page-images/solar-inverter.svg"
   },
-  "resources/js/assets/Home-page-images/solar-panel.svg": {
-    "file": "assets/solar-panel-CnJdGOUR.svg",
-    "src": "resources/js/assets/Home-page-images/solar-panel.svg"
+  "resources/js/assets/Home-page-images/solar-panel.png": {
+    "file": "assets/solar-panel-UL7mtTjQ.png",
+    "src": "resources/js/assets/Home-page-images/solar-panel.png"
   },
   "resources/js/assets/Home-page-images/who we are.svg": {
-    "file": "assets/who we are-C07twSM6.svg",
+    "file": "assets/who we are-DqwkI15M.svg",
     "src": "resources/js/assets/Home-page-images/who we are.svg"
   },
   "resources/js/assets/Pale Blue Solar Eco Emblem.png": {
-    "file": "assets/Pale Blue Solar Eco Emblem-MoAZtc0D.png",
+    "file": "assets/Pale Blue Solar Eco Emblem-DP7u0z1G.png",
     "src": "resources/js/assets/Pale Blue Solar Eco Emblem.png"
   },
   "resources/js/assets/about-image.png": {
-    "file": "assets/about-image-Bmm978Ok.png",
+    "file": "assets/about-image-C45_s3Y9.png",
     "src": "resources/js/assets/about-image.png"
-  },
-  "resources/js/assets/about-us/about-header.jpg": {
-    "file": "assets/about-header-Bc2snlzQ.jpg",
-    "src": "resources/js/assets/about-us/about-header.jpg"
   },
   "resources/js/assets/about-us/map.svg": {
     "file": "assets/map-CKhyzvk8.svg",
@@ -137,7 +87,7 @@
     "src": "resources/js/assets/about-us/solar-panel-installation.svg"
   },
   "resources/js/assets/aboutus-banner-image.png": {
-    "file": "assets/aboutus-banner-image-BOOsPVCW.png",
+    "file": "assets/aboutus-banner-image-C-_Gnqzl.png",
     "src": "resources/js/assets/aboutus-banner-image.png"
   },
   "resources/js/assets/clients-logo/adani.png": {
@@ -173,7 +123,7 @@
     "src": "resources/js/assets/clients-logo/waaree-solar-logo.png"
   },
   "resources/js/assets/contact-consultation.jpg": {
-    "file": "assets/contact-consultation-BdUwsTnn.jpg",
+    "file": "assets/contact-consultation-CoMeVQGs.jpg",
     "src": "resources/js/assets/contact-consultation.jpg"
   },
   "resources/js/assets/footer.jpeg": {
@@ -189,51 +139,19 @@
     "src": "resources/js/assets/home.png"
   },
   "resources/js/assets/jose-jo-no-bg.png": {
-    "file": "assets/jose-jo-no-bg-UTa98Tzf.png",
+    "file": "assets/jose-jo-no-bg-Cf1g2UbK.png",
     "src": "resources/js/assets/jose-jo-no-bg.png"
   },
-  "resources/js/assets/jose-jo.png": {
-    "file": "assets/jose-jo-BaBVw2yM.png",
-    "src": "resources/js/assets/jose-jo.png"
-  },
-  "resources/js/assets/left-side-leaf.png": {
-    "file": "assets/left-side-leaf-CREU9hDj.png",
-    "src": "resources/js/assets/left-side-leaf.png"
-  },
   "resources/js/assets/logo/logo.png": {
-    "file": "assets/logo-CkhDT9gi.png",
+    "file": "assets/logo-BPMq_4EL.png",
     "src": "resources/js/assets/logo/logo.png"
   },
-  "resources/js/assets/project-gallery-images/image-1.png": {
-    "file": "assets/image-1-DlBKvcBT.png",
-    "src": "resources/js/assets/project-gallery-images/image-1.png"
-  },
-  "resources/js/assets/project-gallery-images/image-2.png": {
-    "file": "assets/image-2-jELo2OtB.png",
-    "src": "resources/js/assets/project-gallery-images/image-2.png"
-  },
-  "resources/js/assets/project-gallery-images/image-3.png": {
-    "file": "assets/image-3-DZkWKaCy.png",
-    "src": "resources/js/assets/project-gallery-images/image-3.png"
-  },
-  "resources/js/assets/project-gallery-images/image-4.png": {
-    "file": "assets/image-4-CZszFV2I.png",
-    "src": "resources/js/assets/project-gallery-images/image-4.png"
-  },
-  "resources/js/assets/project-gallery-images/image-5.png": {
-    "file": "assets/image-5-DvfbhQei.png",
-    "src": "resources/js/assets/project-gallery-images/image-5.png"
-  },
-  "resources/js/assets/project-gallery-images/image-7.png": {
-    "file": "assets/image-7-DN3KPAXq.png",
-    "src": "resources/js/assets/project-gallery-images/image-7.png"
-  },
   "resources/js/assets/right-side-leaf.png": {
-    "file": "assets/right-side-leaf-GI8AQxdO.png",
+    "file": "assets/right-side-leaf-DHRrSLGg.png",
     "src": "resources/js/assets/right-side-leaf.png"
   },
   "resources/js/assets/service-banner-image.png": {
-    "file": "assets/service-banner-image-CmXh413G.png",
+    "file": "assets/service-banner-image-X-aFJi65.png",
     "src": "resources/js/assets/service-banner-image.png"
   },
   "resources/js/assets/service/CCTV-Camera.png": {
@@ -241,7 +159,7 @@
     "src": "resources/js/assets/service/CCTV-Camera.png"
   },
   "resources/js/assets/service/commercial-image.png": {
-    "file": "assets/commercial-image-D9A6-60v.png",
+    "file": "assets/commercial-image-Cv94om87.png",
     "src": "resources/js/assets/service/commercial-image.png"
   },
   "resources/js/assets/service/hybrid-inverter.png": {
@@ -253,11 +171,11 @@
     "src": "resources/js/assets/service/hybrid-solar-system.png"
   },
   "resources/js/assets/service/industrial-image.png": {
-    "file": "assets/industrial-image-By28LagB.png",
+    "file": "assets/industrial-image-OEaattna.png",
     "src": "resources/js/assets/service/industrial-image.png"
   },
   "resources/js/assets/service/maintenance-img.png": {
-    "file": "assets/maintenance-img-GgjyhZEZ.png",
+    "file": "assets/maintenance-img-CGY3P1x9.png",
     "src": "resources/js/assets/service/maintenance-img.png"
   },
   "resources/js/assets/service/micro-inverter.png": {
@@ -265,7 +183,7 @@
     "src": "resources/js/assets/service/micro-inverter.png"
   },
   "resources/js/assets/service/nvr-dvr.png": {
-    "file": "assets/nvr-dvr-CWZVJRJ3.png",
+    "file": "assets/nvr-dvr-BXT41ywK.png",
     "src": "resources/js/assets/service/nvr-dvr.png"
   },
   "resources/js/assets/service/off-grid-solar-system.png": {
@@ -281,45 +199,41 @@
     "src": "resources/js/assets/service/on-grid-solar-system.png"
   },
   "resources/js/assets/service/residential-solar.png": {
-    "file": "assets/residential-solar-CQ51Jv5Y.png",
+    "file": "assets/residential-solar-BD8OrIui.png",
     "src": "resources/js/assets/service/residential-solar.png"
-  },
-  "resources/js/assets/service/solar-png.png": {
-    "file": "assets/solar-png-DvBaIKE2.png",
-    "src": "resources/js/assets/service/solar-png.png"
-  },
-  "resources/js/assets/service/transparent-background.png": {
-    "file": "assets/transparent-background-CZYlzuIx.png",
-    "src": "resources/js/assets/service/transparent-background.png"
   },
   "resources/js/assets/vector-drawing.png": {
     "file": "assets/vector-drawing-qRYc7a_i.png",
     "src": "resources/js/assets/vector-drawing.png"
   },
   "resources/js/main.jsx": {
-    "file": "assets/main-IhKqypZy.js",
+    "file": "assets/main-BODfDnrK.js",
     "name": "main",
     "src": "resources/js/main.jsx",
     "isEntry": true,
     "imports": [
-      "_vendor-motion-MOU-OT13.js",
-      "_vendor-react-Dazix4UH.js",
-      "_vendor-lucide-4C9EtVwN.js"
+      "_vendor-react-BTWxf2Te.js",
+      "_vendor-export-DW9Lu604.js",
+      "_vendor-motion-BuUo_DR2.js"
     ],
     "dynamicImports": [
-      "node_modules/html2canvas/dist/html2canvas.esm.js",
-      "node_modules/dompurify/dist/purify.es.mjs",
-      "node_modules/canvg/lib/index.es.js"
+      "resources/js/pages/AboutUs.jsx",
+      "resources/js/pages/Services.jsx",
+      "resources/js/pages/Projects.jsx",
+      "resources/js/pages/ProjectDetails.jsx",
+      "resources/js/pages/LegalPrivacy.jsx",
+      "resources/js/pages/TermsOfService.jsx",
+      "resources/js/pages/Contact.jsx",
+      "resources/js/pages/AdminPage.jsx",
+      "resources/js/pages/AdminResetPasswordPage.jsx"
     ],
     "css": [
-      "assets/main-B0ixSJaO.css",
-      "assets/app-CquBLqo2.css"
+      "assets/main-xSTJw5ws.css",
+      "assets/app-tPAX09C9.css"
     ],
     "assets": [
-      "assets/logo-CkhDT9gi.png",
-      "assets/jose-jo-no-bg-UTa98Tzf.png",
-      "assets/about-image-Bmm978Ok.png",
-      "assets/Pale Blue Solar Eco Emblem-MoAZtc0D.png",
+      "assets/logo-BPMq_4EL.png",
+      "assets/jose-jo-no-bg-Cf1g2UbK.png",
       "assets/adani-B2L_lTgk.png",
       "assets/vikram-solar-logo-BI9XgnG5.svg",
       "assets/waaree-solar-logo-CuR_fE0S.png",
@@ -330,25 +244,151 @@
       "assets/loom-logo-Bd1N6BER.png",
       "assets/home-C6jJSSNv.png",
       "assets/vector-drawing-qRYc7a_i.png",
-      "assets/aboutus-banner-image-BOOsPVCW.png",
+      "assets/aboutus-banner-image-C-_Gnqzl.png",
       "assets/off-grid-solar-system-Dmbhi1UO.png",
       "assets/on-grid-solar-system-BWjJ5khD.png",
       "assets/hybrid-solar-system-ByfUyg36.png",
       "assets/on-grid-inverter-_UaEQwbC.png",
       "assets/hybrid-inverter-BnQ4Rwwb.png",
       "assets/micro-inverter-Bhp3RYzb.png",
-      "assets/nvr-dvr-CWZVJRJ3.png",
+      "assets/nvr-dvr-BXT41ywK.png",
       "assets/CCTV-Camera-DgSdnigM.png",
-      "assets/residential-solar-CQ51Jv5Y.png",
-      "assets/commercial-image-D9A6-60v.png",
-      "assets/industrial-image-By28LagB.png",
-      "assets/maintenance-img-GgjyhZEZ.png",
-      "assets/right-side-leaf-GI8AQxdO.png",
-      "assets/service-banner-image-CmXh413G.png",
+      "assets/residential-solar-BD8OrIui.png",
+      "assets/commercial-image-Cv94om87.png",
+      "assets/industrial-image-OEaattna.png",
+      "assets/maintenance-img-CGY3P1x9.png",
+      "assets/right-side-leaf-DHRrSLGg.png",
+      "assets/service-banner-image-X-aFJi65.png",
+      "assets/inverter-VcUT4IeY.png"
+    ]
+  },
+  "resources/js/pages/AboutUs.jsx": {
+    "file": "assets/AboutUs-D_Ddhyn6.js",
+    "name": "AboutUs",
+    "src": "resources/js/pages/AboutUs.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-BTWxf2Te.js",
+      "resources/js/main.jsx",
+      "_vendor-motion-BuUo_DR2.js",
+      "_vendor-export-DW9Lu604.js"
+    ],
+    "css": [
+      "assets/app-tPAX09C9.css"
+    ],
+    "assets": [
+      "assets/about-image-C45_s3Y9.png"
+    ]
+  },
+  "resources/js/pages/AdminPage.jsx": {
+    "file": "assets/AdminPage-COn4mXKX.js",
+    "name": "AdminPage",
+    "src": "resources/js/pages/AdminPage.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-BTWxf2Te.js",
+      "resources/js/main.jsx",
+      "_vendor-export-DW9Lu604.js",
+      "_vendor-motion-BuUo_DR2.js"
+    ],
+    "css": [
+      "assets/app-tPAX09C9.css"
+    ],
+    "assets": [
+      "assets/Pale Blue Solar Eco Emblem-DP7u0z1G.png",
       "assets/header-CeTtS6N-.jpeg",
-      "assets/footer-CVqmcyWq.jpeg",
-      "assets/inverter-CrLAiEkT.png",
-      "assets/contact-consultation-BdUwsTnn.jpg"
+      "assets/footer-CVqmcyWq.jpeg"
+    ]
+  },
+  "resources/js/pages/AdminResetPasswordPage.jsx": {
+    "file": "assets/AdminResetPasswordPage-CzdZ9NTn.js",
+    "name": "AdminResetPasswordPage",
+    "src": "resources/js/pages/AdminResetPasswordPage.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-BTWxf2Te.js",
+      "resources/js/main.jsx",
+      "_vendor-export-DW9Lu604.js",
+      "_vendor-motion-BuUo_DR2.js"
+    ],
+    "css": [
+      "assets/app-tPAX09C9.css"
+    ]
+  },
+  "resources/js/pages/Contact.jsx": {
+    "file": "assets/Contact-CzlUY5Ua.js",
+    "name": "Contact",
+    "src": "resources/js/pages/Contact.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-BTWxf2Te.js",
+      "resources/js/main.jsx",
+      "_vendor-motion-BuUo_DR2.js",
+      "_vendor-export-DW9Lu604.js"
+    ],
+    "css": [
+      "assets/app-tPAX09C9.css"
+    ],
+    "assets": [
+      "assets/contact-consultation-CoMeVQGs.jpg"
+    ]
+  },
+  "resources/js/pages/LegalPrivacy.jsx": {
+    "file": "assets/LegalPrivacy-CZCcELWo.js",
+    "name": "LegalPrivacy",
+    "src": "resources/js/pages/LegalPrivacy.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-BTWxf2Te.js",
+      "_vendor-motion-BuUo_DR2.js",
+      "_vendor-export-DW9Lu604.js"
+    ]
+  },
+  "resources/js/pages/ProjectDetails.jsx": {
+    "file": "assets/ProjectDetails-CIBegRFZ.js",
+    "name": "ProjectDetails",
+    "src": "resources/js/pages/ProjectDetails.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-BTWxf2Te.js",
+      "_vendor-export-DW9Lu604.js"
+    ]
+  },
+  "resources/js/pages/Projects.jsx": {
+    "file": "assets/Projects-DPbbELGv.js",
+    "name": "Projects",
+    "src": "resources/js/pages/Projects.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-BTWxf2Te.js",
+      "_vendor-motion-BuUo_DR2.js",
+      "_vendor-export-DW9Lu604.js"
+    ]
+  },
+  "resources/js/pages/Services.jsx": {
+    "file": "assets/Services-B89K1x7e.js",
+    "name": "Services",
+    "src": "resources/js/pages/Services.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-BTWxf2Te.js",
+      "resources/js/main.jsx",
+      "_vendor-motion-BuUo_DR2.js",
+      "_vendor-export-DW9Lu604.js"
+    ],
+    "css": [
+      "assets/app-tPAX09C9.css"
+    ]
+  },
+  "resources/js/pages/TermsOfService.jsx": {
+    "file": "assets/TermsOfService-BaFa-khg.js",
+    "name": "TermsOfService",
+    "src": "resources/js/pages/TermsOfService.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "_vendor-react-BTWxf2Te.js",
+      "_vendor-motion-BuUo_DR2.js",
+      "_vendor-export-DW9Lu604.js"
     ]
   }
 }

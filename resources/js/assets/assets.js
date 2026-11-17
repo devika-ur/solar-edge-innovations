@@ -1,103 +1,70 @@
 import logo from '../assets/logo/logo.png';
-import headerImage from '../assets/Home-page-images/header.jpg'
-import commercialImage from '../assets/Home-page-images/commercial-img.jpg'
-import industrialImage from '../assets/Home-page-images/industrial-img.jpg'
-import whoWeAre from '../assets/Home-page-images/who we are.svg'
-import whyChooseUsPattern1 from '../assets/Home-page-images/whyChooseUsPattern1.svg'
-import whyChooseUsPattern2 from '../assets/Home-page-images/whyChooseUsPattern2.svg'
-import cctvCamera from '../assets/Home-page-images/cctv-camera.png'
-import solarInverter from '../assets/Home-page-images/solar-inverter.svg'
-import solarPanel from '../assets/Home-page-images/solar-panel.svg'
+import headerImage from '../assets/Home-page-images/header.jpg';
+import commercialImage from '../assets/Home-page-images/commercial-img.jpg';
+import industrialImage from '../assets/Home-page-images/industrial-img.jpg';
+import whoWeAre from '../assets/Home-page-images/who we are.svg';
+import whyChooseUsPattern1 from '../assets/Home-page-images/whyChooseUsPattern1.svg';
+import whyChooseUsPattern2 from '../assets/Home-page-images/whyChooseUsPattern2.svg';
+import cctvCamera from '../assets/Home-page-images/cctv-camera.png';
+import solarInverter from '../assets/Home-page-images/solar-inverter.svg';
+import solarPanel from '../assets/Home-page-images/solar-panel.png';
 
-import JoseJo from '../assets/jose-jo.png'
-import joseJoNoBg from '../assets/jose-jo-no-bg.png'
-import aboutImage from '../assets/about-image.png'
+import joseJoNoBg from '../assets/jose-jo-no-bg.png';
+import aboutImage from '../assets/about-image.png';
 import paleBlueSolarEcoEmblem from '../assets/Pale Blue Solar Eco Emblem.png';
 
-import one from '../assets/Home-page-images/1.jpg'
-import two from '../assets/Home-page-images/3.jpg'
-import three from '../assets/Home-page-images/4.jpg'
-import four from '../assets/Home-page-images/5.jpg'
-import five from '../assets/Home-page-images/6.jpg'
-import six from '../assets/Home-page-images/7.jpg'
-
-
-//import adaniLogo from '../assets/clients-logo/adani-logo.svg';
 import adaniLogo from '../assets/clients-logo/adani.png';
 import vikramSolarLogo from '../assets/clients-logo/vikram-solar-logo.svg';
 import wareeSolarLogo from '../assets/clients-logo/waaree-solar-logo.png';
 import microtekLogo from '../assets/clients-logo/microtek-logo.svg';
 import vguardLogo from '../assets/clients-logo/vguard-logo.png';
 import loomSolarLogo from '../assets/clients-logo/loom-solar-logo.png';
-import emmveeLogo from '../assets/clients-logo/emmvee-logo.png'
-import luminousLogo from '../assets/clients-logo/luminous-logo.png'
-import exideLogo from '../assets/clients-logo/exide.svg'
-import loomLogo from '../assets/clients-logo/loom-logo.png'
+import emmveeLogo from '../assets/clients-logo/emmvee-logo.png';
+import luminousLogo from '../assets/clients-logo/luminous-logo.png';
+import exideLogo from '../assets/clients-logo/exide.svg';
+import loomLogo from '../assets/clients-logo/loom-logo.png';
 
-import home from '../assets/home.png'
-import vectorDrawing from '../assets/vector-drawing.png'
-import aboutHeader from '../assets/about-us/about-header.jpg'
+import home from '../assets/home.png';
+import vectorDrawing from '../assets/vector-drawing.png';
 
-import mission from '../assets/about-us/mission.svg'
-import vision from '../assets/about-us/vision.svg'
-import values from '../assets/about-us/values.svg'
-import aboutusBannerImage from '../assets/aboutus-banner-image.png'
+import mission from '../assets/about-us/mission.svg';
+import vision from '../assets/about-us/vision.svg';
+import values from '../assets/about-us/values.svg';
+import aboutusBannerImage from '../assets/aboutus-banner-image.png';
 
-import batteryStorageSolution from '../assets/about-us/battery-storage-solution.svg'
-import solarInverterInstallation from '../assets/about-us/solar-inverter-installation.svg'
-import cctvMaintenanceAndRepair from '../assets/about-us/cctv-maintenance.svg'
-import solarPanelInstallation from '../assets/about-us/solar-panel-installation.svg'
-import mapSvg from '../assets/about-us/map.svg'
+import batteryStorageSolution from '../assets/about-us/battery-storage-solution.svg';
+import solarInverterInstallation from '../assets/about-us/solar-inverter-installation.svg';
+import cctvMaintenanceAndRepair from '../assets/about-us/cctv-maintenance.svg';
+import solarPanelInstallation from '../assets/about-us/solar-panel-installation.svg';
+import mapSvg from '../assets/about-us/map.svg';
 
-import transparentbackground from '../assets/service/transparent-background.png'
-import bg from '../assets/BG.png'
+import certified from '../assets/service/certified.svg';
+import ecoFriendly from '../assets/service/eco-friendly.svg';
+import loan from '../assets/service/loan.svg';
+import subsidy from '../assets/service/subsidy.svg';
+import warranty from '../assets/service/warranty.svg';
 
-import certified from '../assets/service/certified.svg'
-import ecoFriendly from '../assets/service/eco-friendly.svg'
-import loan from '../assets/service/loan.svg'
-import subsidy from '../assets/service/subsidy.svg'
-import warranty from '../assets/service/warranty.svg'
+import offGridSolarSystem from '../assets/service/off-grid-solar-system.png';
+import onGridSolarSystem from '../assets/service/on-grid-solar-system.png';
+import hybridSolarSystem from '../assets/service/hybrid-solar-system.png';
 
-import solar from '../assets/service/solar-png.png'
+import onGridInverter from '../assets/service/on-grid-inverter.png';
+import hybridInverter from '../assets/service/hybrid-inverter.png';
+import microInverter from '../assets/service/micro-inverter.png';
 
-import offGridSolarSystem from '../assets/service/off-grid-solar-system.png'
-import onGridSolarSystem from '../assets/service/on-grid-solar-system.png'
-import hybridSolarSystem from '../assets/service/hybrid-solar-system.png'
+import nvrDvr from '../assets/service/nvr-dvr.png';
+import cctvImage from '../assets/service/CCTV-Camera.png';
 
-import onGridInverter from '../assets/service/on-grid-inverter.png'
-import hybridInverter from '../assets/service/hybrid-inverter.png'
-import microInverter from '../assets/service/micro-inverter.png'
+import residentialSolar from '../assets/service/residential-solar.png';
+import serviceCommercial from '../assets/service/commercial-image.png';
+import serviceIndustrial from '../assets/service/industrial-image.png';
+import serviceMaintenance from '../assets/service/maintenance-img.png';
 
-import nvrDvr from '../assets/service/nvr-dvr.png'
-import cctvImage from '../assets/service/CCTV-Camera.png'
-
-import residentialSolar from '../assets/service/residential-solar.png'
-import serviceCommercial from '../assets/service/commercial-image.png'
-import serviceIndustrial from '../assets/service/industrial-image.png'
-import serviceMaintenance from '../assets/service/maintenance-img.png'
-
-import leftSideLeaf from '../assets/left-side-leaf.png'
-import rightSideLeaf from '../assets/right-side-leaf.png'
-import serviceBannerImage from '../assets/service-banner-image.png'
-
-import galleryImg1 from '../assets/project-gallery-images/image-1.png'
-import galleryImg2 from '../assets/project-gallery-images/image-2.png'
-import galleryImg3 from '../assets/project-gallery-images/image-3.png'
-import galleryImg4 from '../assets/project-gallery-images/image-4.png'
-import galleryImg5 from '../assets/project-gallery-images/image-5.png'
-import galleryImg7 from '../assets/project-gallery-images/image-7.png'
+import rightSideLeaf from '../assets/right-side-leaf.png';
+import serviceBannerImage from '../assets/service-banner-image.png';
 
 import quotationHeader from '../assets/header.jpeg';
 import quotationFooter from '../assets/footer.jpeg';
-
-export const projectGalleryImages = [
-    { id: 1, src: galleryImg1, title: 'Solar Panel Rooftop Installation', location: 'Trivandrum' },
-    { id: 2, src: galleryImg2, title: 'Commercial Solar System Project', location: 'Kollam' },
-    { id: 3, src: galleryImg3, title: 'Hybrid Solar & Battery Backup', location: 'Varkala' },
-    { id: 4, src: galleryImg4, title: 'Industrial Solar Infrastructure', location: 'Parippally' },
-    { id: 5, src: galleryImg5, title: 'On-Grid Solar Energy Project', location: 'Elakamon' },
-    { id: 6, src: galleryImg7, title: 'Residential Solar Installation', location: 'Paravur' },
-];
 
 export const assets = {
     logo,
@@ -113,18 +80,15 @@ export const assets = {
     cctvCamera,
     solarInverter,
     solarPanel,
-    one, two, three, four, five, six,
     home,
     vectorDrawing,
-    aboutHeader,
-    mission, values, vision,
+    mission,
+    values,
+    vision,
     mapSvg,
-    transparentbackground,
-    bg, solar, JoseJo,
     aboutusBannerImage,
     joseJoNoBg,
     aboutImage,
-    leftSideLeaf,
     rightSideLeaf,
     serviceBannerImage,
     residentialSolar,

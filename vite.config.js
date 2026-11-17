@@ -17,20 +17,30 @@ export default defineConfig({
     tailwindcss(),
   ],
   build: {
-    // Raise warning threshold — some large assets are expected
-    chunkSizeWarningLimit: 800,
+    chunkSizeWarningLimit: 600,
+    cssCodeSplit: true,
+    minify: 'esbuild',
     rollupOptions: {
       output: {
-        // Split vendor libs from app code
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-motion': ['framer-motion'],
-          'vendor-lucide': ['lucide-react'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router') || id.includes('react-helmet')) {
+              return 'vendor-react';
+            }
+            if (id.includes('framer-motion') || id.includes('lenis')) {
+              return 'vendor-motion';
+            }
+            if (id.includes('lucide-react')) {
+              return 'vendor-lucide';
+            }
+            if (id.includes('html2canvas') || id.includes('xlsx') || id.includes('jspdf') || id.includes('canvg')) {
+              return 'vendor-export';
+            }
+          }
         },
       },
     },
-    // Compress assets
-    assetsInlineLimit: 4096, // inline assets < 4KB as base64
+    assetsInlineLimit: 4096,
   },
   server: {
     watch: {

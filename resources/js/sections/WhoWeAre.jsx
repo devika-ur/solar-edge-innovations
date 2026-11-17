@@ -56,7 +56,15 @@ const WhoWeAre = () => {
                     whileInView={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 1, ease: "easeOut" }}
                     viewport={{ once: true, amount: 0.3 }}>
-                    <img src={assets.whoWeAre} alt="who we are" className=" xl:w-full xl:h-full w-1/2 " />
+                    <img 
+                        src={assets.whoWeAre} 
+                        alt="Who We Are - Solar Edge Innovation" 
+                        loading="lazy" 
+                        decoding="async" 
+                        width="543" 
+                        height="640" 
+                        className="xl:w-full xl:h-full w-1/2 object-contain" 
+                    />
                 </motion.div>
 
                 {/* Right Cards */}

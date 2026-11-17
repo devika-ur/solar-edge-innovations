@@ -109,6 +109,8 @@ const ProjectShowcase = () => {
                             <img
                                 src={project.src}
                                 alt="Solar Edge Project Showcase"
+                                loading="lazy"
+                                decoding="async"
                                 className="w-full h-full object-cover transform transition-transform duration-700 ease-out group-hover:scale-108"
                             />
 

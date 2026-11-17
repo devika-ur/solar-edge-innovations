@@ -50,6 +50,9 @@ export default function Navbar() {
             <img
               src={assets.logo}
               alt="Solar Edge Logo"
+              width="64"
+              height="64"
+              decoding="async"
               className="h-14 md:h-16 w-auto object-contain transition-all hover:scale-105"
             />
           </NavLink>

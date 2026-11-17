@@ -34,7 +34,7 @@ const EnergyBackupSecurity = () => {
                         viewport={{ once: true, amount: 0.1 }}
                         transition={{ duration: 1, ease: "easeIn", delay: 0.2 }}
                         className="w-72 hover:scale-106 duration-300 2xl:w-full h-auto flex flex-col justify-center items-center gap-3 relative rounded-4xl bg-[#fff] shadow-[0_4px_7.3px_0_rgba(0,0,0,0.1)] p-6 pt-16">
-                        <img src={assets.solarPanel} alt="solar panel image" className='absolute -top-12 left-1/2 -translate-x-1/2 w-35 h-35 object-contain' />
+                        <img src={assets.solarPanel} alt="solar panel image" loading="lazy" decoding="async" width="140" height="140" className='absolute -top-12 left-1/2 -translate-x-1/2 w-35 h-35 object-contain' />
                         <h1 className='text-[30px] text-green-medium mt-9 font-bold'>SOLAR</h1>
                         <Button text={'VIEW'} bgColor='bg-white' textColor='text-black' border='border border-green-medium' />
                     </motion.div>
@@ -48,7 +48,7 @@ const EnergyBackupSecurity = () => {
                         viewport={{ once: true, amount: 0.1 }}
                         transition={{ duration: 1, ease: "easeIn", delay: 0.8 }}
                         className="w-72 hover:scale-106 duration-300 2xl:w-full h-auto flex flex-col justify-center items-center gap-3 relative rounded-4xl bg-[#fff] shadow-[0_4px_7.3px_0_rgba(0,0,0,0.1)] p-6 pt-16">
-                        <img src={assets.solarInverter} alt="solar inverter image" className='absolute -top-12 left-1/2 -translate-x-1/2 w-35 h-35 object-contain' />
+                        <img src={assets.solarInverter} alt="solar inverter image" loading="lazy" decoding="async" width="140" height="140" className='absolute -top-12 left-1/2 -translate-x-1/2 w-35 h-35 object-contain' />
                         <h1 className='text-[30px] text-green-medium mt-9 font-bold'>INVERTERS</h1>
                         <Button text={'VIEW'} bgColor='bg-white' textColor='text-black' border='border border-green-medium' />
                     </motion.div>
@@ -62,7 +62,7 @@ const EnergyBackupSecurity = () => {
                         viewport={{ once: true, amount: 0.1 }}
                         transition={{ duration: 1, ease: "easeIn", delay: 1 }}
                         className="w-72 hover:scale-106 duration-300 2xl:w-full h-auto flex flex-col justify-center items-center gap-3 relative rounded-4xl bg-[#fff] shadow-[0_4px_7.3px_0_rgba(0,0,0,0.1)] p-6 pt-16">
-                        <img src={assets.cctvCamera} alt="cctv camera image" className='absolute -top-15 left-1/2 -translate-x-1/2 w-40 h-40  object-contain' />
+                        <img src={assets.cctvCamera} alt="cctv camera image" loading="lazy" decoding="async" width="160" height="160" className='absolute -top-15 left-1/2 -translate-x-1/2 w-40 h-40  object-contain' />
                         <h1 className='text-[30px] text-green-medium mt-9 font-bold'>CCTV</h1>
                         <Button text={'VIEW'} bgColor='bg-white' textColor='text-black' border='border border-green-medium' />
                     </motion.div>

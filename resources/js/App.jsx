@@ -1,20 +1,21 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, Suspense, lazy } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import Home from './pages/Home';
-import AboutUs from './pages/AboutUs';
-import Services from './pages/Services';
-import Projects from './pages/Projects';
 import Navbar from './components/Navbar';
 import { Footer } from './components/Footer';
-import RotatingRings from './utils/RotatingRings';
-import ProjectDetails from './pages/ProjectDetails';
+
+// Code-split all secondary routes and admin bundle to keep initial landing page ultra-light
+const AboutUs = lazy(() => import('./pages/AboutUs'));
+const Services = lazy(() => import('./pages/Services'));
+const Projects = lazy(() => import('./pages/Projects'));
+const ProjectDetails = lazy(() => import('./pages/ProjectDetails'));
+const PrivacyPolicy = lazy(() => import('./pages/LegalPrivacy'));
+const TermsOfService = lazy(() => import('./pages/TermsOfService'));
+const Contact = lazy(() => import('./pages/Contact'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
+const AdminResetPasswordPage = lazy(() => import('./pages/AdminResetPasswordPage').then(m => ({ default: m.AdminResetPasswordPage })));
 import Lenis from 'lenis';
-import PrivacyPolicy from './pages/LegalPrivacy';
-import TermsOfService from './pages/TermsOfService';
-import AdminPage from './pages/AdminPage';
-import { AdminResetPasswordPage } from './pages/AdminResetPasswordPage';
-import Contact from './pages/Contact';
 
 const ScrollToTop = () => {
     const { pathname, hash } = useLocation();
@@ -107,46 +108,32 @@ const AppContent = () => {
         <>
             <ScrollToTop />
             {!isAdminRoute && <Navbar />}
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/about" element={<AboutUs />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/projects/:id" element={<ProjectDetails />} />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="/terms" element={<TermsOfService />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/admin/:tab" element={<AdminPage />} />
-            </Routes>
+            <Suspense fallback={
+                <div className="min-h-[60vh] w-full flex items-center justify-center">
+                    <div className="w-8 h-8 border-3 border-[#1A4D2E] border-t-transparent rounded-full animate-spin" />
+                </div>
+            }>
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/about" element={<AboutUs />} />
+                    <Route path="/services" element={<Services />} />
+                    <Route path="/projects" element={<Projects />} />
+                    <Route path="/projects/:id" element={<ProjectDetails />} />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/terms" element={<TermsOfService />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/admin/reset-password" element={<AdminResetPasswordPage />} />
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/admin/:tab" element={<AdminPage />} />
+                </Routes>
+            </Suspense>
             {!isAdminRoute && <Footer />}
         </>
     );
 };
 
 const App = () => {
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const timer = setTimeout(() => setIsLoading(false), 500);
-        return () => clearTimeout(timer);
-    }, []);
-
-    return (
-        <>
-            {
-                isLoading ? (
-                    <div className="min-h-screen w-full flex items-center justify-center bg-white">
-                        <RotatingRings size="xl" message="Loading..." />
-                    </div>
-                ) : (
-                    <AppContent />
-                )
-            }
-        </>
-    );
-
+    return <AppContent />;
 };
 
 export default App;

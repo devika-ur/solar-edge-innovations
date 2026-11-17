@@ -34,6 +34,10 @@ const CategorySection = () => {
                         <img
                             src={assets.industrialImage}
                             alt="Domestic Solar Installation"
+                            loading="lazy"
+                            decoding="async"
+                            width="600"
+                            height="400"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                         />
                         <div className="absolute inset-0 bg-gradient-to-r from-black/25 to-transparent z-10"></div>
@@ -75,6 +79,10 @@ const CategorySection = () => {
                         <img
                             src={assets.commercialImage}
                             alt="Commercial Solar Installation"
+                            loading="lazy"
+                            decoding="async"
+                            width="600"
+                            height="400"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                         />
                         <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent z-10"></div>
