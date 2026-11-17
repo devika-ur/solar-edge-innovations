@@ -1,4 +1,4 @@
-import{j as e,x as n,y as c,U as r,T as i,r as m,h as p,k as h,J as u,K as g,Z as f,E as v,O as b,X as j}from"./vendor-react-BTWxf2Te.js";import{a as o}from"./main-BODfDnrK.js";import{m as t,A as y}from"./vendor-motion-BuUo_DR2.js";import"./vendor-export-DW9Lu604.js";/* empty css            */const w="/build/assets/about-image-C45_s3Y9.png";function N(){return e.jsxs("section",{className:`
+import{j as e,x as n,y as c,U as r,T as i,r as m,h as p,k as h,J as u,K as g,Z as f,E as v,O as b,X as j}from"./vendor-react-BTWxf2Te.js";import{a as o}from"./main-C5fIR-jx.js";import{m as t,A as y}from"./vendor-motion-BuUo_DR2.js";import"./vendor-export-DW9Lu604.js";/* empty css            */const w="/build/assets/about-image-C45_s3Y9.png";function N(){return e.jsxs("section",{className:`
         w-full
         px-6 sm:px-10 lg:px-16 xl:px-20
         pt-4 sm:pt-6 lg:pt-8

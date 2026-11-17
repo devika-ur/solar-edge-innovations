@@ -25,7 +25,8 @@ import {
     X,
     ArrowUpDown,
     Download,
-    Trash2
+    Trash2,
+    KeyRound
 } from 'lucide-react';
 import { Pagination } from './Pagination';
 import { exportToExcel } from './reports/ExcelExport';
