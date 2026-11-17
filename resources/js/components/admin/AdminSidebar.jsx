@@ -6,6 +6,8 @@ import {
     FileText,
     FileSignature,
     History,
+    Hourglass,
+    Wallet,
     CreditCard,
     ScrollText,
     Mail,
@@ -39,6 +41,7 @@ export const ADMIN_NAV_SECTIONS = [
         items: [
             { id: 'inquiries', label: 'Enquiry', icon: Mail },
             { id: 'quotation', label: 'Quotation Builder', icon: FileText },
+            { id: 'pending-approval', label: 'Pending Approval', icon: Hourglass },
             { id: 'quotation-history', label: 'Quotation History', icon: History },
             { id: 'approved-quotations', label: 'Approved Quotations', icon: CheckCircle2 },
             { id: 'agreement', label: 'Agreement', icon: FileSignature },
@@ -68,7 +71,15 @@ export const ADMIN_NAV_SECTIONS = [
         ],
     },
     {
+        title: 'FINANCE',
+        superAdminOnly: true,
+        items: [
+            { id: 'expenses', label: 'Other Expenses', icon: Wallet },
+        ],
+    },
+    {
         title: 'SECURITY',
+        superAdminOnly: true,
         items: [
             { id: 'activity-log', label: 'Activity Log', icon: ShieldCheck },
         ],
@@ -90,9 +101,9 @@ export const AdminSidebar = ({
     onChangePassword,
     userRole
 }) => {
-    // Only Super Admin can see the SECURITY (Activity Log) section
+    // Only Super Admin can see the FINANCE (Other Expenses) and SECURITY (Activity Log) sections
     const visibleSections = ADMIN_NAV_SECTIONS.filter((section) => {
-        if (section.title === 'SECURITY') {
+        if (section.superAdminOnly) {
             return userRole === 'super_admin';
         }
         return true;

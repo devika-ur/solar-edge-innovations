@@ -431,10 +431,10 @@ export const ApplicationTrackingManager = ({ onNavigate, onUnauthorized, initial
                                                             {onNavigate && (
                                                                 <button
                                                                     type="button"
-                                                                    onClick={() => onNavigate('quotation-history')}
+                                                                    onClick={() => onNavigate('pending-approval')}
                                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 text-xs font-semibold transition-all cursor-pointer"
                                                                 >
-                                                                    <span>Review in History</span>
+                                                                    <span>Review in Pending Approval</span>
                                                                 </button>
                                                             )}
                                                         </div>

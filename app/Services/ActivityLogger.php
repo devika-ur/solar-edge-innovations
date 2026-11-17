@@ -64,6 +64,11 @@ class ActivityLogger
         return self::log('approved', $recordType, $recordIdentifier, (string)$recordId, $details, $oldValues, $newValues);
     }
 
+    public static function reopened(string $recordType, string $recordIdentifier, $recordId = null, ?string $details = null, ?array $oldValues = null, ?array $newValues = null): ?ActivityLog
+    {
+        return self::log('reopened', $recordType, $recordIdentifier, (string)$recordId, $details, $oldValues, $newValues);
+    }
+
     public static function rejected(string $recordType, string $recordIdentifier, $recordId = null, ?string $details = null, ?array $oldValues = null): ?ActivityLog
     {
         return self::log('rejected', $recordType, $recordIdentifier, (string)$recordId, $details, $oldValues, null);

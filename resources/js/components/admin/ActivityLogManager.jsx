@@ -308,6 +308,13 @@ export const ActivityLogManager = ({ _onNavigate, onUnauthorized }) => {
                         <span>{actionLabel || 'Rejected'}</span>
                     </span>
                 );
+            case 'reopened':
+                return (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
+                        <RotateCcw size={11} className="text-orange-600" />
+                        <span>{actionLabel || 'Reopened'}</span>
+                    </span>
+                );
             case 'edited':
                 return (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
@@ -726,6 +733,7 @@ export const ActivityLogManager = ({ _onNavigate, onUnauthorized }) => {
                                 <option value="deleted">Deleted</option>
                                 <option value="approved">Approved</option>
                                 <option value="rejected">Rejected</option>
+                                <option value="reopened">Reopened</option>
                                 <option value="edited">Edited</option>
                                 <option value="added">Added</option>
                                 <option value="login">Login</option>

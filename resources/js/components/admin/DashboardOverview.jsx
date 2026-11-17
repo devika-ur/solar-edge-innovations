@@ -988,7 +988,7 @@ export const DashboardOverview = ({ onNavigate, onUnauthorized }) => {
                                     recentQuotations.map((qt) => (
                                         <tr
                                             key={qt.id}
-                                            onClick={() => onNavigate('quotation-history')}
+                                            onClick={() => onNavigate(qt.workflow_status === 'approval_pending' ? 'pending-approval' : 'quotation-history')}
                                             className="hover:bg-neutral-50/80 transition-colors cursor-pointer group"
                                         >
                                             <td className="py-4 px-6 font-semibold text-neutral-900 group-hover:text-[#1A4D2E]">

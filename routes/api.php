@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\Admin\ActivityLogController as AdminActivityLogController;
 use App\Http\Controllers\Api\Admin\AgreementController as AdminAgreementController;
 use App\Http\Controllers\Api\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Api\Admin\ExpenseController as AdminExpenseController;
 use App\Http\Controllers\Api\Admin\PasswordResetController as AdminPasswordResetController;
 use App\Http\Controllers\Api\Admin\FaqController as AdminFaqController;
 use App\Http\Controllers\Api\Admin\InquiryController as AdminInquiryController;
@@ -168,6 +169,12 @@ Route::middleware('admin.session')->group(function () {
         Route::post('/admin-activity-log-change-password.php', [AdminActivityLogController::class, 'changePassword']);
         Route::get('/admin/activity-log', [AdminActivityLogController::class, 'index']);
         Route::get('/admin-activity-log.php', [AdminActivityLogController::class, 'index']);
+
+        // Other Expenses (Super Admin only)
+        Route::get('/admin/expenses', [AdminExpenseController::class, 'index']);
+        Route::post('/admin/expenses', [AdminExpenseController::class, 'store']);
+        Route::post('/admin/expenses/{id}', [AdminExpenseController::class, 'update'])->whereNumber('id');
+        Route::post('/admin/expenses/{id}/delete', [AdminExpenseController::class, 'destroy'])->whereNumber('id');
     });
 
     // Admin Setup

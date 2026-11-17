@@ -66,6 +66,7 @@ class StatsController extends Controller
                         'client_name' => $q->client_name,
                         'capacity' => $q->capacity,
                         'total_amount' => $q->total_amount,
+                        'workflow_status' => $q->workflow_status ?: 'approval_pending',
                         'created_at_formatted' => $q->created_at?->format('d M Y, h:i A'),
                     ];
                 });

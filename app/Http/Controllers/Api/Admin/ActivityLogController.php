@@ -320,6 +320,7 @@ class ActivityLogController extends Controller
                 'deleted' => 'Deleted',
                 'approved' => 'Approved',
                 'rejected' => 'Rejected',
+                'reopened' => 'Reopened',
                 'edited' => 'Edited',
                 'added' => 'Added',
                 'login' => 'Login',

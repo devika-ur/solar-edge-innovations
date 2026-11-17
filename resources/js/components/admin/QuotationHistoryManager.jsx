@@ -33,7 +33,10 @@ import {
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import { Pagination } from './Pagination';
 
-export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
+export const QuotationHistoryManager = ({ onNavigate, onUnauthorized, mode = 'history' }) => {
+    // mode 'pending'  -> Pending Approval page: only quotations awaiting client approval
+    // mode 'history'  -> Quotation History page: every quotation that has left the pending stage
+    const isPendingMode = mode === 'pending';
     const [quotations, setQuotations] = useState([]);
     const [stats, setStats] = useState({ total: 0, today: 0, this_month: 0, filtered_count: 0 });
     const [isLoading, setIsLoading] = useState(true);
@@ -102,7 +105,12 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
             if (searchQuery.trim()) params.append('search', searchQuery.trim());
             if (startDate) params.append('start_date', startDate);
             if (endDate) params.append('end_date', endDate);
-            if (workflowFilter !== 'all') params.append('workflow_status', workflowFilter);
+            if (isPendingMode) {
+                params.append('workflow_status', 'approval_pending');
+            } else {
+                params.append('exclude_workflow_status', 'approval_pending');
+                if (workflowFilter !== 'all') params.append('workflow_status', workflowFilter);
+            }
 
             const url = `/api/admin-quotations.php?${params.toString()}`;
             const res = await fetch(url, {
@@ -122,7 +130,7 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                 if (data.stats) {
                     setStats(data.stats);
                 }
-                if (isManual) toast.success('Quotation history refreshed!');
+                if (isManual) toast.success(isPendingMode ? 'Pending approvals refreshed!' : 'Quotation history refreshed!');
             } else {
                 toast.error(data.message || 'Failed to load quotation history.');
             }
@@ -136,7 +144,7 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
     useEffect(() => {
         setCurrentPage(1);
         loadQuotations();
-    }, [startDate, endDate, workflowFilter]);
+    }, [startDate, endDate, workflowFilter, mode]);
 
     const handleSearchSubmit = (e) => {
         e.preventDefault();
@@ -199,7 +207,9 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
             });
             const data = await res.json();
             if (res.ok && data.success) {
-                toast.success(`Quotation #${quotationToReject.ref_no} marked as Rejected by Client.`);
+                toast.success(isPendingMode
+                    ? `Quotation #${quotationToReject.ref_no} marked as Rejected by Client and moved to Quotation History.`
+                    : `Quotation #${quotationToReject.ref_no} marked as Rejected by Client.`);
                 setQuotationToReject(null);
                 setRejectionReason('');
                 loadQuotations();
@@ -224,7 +234,9 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
             });
             const data = await res.json();
             if (res.ok && data.success) {
-                toast.success(`Quotation #${quote.ref_no} reopened for editing!`);
+                toast.success(isPendingMode
+                    ? `Quotation #${quote.ref_no} reopened for editing!`
+                    : `Quotation #${quote.ref_no} reopened and moved to Pending Approval.`);
                 loadQuotations();
                 if (callback) callback();
             } else {
@@ -294,10 +306,12 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight">
-                        Quotation History
+                        {isPendingMode ? 'Pending Approval' : 'Quotation History'}
                     </h1>
                     <p className="text-xs sm:text-sm text-neutral-500 mt-1">
-                        Manage saved quotations, edit pending quotes, record client approval/rejection, and track agreements.
+                        {isPendingMode
+                            ? 'Quotations waiting for the client\'s decision. Approved quotations move to Approved Quotations; rejected ones move to Quotation History.'
+                            : 'Quotations that have received a client decision: approved, rejected, agreement created or completed.'}
                     </p>
                 </div>
 
@@ -335,7 +349,7 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                         <span className="hidden sm:inline">Refresh</span>
                     </button>
 
-                    {onNavigate && (
+                    {onNavigate && !isPendingMode && (
                         <button
                             type="button"
                             onClick={() => onNavigate('quotation')}
@@ -351,9 +365,9 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
             {/* Stats Overview Bar */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-5">
                 <div className="bg-white p-4 sm:p-5 rounded-2xl border border-neutral-200/80 shadow-2xs">
-                    <div className="text-xs font-medium text-neutral-500 uppercase tracking-wider">Total Saved</div>
-                    <div className="text-2xl sm:text-3xl font-semibold text-neutral-900 mt-1 font-poppins">{stats.total}</div>
-                    <div className="text-[11px] text-neutral-400 mt-0.5">Historical records</div>
+                    <div className="text-xs font-medium text-neutral-500 uppercase tracking-wider">{isPendingMode ? 'Awaiting Approval' : 'Total Saved'}</div>
+                    <div className="text-2xl sm:text-3xl font-semibold text-neutral-900 mt-1 font-poppins">{isPendingMode ? (stats.pending_approval ?? 0) : stats.total}</div>
+                    <div className="text-[11px] text-neutral-400 mt-0.5">{isPendingMode ? 'Client decision pending' : 'All quotations (incl. pending)'}</div>
                 </div>
                 <div className="bg-white p-4 sm:p-5 rounded-2xl border border-neutral-200/80 shadow-2xs">
                     <div className="text-xs font-medium text-emerald-700 uppercase tracking-wider">Saved Today</div>
@@ -449,11 +463,11 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
 
                     {/* Status Filter Tabs & Custom Date Range */}
                     <div className="pt-3 border-t border-neutral-100 flex flex-wrap items-center justify-between gap-3">
+                        {!isPendingMode && (
                         <div className="flex flex-wrap items-center gap-1.5">
                             <span className="text-xs font-bold text-neutral-500 mr-1">Status:</span>
                             {[
                                 { id: 'all', label: 'All Statuses' },
-                                { id: 'approval_pending', label: 'Approval Pending' },
                                 { id: 'approved', label: 'Approved by Client' },
                                 { id: 'rejected', label: 'Rejected by Client' },
                                 { id: 'agreement_created', label: 'Agreement Created' },
@@ -473,6 +487,7 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                                 </button>
                             ))}
                         </div>
+                        )}
 
                         {(startDate || endDate || searchQuery || workflowFilter !== 'all') && (
                             <button
@@ -500,11 +515,13 @@ export const QuotationHistoryManager = ({ onNavigate, onUnauthorized }) => {
                         <FileText size={26} />
                     </div>
                     <div className="space-y-1">
-                        <h3 className="text-base font-bold text-neutral-900">No Quotations Found</h3>
+                        <h3 className="text-base font-bold text-neutral-900">{isPendingMode ? 'No Pending Approvals' : 'No Quotations Found'}</h3>
                         <p className="text-xs text-neutral-500 max-w-sm mx-auto">
                             {startDate || endDate || searchQuery || workflowFilter !== 'all'
                                 ? "No quotations matched your active filters. Try adjusting or clearing your filters."
-                                : "You haven't saved any quotations to history yet. Open the Quotation Builder, create a quote, and click Save."}
+                                : isPendingMode
+                                    ? "There are no quotations waiting for client approval. New quotations saved from the Quotation Builder appear here."
+                                    : "No quotations have received a client decision yet. Pending quotations are listed on the Pending Approval page."}
                         </p>
                     </div>
                 </div>

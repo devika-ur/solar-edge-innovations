@@ -25,12 +25,35 @@ class QuotationController extends Controller
             $startDate = $request->query('start_date');
             $endDate = $request->query('end_date');
             $workflowStatus = trim((string)$request->query('workflow_status', ''));
+            $excludeStatuses = array_filter(array_map('trim', explode(',', (string)$request->query('exclude_workflow_status', ''))));
 
             $query = Quotation::active()->with(['agreement', 'payment']);
 
-            // Filter by workflow status (e.g. 'approved' for Approved Quotations tab)
+            // Filter by workflow status (e.g. 'approved' for Approved Quotations tab).
+            // Legacy rows with an empty workflow_status are treated as 'approval_pending'.
+            // Accepts a single status or a comma-separated list (e.g. 'approved,agreement_created,completed').
             if (!empty($workflowStatus)) {
-                $query->where('workflow_status', $workflowStatus);
+                $statuses = array_values(array_filter(array_map('trim', explode(',', $workflowStatus))));
+                $query->where(function ($q) use ($statuses) {
+                    $q->whereIn('workflow_status', $statuses);
+                    if (in_array('approval_pending', $statuses, true)) {
+                        $q->orWhereNull('workflow_status')->orWhere('workflow_status', '');
+                    }
+                });
+            }
+
+            // Exclude workflow statuses (e.g. Quotation History hides pending quotes, which live on the Pending Approval page)
+            if (!empty($excludeStatuses)) {
+                if (in_array('approval_pending', $excludeStatuses, true)) {
+                    $query->whereNotNull('workflow_status')
+                          ->where('workflow_status', '!=', '')
+                          ->whereNotIn('workflow_status', $excludeStatuses);
+                } else {
+                    $query->where(function ($q) use ($excludeStatuses) {
+                        $q->whereNull('workflow_status')
+                          ->orWhereNotIn('workflow_status', $excludeStatuses);
+                    });
+                }
             }
 
             // Date Range Filter
@@ -479,11 +502,19 @@ class QuotationController extends Controller
             $quotation->rejection_reason = null;
             $quotation->save();
 
-            ActivityLogger::edited(
+            $oldLabel = match ($oldStatus) {
+                'approved' => 'Approved by Client',
+                'rejected' => 'Rejected by Client',
+                'agreement_created' => 'Agreement Created',
+                'completed' => 'Completed',
+                default => 'Approval Pending',
+            };
+
+            ActivityLogger::reopened(
                 'Quotation',
                 "Quotation #{$quotation->ref_no} ({$quotation->client_name})",
                 (string)$quotation->id,
-                "Authorized reopening of quotation #{$quotation->ref_no} for editing.",
+                "Reopened quotation #{$quotation->ref_no} for {$quotation->client_name} (was '{$oldLabel}') and moved it back to Pending Approval.",
                 ['workflow_status' => $oldStatus],
                 ['workflow_status' => 'approval_pending']
             );

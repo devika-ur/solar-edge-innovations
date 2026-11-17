@@ -509,11 +509,11 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate, editId: propEdit
                 toast.success(
                     activeEditId
                         ? `Quotation #${quotationData.refNo} updated successfully!`
-                        : "Quotation saved successfully! Navigating to Quotation History..."
+                        : "Quotation saved successfully! Navigating to Pending Approval..."
                 );
 
                 if (onNavigate) {
-                    onNavigate('quotation-history');
+                    onNavigate('pending-approval');
                 }
             } else {
                 toast.error(data.message || "Failed to save quotation to history.");
@@ -914,11 +914,11 @@ export const QuotationEditor = ({ onLogout, onBack, onNavigate, editId: propEdit
                         {onNavigate && (
                             <button
                                 type="button"
-                                onClick={() => onNavigate('quotation-history')}
+                                onClick={() => onNavigate(editingQuotationMeta?.workflow_status === 'approval_pending' ? 'pending-approval' : 'quotation-history')}
                                 className="inline-flex items-center gap-1 px-3 py-1 bg-white hover:bg-neutral-50 rounded-lg text-xs font-semibold border border-neutral-200 transition-colors cursor-pointer"
                             >
                                 <ArrowLeft size={12} />
-                                <span>Return to History</span>
+                                <span>{editingQuotationMeta?.workflow_status === 'approval_pending' ? 'Return to Pending Approval' : 'Return to History'}</span>
                             </button>
                         )}
                     </div>

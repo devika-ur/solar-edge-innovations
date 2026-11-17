@@ -15,6 +15,7 @@ import { PaymentManager } from '../components/admin/PaymentManager';
 import { ReportManager } from '../components/admin/reports/ReportManager';
 import { AgreementEditor } from '../components/admin/AgreementEditor';
 import { ActivityLogManager } from '../components/admin/ActivityLogManager';
+import { ExpenseManager } from '../components/admin/ExpenseManager';
 import { Toaster, toast } from 'react-hot-toast';
 import {
     LogOut,
@@ -38,6 +39,7 @@ const VALID_TABS = [
     'faqs',
     'letterhead',
     'quotation',
+    'pending-approval',
     'quotation-history',
     'approved-quotations',
     'agreement',
@@ -47,6 +49,7 @@ const VALID_TABS = [
     'payment-report',
     'quotation-report',
     'approved-quotations-report',
+    'expenses',
     'activity-log'
 ];
 
@@ -464,8 +467,18 @@ const AdminPage = () => {
                         onNavigate={handleTabChange}
                     />
                 )}
+                {activeTab === 'pending-approval' && (
+                    <QuotationHistoryManager
+                        key="pending-approval"
+                        mode="pending"
+                        onNavigate={handleTabChange}
+                        onUnauthorized={handleUnauthorized}
+                    />
+                )}
                 {activeTab === 'quotation-history' && (
                     <QuotationHistoryManager
+                        key="quotation-history"
+                        mode="history"
                         onNavigate={handleTabChange}
                         onUnauthorized={handleUnauthorized}
                     />
@@ -525,6 +538,37 @@ const AdminPage = () => {
                         onBack={() => handleTabChange('dashboard')}
                         onNavigate={handleTabChange}
                     />
+                )}
+                {activeTab === 'expenses' && (
+                    currentUser?.role === 'super_admin' ? (
+                        <ExpenseManager onUnauthorized={handleUnauthorized} />
+                    ) : (
+                        <div className="max-w-xl mx-auto mt-16 px-4 font-poppins">
+                            <div className="bg-white rounded-3xl border border-red-200/90 p-8 sm:p-10 text-center shadow-xl space-y-5">
+                                <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto border border-red-100">
+                                    <ShieldAlert size={32} />
+                                </div>
+                                <div className="space-y-2">
+                                    <span className="inline-block px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-full uppercase tracking-wider">
+                                        403 Access Denied
+                                    </span>
+                                    <h2 className="text-xl sm:text-2xl font-bold text-neutral-900">Access Restricted</h2>
+                                    <p className="text-sm text-neutral-600 max-w-md mx-auto">
+                                        Other Expenses is restricted to Super Admin only.
+                                    </p>
+                                </div>
+                                <div className="pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleTabChange('dashboard')}
+                                        className="px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white text-xs sm:text-sm font-semibold rounded-xl transition cursor-pointer shadow-sm"
+                                    >
+                                        Back to Dashboard
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )
                 )}
                 {activeTab === 'activity-log' && (
                     currentUser?.role === 'super_admin' ? (
