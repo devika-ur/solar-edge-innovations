@@ -27,6 +27,7 @@ import {
     Layers
 } from 'lucide-react';
 import { assets } from '../../assets/assets';
+import { DEFAULT_BANK_DETAILS } from '../../data/defaultQuotationData';
 import { QuotationPreview6Pages } from './QuotationPreview6Pages';
 import toast from 'react-hot-toast';
 
@@ -112,6 +113,12 @@ export const QuotationEditorMobile = ({
         }
         curr[keys[keys.length - 1]] = value;
         onChange(newData);
+    };
+
+    // Bank details (older saved quotations may not have them yet -> fall back to defaults)
+    const bankDetails = { ...DEFAULT_BANK_DETAILS, ...(data.bankDetails || {}) };
+    const updateBankDetail = (key, value) => {
+        updateField('bankDetails', { ...bankDetails, [key]: value });
     };
 
     // Add / remove manufacturer item
@@ -716,6 +723,30 @@ export const QuotationEditorMobile = ({
                                     </div>
                                 </div>
 
+                                {/* Bank Details (3 editable boxes, Page 5 above KSEB fees) */}
+                                <div className="bg-white border border-neutral-200 rounded-2xl p-3.5 space-y-3 shadow-2xs">
+                                    <div className="pb-2 border-b border-neutral-100">
+                                        <h3 className="text-xs font-black text-neutral-900 uppercase tracking-wider">Vendor Bank Account Details</h3>
+                                        <p className="text-[10px] text-neutral-500 mt-0.5">Shown above the KSEB fees table</p>
+                                    </div>
+                                    {[
+                                        { key: 'accountName', label: 'Account Name', placeholder: 'Account holder name' },
+                                        { key: 'accountNumber', label: 'A/C No', placeholder: 'Account number' },
+                                        { key: 'ifsc', label: 'IFSC', placeholder: 'IFSC code' },
+                                    ].map((field) => (
+                                        <div key={field.key}>
+                                            <label className="block text-[11px] font-bold text-neutral-700 mb-1.5">{field.label}</label>
+                                            <input
+                                                type="text"
+                                                value={bankDetails[field.key] ?? ''}
+                                                onChange={(e) => updateBankDetail(field.key, e.target.value)}
+                                                className="w-full p-3 bg-neutral-50 border border-neutral-300 rounded-xl text-xs font-bold text-neutral-900 focus:bg-white focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none transition-all"
+                                                placeholder={field.placeholder}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+
                                 {/* KSEB Permit Fees */}
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
@@ -768,6 +799,7 @@ export const QuotationEditorMobile = ({
                                         </div>
                                     ))}
                                 </div>
+
                             </div>
                         )}
 

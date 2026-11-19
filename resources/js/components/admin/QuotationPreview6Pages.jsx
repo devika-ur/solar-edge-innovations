@@ -3,6 +3,7 @@ import { QuotationHeader } from './QuotationHeader';
 import { QuotationFooter } from './QuotationFooter';
 import paleBlueSolarEcoEmblem from '../../assets/Pale Blue Solar Eco Emblem.png';
 import { assets } from '../../assets/assets';
+import { DEFAULT_BANK_DETAILS } from '../../data/defaultQuotationData';
 
 const WatermarkOverlay = () => (
     <div className="absolute inset-0 flex items-center justify-center opacity-30 pointer-events-none select-none z-0">
@@ -394,6 +395,30 @@ export const QuotationPreview6Pages = ({ data }) => {
                                 </div>
                             </>
                         )}
+
+                        {/* Bank Details (3 editable boxes) - placed above the KSEB permit fees */}
+                        {chunkIdx === 0 && (() => {
+                            const bank = { ...DEFAULT_BANK_DETAILS, ...(data.bankDetails || {}) };
+                            return (
+                                <div id="preview-page-bank" className="w-full border border-[#7AAAD8] rounded-xl overflow-hidden text-xs">
+                                    <div className="bg-[#134D8B] text-white py-2 px-4 font-bold uppercase tracking-wider">
+                                        VENDOR BANK ACCOUNT DETAILS
+                                    </div>
+                                    <div className="grid grid-cols-3 divide-x divide-[#BED6EE] bg-[#F4F9FF]">
+                                        {[
+                                            { label: 'Account Name', value: bank.accountName },
+                                            { label: 'A/C No', value: bank.accountNumber },
+                                            { label: 'IFSC', value: bank.ifsc },
+                                        ].map((box) => (
+                                            <div key={box.label} className="py-2 px-4 min-w-0">
+                                                <div className="text-[10px] font-semibold text-neutral-600 uppercase tracking-wide">{box.label}</div>
+                                                <div className="font-extrabold text-[#0D4379] leading-snug break-words [overflow-wrap:anywhere]">{box.value || '\u00A0'}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            );
+                        })()}
 
                         {/* Table 2: KSEB Permits & Fees */}
                         <div className="w-full border border-[#7AAAD8] rounded-xl overflow-hidden text-xs">

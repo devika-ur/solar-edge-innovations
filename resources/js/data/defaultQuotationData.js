@@ -6,6 +6,13 @@ export const getTodayFormatted = () => {
     return `${day}/${month}/${year}`;
 };
 
+// Default company bank details shown after the KSEB permit fees table (Page 5)
+export const DEFAULT_BANK_DETAILS = {
+    accountName: "SOLAREDGE INNOVATIONS",
+    accountNumber: "8162058232",
+    ifsc: "IDIB000K099"
+};
+
 export const defaultQuotationData = {
     // Reference & Header Info
     refNo: "",
@@ -65,6 +72,9 @@ export const defaultQuotationData = {
         { id: 3, item: "Inspectorate Charge", fee: "NIL" },
         { id: 4, item: "KSEB Registration fee", fee: "Single Phase (Rs. 4,900) / Three Phase (Rs. 10,000): CUSTOMER SIDE" }
     ],
+
+    // Bank Details (Page 5 - shown right after the KSEB permit fees table)
+    bankDetails: { ...DEFAULT_BANK_DETAILS },
 
     // Battery Details Table (Page 5 - 1 default row for immediate entry)
     batteryDetails: [

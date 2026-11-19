@@ -16,6 +16,7 @@ import {
     Download,
     Sparkles
 } from 'lucide-react';
+import { DEFAULT_BANK_DETAILS } from '../../data/defaultQuotationData';
 
 export const QuotationFormControls = ({
     data,
@@ -63,6 +64,12 @@ export const QuotationFormControls = ({
         }
         curr[keys[keys.length - 1]] = value;
         onChange(newData);
+    };
+
+    // Bank details (older saved quotations may not have them yet -> fall back to defaults)
+    const bankDetails = { ...DEFAULT_BANK_DETAILS, ...(data.bankDetails || {}) };
+    const updateBankDetail = (key, value) => {
+        updateField('bankDetails', { ...bankDetails, [key]: value });
     };
 
     // Add manufacturer item
@@ -814,6 +821,32 @@ export const QuotationFormControls = ({
 
                         <hr className="border-neutral-200 my-3" />
 
+                        {/* Bank Details (3 editable boxes, Page 5 above KSEB fees) */}
+                        <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 space-y-2.5">
+                            <div>
+                                <h3 className="font-bold text-neutral-800">Vendor Bank Account Details</h3>
+                                <p className="text-[11px] text-neutral-500">Renders on Page 5 above the KSEB fees table</p>
+                            </div>
+                            <div className={isFullWidth ? "grid grid-cols-1 md:grid-cols-3 gap-3" : "space-y-2"}>
+                                {[
+                                    { key: 'accountName', label: 'Account Name', placeholder: 'Account holder name' },
+                                    { key: 'accountNumber', label: 'A/C No', placeholder: 'Account number' },
+                                    { key: 'ifsc', label: 'IFSC', placeholder: 'IFSC code' },
+                                ].map((field) => (
+                                    <div key={field.key}>
+                                        <label className="block text-[11px] font-bold text-neutral-700 mb-1">{field.label}</label>
+                                        <input
+                                            type="text"
+                                            placeholder={field.placeholder}
+                                            value={bankDetails[field.key] ?? ''}
+                                            onChange={(e) => updateBankDetail(field.key, e.target.value)}
+                                            className="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded-md font-bold text-xs outline-none focus:border-emerald-600"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Permit Fees List */}
                         <div className="flex items-center justify-between bg-neutral-50 p-3 rounded-xl border border-neutral-200">
                             <div>
@@ -864,6 +897,7 @@ export const QuotationFormControls = ({
                                 </div>
                             ))}
                         </div>
+
 
                         <div>
                             <label className="block font-bold text-neutral-700 mb-1">Government Subsidy Statement Note</label>
