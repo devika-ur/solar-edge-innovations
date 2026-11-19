@@ -13,6 +13,7 @@ import {
     Download,
     Loader2,
     Eye,
+    EyeOff,
     Edit3,
     Save,
     RotateCcw,
@@ -116,7 +117,9 @@ export const QuotationEditorMobile = ({
     };
 
     // Bank details (older saved quotations may not have them yet -> fall back to defaults)
+    // Editable bank details; hidden until the eye icon is clicked
     const bankDetails = { ...DEFAULT_BANK_DETAILS, ...(data.bankDetails || {}) };
+    const [showBankDetails, setShowBankDetails] = useState(false);
     const updateBankDetail = (key, value) => {
         updateField('bankDetails', { ...bankDetails, [key]: value });
     };
@@ -723,13 +726,24 @@ export const QuotationEditorMobile = ({
                                     </div>
                                 </div>
 
-                                {/* Bank Details (3 editable boxes, Page 5 above KSEB fees) */}
+                                {/* Vendor Bank Account Details (editable, Page 5 above KSEB fees) - eye icon shows/hides */}
                                 <div className="bg-white border border-neutral-200 rounded-2xl p-3.5 space-y-3 shadow-2xs">
-                                    <div className="pb-2 border-b border-neutral-100">
-                                        <h3 className="text-xs font-black text-neutral-900 uppercase tracking-wider">Vendor Bank Account Details</h3>
-                                        <p className="text-[10px] text-neutral-500 mt-0.5">Shown above the KSEB fees table</p>
+                                    <div className={`flex items-center justify-between gap-2 ${showBankDetails ? 'pb-2 border-b border-neutral-100' : ''}`}>
+                                        <div>
+                                            <h3 className="text-xs font-black text-neutral-900 uppercase tracking-wider">Vendor Bank Account Details</h3>
+                                            <p className="text-[10px] text-neutral-500 mt-0.5">Shown above the KSEB fees table</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowBankDetails((v) => !v)}
+                                            className="p-2 rounded-lg text-neutral-500 hover:text-blue-700 hover:bg-blue-50 transition-colors cursor-pointer shrink-0"
+                                            title={showBankDetails ? 'Hide bank details' : 'Show bank details'}
+                                            aria-label={showBankDetails ? 'Hide bank details' : 'Show bank details'}
+                                        >
+                                            {showBankDetails ? <EyeOff size={16} /> : <Eye size={16} />}
+                                        </button>
                                     </div>
-                                    {[
+                                    {showBankDetails && [
                                         { key: 'accountName', label: 'Account Name', placeholder: 'Account holder name' },
                                         { key: 'accountNumber', label: 'A/C No', placeholder: 'Account number' },
                                         { key: 'ifsc', label: 'IFSC', placeholder: 'IFSC code' },

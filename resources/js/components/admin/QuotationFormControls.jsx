@@ -14,7 +14,9 @@ import {
     LogOut,
     Loader2,
     Download,
-    Sparkles
+    Sparkles,
+    Eye,
+    EyeOff
 } from 'lucide-react';
 import { DEFAULT_BANK_DETAILS } from '../../data/defaultQuotationData';
 
@@ -67,7 +69,9 @@ export const QuotationFormControls = ({
     };
 
     // Bank details (older saved quotations may not have them yet -> fall back to defaults)
+    // Editable bank details; hidden until the eye icon is clicked
     const bankDetails = { ...DEFAULT_BANK_DETAILS, ...(data.bankDetails || {}) };
+    const [showBankDetails, setShowBankDetails] = useState(false);
     const updateBankDetail = (key, value) => {
         updateField('bankDetails', { ...bankDetails, [key]: value });
     };
@@ -821,12 +825,24 @@ export const QuotationFormControls = ({
 
                         <hr className="border-neutral-200 my-3" />
 
-                        {/* Bank Details (3 editable boxes, Page 5 above KSEB fees) */}
+                        {/* Vendor Bank Account Details (editable, Page 5 above KSEB fees) - eye icon shows/hides */}
                         <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 space-y-2.5">
-                            <div>
-                                <h3 className="font-bold text-neutral-800">Vendor Bank Account Details</h3>
-                                <p className="text-[11px] text-neutral-500">Renders on Page 5 above the KSEB fees table</p>
+                            <div className="flex items-center justify-between gap-2">
+                                <div>
+                                    <h3 className="font-bold text-neutral-800">Vendor Bank Account Details</h3>
+                                    <p className="text-[11px] text-neutral-500">Renders on Page 5 above the KSEB fees table</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowBankDetails((v) => !v)}
+                                    className="p-1.5 rounded-lg text-neutral-500 hover:text-emerald-700 hover:bg-emerald-50 transition-colors cursor-pointer shrink-0"
+                                    title={showBankDetails ? 'Hide bank details' : 'Show bank details'}
+                                    aria-label={showBankDetails ? 'Hide bank details' : 'Show bank details'}
+                                >
+                                    {showBankDetails ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
                             </div>
+                            {showBankDetails && (
                             <div className={isFullWidth ? "grid grid-cols-1 md:grid-cols-3 gap-3" : "space-y-2"}>
                                 {[
                                     { key: 'accountName', label: 'Account Name', placeholder: 'Account holder name' },
@@ -845,6 +861,7 @@ export const QuotationFormControls = ({
                                     </div>
                                 ))}
                             </div>
+                            )}
                         </div>
 
                         {/* Permit Fees List */}
